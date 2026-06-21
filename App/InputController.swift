@@ -6,6 +6,7 @@ import KeyKeyEngine
 final class InputController: IMKInputController {
     private let engine: SmartPhoneticEngine
     private let candidateWindow = CandidateWindow()
+    private var selecting = false
 
     override init!(server: IMKServer!, delegate: Any!, client inputClient: Any!) {
         // Load the bundled LM once; fail safe to an empty model (no candidates) if missing.
@@ -28,7 +29,7 @@ final class InputController: IMKInputController {
     override func handle(_ event: NSEvent!, client sender: Any!) -> Bool {
         guard let event, event.type == .keyDown, let client = sender as? IMKTextInput else { return false }
 
-        // Enter commits; Esc/Backspace edit; Space + mapped keys feed the engine.
+        // Enter commits; Backspace deletes; Esc cancels; Down opens selection; mapped keys feed the engine.
         switch event.keyCode {
         case 36: // Return
             guard !engine.composingText.isEmpty else { return false }
@@ -38,15 +39,24 @@ final class InputController: IMKInputController {
             engine.backspace(); refresh(client); return true
         case 53: // Escape
             guard !engine.composingText.isEmpty else { return false }
-            _ = engine.commit(); refresh(client); return true
+            selecting = false
+            _ = engine.commit(); refresh(client); return true // cancel composition (commit-then-discard)
+        case 125: // Down arrow opens candidate selection
+            guard !engine.composingText.isEmpty, !engine.candidates.isEmpty else { return false }
+            selecting = true; refresh(client); return true
         default: break
         }
 
-        // candidate selection via number keys 1...9 while candidates are visible
-        if let chars = event.characters, let digit = Int(chars), (1...9).contains(digit),
-           !engine.candidates.isEmpty {
-            engine.selectCandidate(digit - 1)
-            return commitCurrent(to: client)
+        if selecting {
+            if let chars = event.characters, let d = Int(chars), (1...9).contains(d),
+               d - 1 < engine.candidates.count {
+                engine.selectCandidate(d - 1)
+                selecting = false
+                return commitCurrent(to: client)
+            }
+            if event.keyCode == 53 { selecting = false; refresh(client); return true } // Esc exits selection
+            // any other key: leave selection mode and fall through to normal composing
+            selecting = false
         }
 
         guard let ch = event.characters?.first else { return false }
@@ -62,6 +72,7 @@ final class InputController: IMKInputController {
 
     @discardableResult
     private func commitCurrent(to client: IMKTextInput) -> Bool {
+        selecting = false
         let text = engine.commit()
         if !text.isEmpty {
             client.insertText(text, replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
