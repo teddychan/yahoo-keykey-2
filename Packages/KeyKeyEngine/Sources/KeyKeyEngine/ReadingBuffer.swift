@@ -18,17 +18,12 @@ public struct ReadingBuffer {
     public var isEmpty: Bool { syllable.isEmpty }
 
     public mutating func receive(_ key: Character) -> Result {
-        guard let component = layout.component(for: key) else { return .unhandled }
-        switch component {
-        case .consonant(let c):
-            syllable.consonant = c
-            track(.consonant)
-        case .medial(let m):
-            syllable.medial = m
-            track(.medial)
-        case .vowel(let v):
-            syllable.vowel = v
-            track(.vowel)
+        guard let resolution = layout.resolve(key: key, given: syllable) else { return .unhandled }
+        switch resolution {
+        case .phoneme(let next):
+            syllable = next
+            rebuildOrder()
+            return .updated(syllable.bpmf)
         case .tone(let t):
             // tone completes only if there is something to commit
             guard !syllable.isEmpty else { return .empty }
@@ -37,7 +32,18 @@ public struct ReadingBuffer {
             syllable = Syllable(); order = []
             return .completed(reading)
         }
-        return .updated(syllable.bpmf)
+    }
+
+    // Rebuild the backspace order canonically from the resolved syllable. A
+    // state-aware keystroke can rewrite an already-set class (e.g. Hsu ㄍ->ㄐ),
+    // so the original typing order is not recoverable; canonical order is the
+    // faithful minimal choice.
+    private mutating func rebuildOrder() {
+        order = []
+        if syllable.consonant != nil { order.append(.consonant) }
+        if syllable.medial != nil { order.append(.medial) }
+        if syllable.vowel != nil { order.append(.vowel) }
+        if syllable.tone != nil { order.append(.tone) }
     }
 
     public mutating func backspace() -> Result {
@@ -49,10 +55,5 @@ public struct ReadingBuffer {
         case .tone:      syllable.tone = nil
         }
         return .updated(syllable.bpmf)
-    }
-
-    private mutating func track(_ cls: Class) {
-        order.removeAll { $0 == cls }
-        order.append(cls)
     }
 }
