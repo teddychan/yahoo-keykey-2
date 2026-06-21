@@ -1,0 +1,602 @@
+{
+  "builtTestProducts" : [
+    {
+      "binaryPath" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEnginePackageTests.xctest/Contents/MacOS/KeyKeyEnginePackageTests",
+      "packagePath" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine",
+      "productName" : "KeyKeyEnginePackageTests"
+    }
+  ],
+  "copyCommands" : {
+
+  },
+  "explicitTargetDependencyImportCheckingMode" : {
+    "none" : {
+
+    }
+  },
+  "generatedSourceTargetSet" : [
+
+  ],
+  "pluginDescriptions" : [
+
+  ],
+  "swiftCommands" : {
+    "C.KeyKeyEngine-arm64-apple-macosx-debug.module" : {
+      "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEngine.build/sources",
+      "importPath" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/Sources/KeyKeyEngine/KeyKeyEngine.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEngine.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "KeyKeyEngine",
+      "moduleOutputPath" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/Modules/KeyKeyEngine.swiftmodule",
+      "objects" : [
+        "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEngine.build/KeyKeyEngine.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx12.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j12",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEngine.build/include/KeyKeyEngine-Swift.h",
+        "-swift-version",
+        "5",
+        "-plugin-path",
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "keykeyengine"
+      ],
+      "outputFileMapPath" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEngine.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEngine.build/KeyKeyEngine.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/Modules/KeyKeyEngine.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/Sources/KeyKeyEngine/KeyKeyEngine.swift"
+      ],
+      "tempsPath" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEngine.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.KeyKeyEnginePackageTests-arm64-apple-macosx-debug.module" : {
+      "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEnginePackageTests.build/sources",
+      "importPath" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEnginePackageTests.derived/runner.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/Modules/KeyKeyEngineTests.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEnginePackageTests.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "KeyKeyEnginePackageTests",
+      "moduleOutputPath" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/Modules/KeyKeyEnginePackageTests.swiftmodule",
+      "objects" : [
+        "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEnginePackageTests.build/runner.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx12.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-Xfrontend",
+        "-enable-cross-import-overlays",
+        "-j12",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEnginePackageTests.build/include/KeyKeyEnginePackageTests-Swift.h",
+        "-plugin-path",
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "keykeyengine"
+      ],
+      "outputFileMapPath" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEnginePackageTests.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEnginePackageTests.build/runner.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/Modules/KeyKeyEnginePackageTests.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEnginePackageTests.derived/runner.swift"
+      ],
+      "tempsPath" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEnginePackageTests.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.KeyKeyEngineTests-arm64-apple-macosx-debug.module" : {
+      "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEngineTests.build/sources",
+      "importPath" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/Tests/KeyKeyEngineTests/SmokeTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/Modules/KeyKeyEngine.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEngineTests.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "KeyKeyEngineTests",
+      "moduleOutputPath" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/Modules/KeyKeyEngineTests.swiftmodule",
+      "objects" : [
+        "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEngineTests.build/SmokeTests.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx14.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-Xfrontend",
+        "-enable-cross-import-overlays",
+        "-j12",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-swift-version",
+        "5",
+        "-plugin-path",
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "keykeyengine"
+      ],
+      "outputFileMapPath" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEngineTests.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEngineTests.build/SmokeTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/Modules/KeyKeyEngineTests.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/Tests/KeyKeyEngineTests/SmokeTests.swift"
+      ],
+      "tempsPath" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEngineTests.build",
+      "wholeModuleOptimization" : false
+    }
+  },
+  "swiftFrontendCommands" : {
+
+  },
+  "swiftTargetScanArgs" : {
+    "KeyKeyEngine" : [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "KeyKeyEngine",
+      "-package-name",
+      "keykeyengine",
+      "-c",
+      "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/Sources/KeyKeyEngine/KeyKeyEngine.swift",
+      "-I",
+      "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx12.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j12",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEngine.build/include/KeyKeyEngine-Swift.h",
+      "-swift-version",
+      "5",
+      "-plugin-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "keykeyengine",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ],
+    "KeyKeyEnginePackageTests" : [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "KeyKeyEnginePackageTests",
+      "-package-name",
+      "keykeyengine",
+      "-c",
+      "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEnginePackageTests.derived/runner.swift",
+      "-I",
+      "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx12.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-Xfrontend",
+      "-enable-cross-import-overlays",
+      "-j12",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEnginePackageTests.build/include/KeyKeyEnginePackageTests-Swift.h",
+      "-plugin-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "keykeyengine",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ],
+    "KeyKeyEngineTests" : [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "KeyKeyEngineTests",
+      "-package-name",
+      "keykeyengine",
+      "-c",
+      "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/Tests/KeyKeyEngineTests/SmokeTests.swift",
+      "-I",
+      "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx14.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-Xfrontend",
+      "-enable-cross-import-overlays",
+      "-j12",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-swift-version",
+      "5",
+      "-plugin-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "keykeyengine",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ]
+  },
+  "targetDependencyMap" : {
+    "KeyKeyEngine" : [
+
+    ],
+    "KeyKeyEnginePackageTests" : [
+      "KeyKeyEngineTests",
+      "KeyKeyEngine"
+    ],
+    "KeyKeyEngineTests" : [
+      "KeyKeyEngine"
+    ]
+  },
+  "testDiscoveryCommands" : {
+
+  },
+  "testEntryPointCommands" : {
+    "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEnginePackageTests.derived/runner.swift" : {
+      "inputs" : [
+
+      ],
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEnginePackageTests.derived/runner.swift"
+        }
+      ]
+    }
+  },
+  "traitConfiguration" : {
+    "default" : {
+
+    }
+  },
+  "writeCommands" : {
+    "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEngine.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/Sources/KeyKeyEngine/KeyKeyEngine.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEngine.build/sources"
+    },
+    "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEnginePackageTests.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEnginePackageTests.derived/runner.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEnginePackageTests.build/sources"
+    },
+    "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEnginePackageTests.product/Objects.LinkFileList" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<link-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEngine.build/KeyKeyEngine.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEnginePackageTests.build/runner.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEngineTests.build/SmokeTests.swift.o"
+        }
+      ],
+      "outputFilePath" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEnginePackageTests.product/Objects.LinkFileList"
+    },
+    "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEngineTests.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/Tests/KeyKeyEngineTests/SmokeTests.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/KeyKeyEngineTests.build/sources"
+    },
+    "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt" : {
+      "alwaysOutOfDate" : true,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<swift-get-version>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+        }
+      ],
+      "outputFilePath" : "/Users/teddychan/git/Yahoo_KeyKey/Packages/KeyKeyEngine/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+    }
+  }
+}
