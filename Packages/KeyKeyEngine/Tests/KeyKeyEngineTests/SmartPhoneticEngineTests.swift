@@ -66,4 +66,58 @@ final class SmartPhoneticEngineTests: XCTestCase {
         e.selectCandidate(i!)
         XCTAssertEqual(e.composingText, "今田")            // selection applied despite phrase walk
     }
+
+    private func makeTwoSyllable() -> SmartPhoneticEngine {
+        let e = SmartPhoneticEngine(languageModel: Self.phraseLM)
+        // type ㄐㄧㄣ then ㄊㄧㄢ -> two readings
+        for k in ["r","u","p"," ","w","u","0"," "] { _ = e.handleKey(Character(k)) }
+        return e
+    }
+
+    func testCursorDefaultsToLastPosition() {
+        let e = makeTwoSyllable()
+        XCTAssertEqual(e.cursorPosition, 1)
+    }
+
+    func testMoveCursorLeftThenSelectOverridesNonFinalSyllable() {
+        let e = makeTwoSyllable()
+        e.moveCursorLeft()                       // cursor now at position 0 (今)
+        XCTAssertEqual(e.cursorPosition, 0)
+        // candidates at position 0 include 今天 (phrase), 今, 斤; pick 斤
+        let i = e.candidates.firstIndex(of: "斤")
+        XCTAssertNotNil(i)
+        e.selectCandidate(i!)
+        XCTAssertEqual(e.composingText, "斤天")   // non-final syllable overridden
+    }
+
+    func testCandidatesAtPositionDelegatesToGrid() {
+        let e = makeTwoSyllable()
+        XCTAssertEqual(e.candidates(at: 0), ["今天", "今", "斤"])
+    }
+
+    func testCursorClampsAtBounds() {
+        let e = makeTwoSyllable()
+        e.moveCursorLeft(); e.moveCursorLeft(); e.moveCursorLeft()
+        XCTAssertEqual(e.cursorPosition, 0)      // clamped at low bound
+        e.moveCursorRight(); e.moveCursorRight(); e.moveCursorRight()
+        XCTAssertEqual(e.cursorPosition, 1)      // clamped at high bound
+    }
+
+    func testLastPositionSelectionStillWorksAfterMovingBack() {
+        let e = makeTwoSyllable()
+        e.moveCursorLeft()                       // position 0
+        e.moveCursorRight()                      // back to position 1
+        let i = e.candidates.firstIndex(of: "田")
+        XCTAssertNotNil(i)
+        e.selectCandidate(i!)
+        XCTAssertEqual(e.composingText, "今田")
+    }
+
+    func testSelectCandidateAtExplicitPosition() {
+        let e = makeTwoSyllable()
+        let i = e.candidates(at: 0).firstIndex(of: "斤")
+        XCTAssertNotNil(i)
+        e.selectCandidate(at: 0, index: i!)
+        XCTAssertEqual(e.composingText, "斤天")
+    }
 }
