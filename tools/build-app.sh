@@ -1,21 +1,22 @@
 #!/bin/bash
-# Build YahooKeyKey.app headlessly with swiftc, assemble the .app bundle, ad-hoc sign it.
+# Build "Yahoo KeyKey 2" (YahooKeyKey2.app) headlessly with swiftc, assemble the .app
+# bundle, ad-hoc sign it.
 #
 # This is a deliberate deviation from the plan's "create the Xcode project in the IDE"
 # step: we cannot drive the Xcode GUI, so we compile and assemble the bundle by hand.
 # The artifact is identical in shape to what Xcode would produce: an LSUIElement IMK
 # host app containing the engine, data.txt, and the IMK Info.plist.
 #
-# Requires: swiftc (Xcode toolchain), codesign, plutil. Produces ./build/YahooKeyKey.app.
+# Requires: swiftc (Xcode toolchain), codesign, plutil. Produces ./build/YahooKeyKey2.app.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 BUILD="$ROOT/build"
-APP="$BUILD/YahooKeyKey.app"
+APP="$BUILD/YahooKeyKey2.app"
 ENGINE_SRC="$ROOT/Packages/KeyKeyEngine/Sources/KeyKeyEngine"
 APP_SRC="$ROOT/App"
 MODULE_DIR="$BUILD/modules"
-EXECUTABLE_NAME="YahooKeyKey"
+EXECUTABLE_NAME="YahooKeyKey2"
 
 SDK="$(xcrun --show-sdk-path)"
 TARGET="$(uname -m)-apple-macosx12.0"
