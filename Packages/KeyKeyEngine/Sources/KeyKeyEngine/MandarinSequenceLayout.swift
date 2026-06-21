@@ -15,7 +15,7 @@
 
 // One BPMF phoneme component, mirroring McBopomofo's bit-masked BopomofoSyllable.
 // We keep the same numeric values so the mask/class predicates port verbatim.
-enum BPMF: UInt16 {
+internal enum BPMF: UInt16 {
     // ConsonantMask 0x001f
     case B = 0x0001, P = 0x0002, M = 0x0003, F = 0x0004, D = 0x0005, T = 0x0006
     case N = 0x0007, L = 0x0008, G = 0x0009, K = 0x000a, H = 0x000b, J = 0x000c
@@ -104,7 +104,7 @@ private let charToBPMF: [Character: BPMF] = Dictionary(
 
 // Shared engine for the 26-key layouts. Holds the key->[component] map and the
 // keySequenceFromSyllable / syllableFromKeySequence round-trip.
-struct MandarinSequenceLayout {
+internal struct MandarinSequenceLayout {
     let keyToComponents: [Character: [BPMF]]
     let isHsu: Bool
     private let componentToKey: [BPMF: Character]

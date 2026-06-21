@@ -23,6 +23,7 @@ public final class SmartPhoneticEngine {
         switch buffer.receive(key) {
         case .completed(let reading):
             readings.append(reading)
+            cursor = nil   // a new syllable re-anchors the cursor to the last position
             return true
         case .updated, .empty:
             return true

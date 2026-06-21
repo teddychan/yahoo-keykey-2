@@ -120,4 +120,14 @@ final class SmartPhoneticEngineTests: XCTestCase {
         e.selectCandidate(at: 0, index: i!)
         XCTAssertEqual(e.composingText, "斤天")
     }
+
+    func testTypingNewReadingResetsMovedCursorToLastPosition() {
+        let e = makeTwoSyllable()           // two readings, cursor tracks last
+        e.moveCursorLeft()                  // cursor moved to position 0
+        XCTAssertEqual(e.cursorPosition, 0)
+        // type a 3rd reading ㄊㄧㄢ (w,u,0, space)
+        for k in ["w","u","0"," "] { _ = e.handleKey(Character(k)) }
+        XCTAssertEqual(e.cursorPosition, 2) // cursor tracks the new last reading
+        XCTAssertEqual(e.candidates, ["天", "田"])
+    }
 }

@@ -9,7 +9,10 @@ public enum FullWidthFilter {
             case 0x20:                    // ASCII space -> IDEOGRAPHIC SPACE
                 out.append("\u{3000}")
             case 0x21...0x7E:             // ASCII printable -> full-width
-                out.unicodeScalars.append(Unicode.Scalar(scalar.value + 0xFEE0)!)
+                // 0x21..0x7E + 0xFEE0 = 0xFF01..0xFF5E is always a valid scalar.
+                if let full = Unicode.Scalar(scalar.value + 0xFEE0) {
+                    out.unicodeScalars.append(full)
+                }
             default:
                 out.unicodeScalars.append(scalar)
             }

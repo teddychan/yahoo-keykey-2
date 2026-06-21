@@ -42,6 +42,8 @@ final class InputController: IMKInputController {
             lm = LanguageModel(text: "# format org.openvanilla.mcbopomofo.sorted")
         }
         self.lm = lm
+        // self.defaults isn't usable yet (two-phase init: stored props before super.init),
+        // so the UserDefaults suite is constructed inline here to read the layout choice.
         let choice = LayoutChoice(rawValue: UserDefaults(suiteName: Bundle.main.bundleIdentifier)?
             .string(forKey: layoutDefaultsKey) ?? "") ?? .standard
         engine = SmartPhoneticEngine(languageModel: lm, layout: choice.makeLayout())
@@ -129,8 +131,13 @@ final class InputController: IMKInputController {
     @objc private func switchLayout(_ sender: NSMenuItem) {
         guard let raw = sender.representedObject as? String,
               let choice = LayoutChoice(rawValue: raw) else { return }
-        // Commit/clear any in-progress composition so the rebuilt engine starts clean.
-        _ = engine.commit()
+        // Commit any in-progress composition into the document so the rebuilt
+        // engine starts clean without silently dropping the partial text.
+        if let client = client() {
+            _ = commitCurrent(to: client)
+        } else {
+            _ = engine.commit()
+        }
         selecting = false
         candidateWindow.hide()
         defaults.set(raw, forKey: layoutDefaultsKey)
