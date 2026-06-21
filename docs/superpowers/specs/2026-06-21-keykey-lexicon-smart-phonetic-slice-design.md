@@ -84,15 +84,17 @@ Decodes `KeyKey.db` → a documented, Swift-loadable language model and validate
 
 - **Input:** the original `KeyKey.db` (12 MB, custom packed format: a big-endian offset
   table at the head indexing into records).
-- **Output:** an intermediate LM with two relations:
+- **Output:** an intermediate LM with two relations, in a **single** format — a
+  plain-text, mmap-loadable LM (McBopomofo-style), inspectable and fast enough at runtime:
   - **unigram:** `reading → [(phrase, score)]`
   - **bigram:** `(previousPhrase, currentPhrase) → score`
-  - Output format: a plain-text LM (McBopomofo-style) for inspectability **plus** a
-    compact binary/SQLite form for fast runtime load. (Final on-disk runtime format decided
-    during the spike based on size/perf.)
-- **Validation harness:** runs the original x86_64 binary under **Rosetta 2** to capture
-  reference candidate outputs for a fixed input corpus, and diffs them against candidates
-  produced from the decoded LM.
+- **Validation (no live-binary oracle):** the original is an `LSBackgroundOnly` IMK
+  server, not a CLI, so it cannot be driven headlessly to produce reference outputs.
+  Validate the decoded LM instead by:
+  - **Structural checks** — readings decode to valid Bopomofo, phrases are valid CJK,
+    scores are monotonic/plausible, counts are sane.
+  - **Cross-check against McBopomofo's open LM** — coverage and top-candidate ranking
+    agreement for a sample of readings (sanity, not byte-equality).
 
 ### 2.2 `KeyKeyEngine` — pure Swift package, no UI, fully unit-tested
 
@@ -143,17 +145,24 @@ keystroke
 
 ## 4. Lexicon spike (Step 0) — the gating work
 
-The whole program depends on the lexicon, so this is done first as a spike with a
-**go/no-go gate**.
+KeyKey's "Smart Phonetic" is the OpenVanilla **`OVIMSmartMandarin`** engine (confirmed in
+the binary's symbols) — the same lineage already open-sourced in Swift as **McBopomofo**
+and **vChewing**, including an open language model and the Viterbi-walk algorithm. So the
+*engine algorithm* is a known quantity; the only genuinely risky part is obtaining an
+*exact* lexicon from `KeyKey.db`.
+
+The whole program depends on the lexicon, so this is done first as a **strictly timeboxed
+spike** with a **go/no-go gate**:
 
 1. Map the offset-table + record layout of `KeyKey.db`.
 2. Extract unigram and bigram entries.
 3. Emit the intermediate LM (§2.1) and load it from `KeyKeyEngine`.
-4. Validate against Rosetta-captured reference outputs from the original binary.
+4. Validate per §2.1 (structural checks + McBopomofo cross-check).
 
-**Go/no-go gate:** if the format cannot be cracked within a fixed timebox, fall back to
-building an **equivalent** LM from open Bopomofo data — explicitly flagged as a deviation
-from "exact" and surfaced to the user for a decision before proceeding.
+**Go/no-go gate:** if the format cannot be decoded within the timebox, the **defined
+fallback** is the open **McBopomofo** language model (same engine family). This is an
+explicit deviation from "exact" candidate ordering and is surfaced to the user for a
+decision before proceeding. Either way, the engine and IMK path are unaffected.
 
 ---
 
@@ -162,8 +171,9 @@ from "exact" and surfaced to the user for a decision before proceeding.
 InputMethodKit controllers run in-process inside other applications, so the controller
 **must never crash the host app**:
 
-- LM load failure → engine degrades to **raw-Bopomofo passthrough** (readings commit
-  without smart conversion) and logs the failure; typing still works.
+- LM load failure → log and **fail safe**: the controller does not crash the host and
+  does not present candidates. (No alternate "passthrough" typing mode — that would be a
+  second input method, out of scope.)
 - Candidate-window failures never block text commit.
 - All engine entry points are pure/total; no force-unwraps on data read from disk.
 
@@ -173,7 +183,7 @@ InputMethodKit controllers run in-process inside other applications, so the cont
 
 - **Engine:** unit tests against a small hand-built fixture LM, plus golden tests against
   the real extracted LM for a set of known inputs → expected top candidates.
-- **Lexicon:** the diff-against-Rosetta-reference harness from §2.1.
+- **Lexicon:** the structural checks + McBopomofo cross-check from §2.1.
 - **IMK layer:** a headless harness that drives the engine exactly as `InputController`
   does (so engine↔controller wiring is testable without a live IMK session), plus a
   manual smoke test typing in TextEdit after installing to `~/Library/Input Methods`.
@@ -185,5 +195,3 @@ InputMethodKit controllers run in-process inside other applications, so the cont
 - **IP caveat (non-blocking):** reusing Yahoo's proprietary lexicon and reproducing a
   defunct proprietary product carries IP considerations. Treated here as a personal
   preservation rewrite; flagged, not blocking.
-- **Final runtime LM on-disk format** is decided during the spike (driven by load
-  performance and size).
