@@ -51,7 +51,7 @@ public final class PlainPhoneticEngine {
     @discardableResult
     public func selectCandidate(_ index: Int) -> String {
         let cands = candidates
-        guard index >= 0, index < cands.count else { return commit() }
+        guard index >= 0, index < cands.count else { return "" }   // out-of-range is a no-op
         let value = cands[index]
         reset()
         return value

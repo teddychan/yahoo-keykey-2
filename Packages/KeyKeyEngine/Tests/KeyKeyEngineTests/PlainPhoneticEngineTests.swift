@@ -36,6 +36,14 @@ final class PlainPhoneticEngineTests: XCTestCase {
         XCTAssertTrue(e.candidates.isEmpty)
     }
 
+    func testSelectCandidateOutOfRangeIsNoOp() {
+        let e = make()
+        _ = e.handleKey("r"); _ = e.handleKey("u"); _ = e.handleKey("p"); _ = e.handleKey(" ")
+        XCTAssertEqual(e.selectCandidate(99), "")        // out of range: no commit
+        XCTAssertEqual(e.composingText, "ㄐㄧㄣ")          // state unchanged
+        XCTAssertEqual(e.candidates, ["斤", "今"])
+    }
+
     func testCommitPicksBestCandidate() {
         let e = make()
         _ = e.handleKey("r"); _ = e.handleKey("u"); _ = e.handleKey("p"); _ = e.handleKey(" ")

@@ -113,9 +113,10 @@ final class InputController: IMKInputController {
             selecting = false   // fall through to normal composing below
         }
 
-        // Plain/Cangjie show candidates as soon as a syllable/code resolves, so digits 1–9
-        // select directly without first opening the picker. (Smart uses Down-then-digit only.)
-        if !method.isSmartSelection,
+        // Cangjie shows candidates as soon as a code resolves, and its keys are a–z, so digits
+        // 1–9 select directly without first opening the picker. (Smart and Plain phonetic use
+        // Down-then-digit, since digit keys are valid Bopomofo input there.)
+        if method.usesDirectDigitSelect,
            let chars = event.characters, let d = Int(chars), (1...9).contains(d),
            d - 1 < engine.candidates.count {
             engine.selectCandidate(d - 1)
@@ -243,6 +244,8 @@ final class InputController: IMKInputController {
 }
 
 private extension InputMethodChoice {
-    // Smart uses Down-then-digit selection; the others select directly from visible candidates.
-    var isSmartSelection: Bool { self == .smartPhonetic }
+    // Only Cangjie selects directly by digit: its keys are a–z, so digits are unambiguous
+    // selectors. Smart and Plain phonetic use Down-then-digit, because in Bopomofo layouts
+    // several digit keys ("1"=ㄅ, "2"=ㄉ, …) are valid input and must not be hijacked.
+    var usesDirectDigitSelect: Bool { self == .cangjie }
 }

@@ -41,7 +41,10 @@ final class PlainPhoneticEngineAdapter: InputEngine {
 
     var composingText: String { pendingSelection ?? engine.composingText }
 
-    var candidates: [String] { engine.candidates }
+    // Once a selection is pending, the composition is effectively finalized: report no
+    // candidates so composingText (= pendingSelection) and candidates stay consistent if
+    // the IMK loop reads them before commit().
+    var candidates: [String] { pendingSelection == nil ? engine.candidates : [] }
 
     func selectCandidate(_ index: Int) {
         let value = engine.selectCandidate(index)
