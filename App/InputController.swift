@@ -46,6 +46,7 @@ private enum InputMethodChoice: String {
 @objc(InputController)
 final class InputController: IMKInputController {
     private let lm: LanguageModel
+    private let characterRank: [Character: Double]
     private let associatedPhrases: AssociatedPhrases
     private let cangjieTable: CangjieTable
     private let simplexTable: SimplexTable
@@ -72,6 +73,11 @@ final class InputController: IMKInputController {
             lm = LanguageModel(text: "# format org.openvanilla.mcbopomofo.sorted")
         }
         self.lm = lm
+
+        // Rank single characters by LM score (higher = more common) so Cangjie/Simplex
+        // wildcard matches surface common characters first. Computed once.
+        let characterRank = lm.characterScores()
+        self.characterRank = characterRank
 
         // Build associated phrases from the same bundled data.txt; fail safe to empty if missing.
         let associatedPhrases: AssociatedPhrases
@@ -103,7 +109,8 @@ final class InputController: IMKInputController {
         // Start on Cangjie; IMK calls setValue(_:forTag:client:) with the active input mode
         // (and on every mode switch), which rebuilds the engine accordingly.
         self.engine = InputController.makeEngine(method: .cangjie, layout: .standard,
-                                                 lm: lm, cangjieTable: cangjieTable,
+                                                 lm: lm, characterRank: characterRank,
+                                                 cangjieTable: cangjieTable,
                                                  simplexTable: simplexTable)
         super.init(server: server, delegate: delegate, client: inputClient)
     }
@@ -111,7 +118,8 @@ final class InputController: IMKInputController {
     // Build the engine for the active method, wrapping in an adapter where the engine
     // surface doesn't already match the app-internal InputEngine protocol.
     private static func makeEngine(method: InputMethodChoice, layout: LayoutChoice,
-                                   lm: LanguageModel, cangjieTable: CangjieTable,
+                                   lm: LanguageModel, characterRank: [Character: Double],
+                                   cangjieTable: CangjieTable,
                                    simplexTable: SimplexTable) -> InputEngine {
         switch method {
         case .smartPhonetic:
@@ -119,9 +127,9 @@ final class InputController: IMKInputController {
         case .plainPhonetic:
             return PlainPhoneticEngineAdapter(PlainPhoneticEngine(languageModel: lm, layout: layout.makeLayout()))
         case .cangjie:
-            return CangjieEngine(table: cangjieTable)
+            return CangjieEngine(table: cangjieTable, characterRank: characterRank)
         case .simplex:
-            return SimplexEngine(table: simplexTable)
+            return SimplexEngine(table: simplexTable, characterRank: characterRank)
         }
     }
 
@@ -147,6 +155,7 @@ final class InputController: IMKInputController {
         candidateWindow.hide()
         method = choice
         engine = InputController.makeEngine(method: choice, layout: layout, lm: lm,
+                                            characterRank: characterRank,
                                             cangjieTable: cangjieTable, simplexTable: simplexTable)
     }
 

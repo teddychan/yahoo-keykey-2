@@ -106,6 +106,20 @@ final class SimplexEngineTests: XCTestCase {
         XCTAssertEqual(e.composingText, "")
     }
 
+    func testCandidatesRerankedByCharacterRank() {
+        // simplex "ab" -> ["明","昌"]; rank 昌 highest so it leads.
+        let rank: [Character: Double] = ["昌": 1.0]
+        let e = SimplexEngine(table: Self.table, characterRank: rank)
+        _ = e.handleKey("a"); _ = e.handleKey("b")
+        XCTAssertEqual(e.candidates, ["昌", "明"])
+    }
+
+    func testEmptyRankLeavesOrderUnchanged() {
+        let e = SimplexEngine(table: Self.table, characterRank: [:])
+        _ = e.handleKey("a"); _ = e.handleKey("b")
+        XCTAssertEqual(e.candidates, ["明", "昌"])
+    }
+
     func testNonLetterIgnored() {
         let e = make()
         _ = e.handleKey("a")

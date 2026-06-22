@@ -14,11 +14,13 @@ public final class CangjieEngine {
     private static let maxRadicals = 5
 
     private let table: CangjieTable
+    private let characterRank: [Character: Double]
     private var code: String = ""
     private var selected: String?
 
-    public init(table: CangjieTable) {
+    public init(table: CangjieTable, characterRank: [Character: Double] = [:]) {
         self.table = table
+        self.characterRank = characterRank
     }
 
     /// Returns true if the key was consumed by the engine.
@@ -41,9 +43,19 @@ public final class CangjieEngine {
         return String(code.map { Self.radicals[$0] ?? $0 })
     }
 
-    /// Characters whose code matches the current radical sequence (supports `*`).
+    /// Characters whose code matches the current radical sequence (supports `*`),
+    /// stable-sorted so common characters (higher rank) come first. With an empty
+    /// rank the table order is preserved unchanged.
     public var candidates: [String] {
-        code.isEmpty ? [] : table.characters(matching: code)
+        guard !code.isEmpty else { return [] }
+        let matches = table.characters(matching: code)
+        if characterRank.isEmpty { return matches }
+        return matches.enumerated().sorted { lhs, rhs in
+            let l = lhs.element.first.flatMap { characterRank[$0] } ?? -.greatestFiniteMagnitude
+            let r = rhs.element.first.flatMap { characterRank[$0] } ?? -.greatestFiniteMagnitude
+            if l != r { return l > r }
+            return lhs.offset < rhs.offset
+        }.map(\.element)
     }
 
     public func selectCandidate(_ index: Int) {
