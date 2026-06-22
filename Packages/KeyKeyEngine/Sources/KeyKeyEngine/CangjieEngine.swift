@@ -31,6 +31,9 @@ public final class CangjieEngine {
         return true
     }
 
+    /// Cangjie has no tone concept, so it never holds a tone-pending syllable.
+    public var isComposingSyllable: Bool { false }
+
     /// The 倉頡 radical glyphs accumulated so far, e.g. "日月".
     public var composingText: String {
         if let selected { return selected }

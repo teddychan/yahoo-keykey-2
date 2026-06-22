@@ -125,6 +125,10 @@ final class InputController: IMKInputController {
             if event.keyCode == 53 { // Escape exits selection without discarding composition
                 selecting = false; refresh(client); return true
             }
+            if event.keyCode == 49 { // Space confirms the current/top candidate
+                if !engine.candidates.isEmpty { engine.selectCandidate(0) }
+                return commitCurrent(to: client)
+            }
             if let chars = event.characters, let d = Int(chars), (1...9).contains(d),
                d - 1 < engine.candidates.count {
                 engine.selectCandidate(d - 1)
@@ -142,6 +146,24 @@ final class InputController: IMKInputController {
            d - 1 < engine.candidates.count {
             engine.selectCandidate(d - 1)
             return commitCurrent(to: client)
+        }
+
+        // SPACE: while a syllable is still being composed (no tone yet), fall through so the
+        // engine receives " " as tone 1 and finalizes it. Once a composition is finalized,
+        // SPACE confirms/commits it; with nothing composing, let a literal space through.
+        if event.keyCode == 49 { // Space
+            if engine.isComposingSyllable {
+                // fall through to engine.handleKey(" ") below to finalize as tone 1
+            } else if !engine.composingText.isEmpty {
+                if method == .smartPhonetic {
+                    return commitCurrent(to: client)
+                } else { // .plainPhonetic / .cangjie: commit the top candidate
+                    if !engine.candidates.isEmpty { engine.selectCandidate(0) }
+                    return commitCurrent(to: client)
+                }
+            } else {
+                return false // nothing composing: pass a literal space to the app
+            }
         }
 
         // Enter commits; Backspace deletes; Esc cancels; Down opens selection; mapped keys feed the engine.
@@ -163,7 +185,12 @@ final class InputController: IMKInputController {
 
         guard let ch = event.characters?.first else { return false }
         let consumed = engine.handleKey(ch)
-        if consumed { refresh(client) }
+        if consumed {
+            // Plain Phonetic: as soon as a syllable completes, show its numbered candidates
+            // (incl. after space=tone 1) so digits 1–9 select. Down still works.
+            if method == .plainPhonetic, !engine.candidates.isEmpty { selecting = true }
+            refresh(client)
+        }
         return consumed
     }
 

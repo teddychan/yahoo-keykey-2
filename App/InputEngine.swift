@@ -14,6 +14,7 @@ import KeyKeyEngine
 protocol InputEngine: AnyObject {
     func handleKey(_ key: Character) -> Bool
     var composingText: String { get }
+    var isComposingSyllable: Bool { get }
     var candidates: [String] { get }
     func selectCandidate(_ index: Int)
     func backspace()
@@ -40,6 +41,9 @@ final class PlainPhoneticEngineAdapter: InputEngine {
     func handleKey(_ key: Character) -> Bool { engine.handleKey(key) }
 
     var composingText: String { pendingSelection ?? engine.composingText }
+
+    // A held selection is already finalized, so it is never a tone-pending syllable.
+    var isComposingSyllable: Bool { pendingSelection == nil ? engine.isComposingSyllable : false }
 
     // Once a selection is pending, the composition is effectively finalized: report no
     // candidates so composingText (= pendingSelection) and candidates stay consistent if

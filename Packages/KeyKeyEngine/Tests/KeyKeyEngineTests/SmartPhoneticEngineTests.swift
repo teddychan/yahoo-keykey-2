@@ -46,6 +46,15 @@ final class SmartPhoneticEngineTests: XCTestCase {
         XCTAssertFalse(e.handleKey("`"))
     }
 
+    func testIsComposingSyllableTrueWithPhonemesFalseAfterTone() {
+        let e = SmartPhoneticEngine(languageModel: Self.phraseLM)
+        XCTAssertFalse(e.isComposingSyllable)              // nothing typed yet
+        _ = e.handleKey("r"); _ = e.handleKey("u"); _ = e.handleKey("p")  // ㄐㄧㄣ phonemes
+        XCTAssertTrue(e.isComposingSyllable)               // mid-syllable, no tone
+        _ = e.handleKey(" ")                               // tone 1 finalizes
+        XCTAssertFalse(e.isComposingSyllable)
+    }
+
     static let phraseLM = LanguageModel(text: """
     # format org.openvanilla.mcbopomofo.sorted
     ㄐㄧㄣ 今 -4.0

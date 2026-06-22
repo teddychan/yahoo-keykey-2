@@ -41,6 +41,9 @@ public final class SmartPhoneticEngine {
         }
     }
 
+    /// True while a phonetic syllable has phonemes typed but no tone applied yet.
+    public var isComposingSyllable: Bool { !buffer.isEmpty }
+
     /// Current selected reading index. Defaults to the last position; clamped to bounds.
     public var cursorPosition: Int {
         guard !readings.isEmpty else { return 0 }

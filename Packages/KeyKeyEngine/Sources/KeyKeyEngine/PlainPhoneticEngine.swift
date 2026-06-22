@@ -34,6 +34,9 @@ public final class PlainPhoneticEngine {
         }
     }
 
+    /// True while a phonetic syllable has phonemes typed but no tone applied yet.
+    public var isComposingSyllable: Bool { !pendingBPMF.isEmpty }
+
     /// Mid-syllable: the in-progress BPMF. Otherwise: the completed reading awaiting selection.
     public var composingText: String {
         pendingBPMF.isEmpty ? completedReading : pendingBPMF
