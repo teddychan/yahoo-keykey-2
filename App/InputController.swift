@@ -37,6 +37,7 @@ final class InputController: IMKInputController {
     private let lm: LanguageModel
     private let cangjieTable: CangjieTable
     private var method: InputMethodChoice
+    private var layout: LayoutChoice
     private var engine: InputEngine
     private let candidateWindow = CandidateWindow()
     private var selecting = false
@@ -73,6 +74,7 @@ final class InputController: IMKInputController {
         let method = InputMethodChoice(rawValue: suite?.string(forKey: methodDefaultsKey) ?? "") ?? .smartPhonetic
         let layout = LayoutChoice(rawValue: suite?.string(forKey: layoutDefaultsKey) ?? "") ?? .standard
         self.method = method
+        self.layout = layout
         self.engine = InputController.makeEngine(method: method, layout: layout, lm: lm, cangjieTable: cangjieTable)
         super.init(server: server, delegate: delegate, client: inputClient)
     }
@@ -95,8 +97,28 @@ final class InputController: IMKInputController {
         Int(NSEvent.EventTypeMask.keyDown.rawValue)
     }
 
+    // IMK creates one controller per text session, but a menu pick updates only the
+    // instance that owns the menu (plus shared UserDefaults). Re-read the persisted
+    // choice when this session activates and before handling keys, rebuilding the engine
+    // if it changed, so the selection applies to whichever instance handles typing.
+    override func activateServer(_ sender: Any!) {
+        super.activateServer(sender)
+        syncFromDefaults()
+    }
+
+    private func syncFromDefaults() {
+        let m = InputMethodChoice(rawValue: defaults.string(forKey: methodDefaultsKey) ?? "") ?? .smartPhonetic
+        let l = LayoutChoice(rawValue: defaults.string(forKey: layoutDefaultsKey) ?? "") ?? .standard
+        guard m != method || l != layout else { return }
+        method = m
+        layout = l
+        selecting = false
+        engine = InputController.makeEngine(method: m, layout: l, lm: lm, cangjieTable: cangjieTable)
+    }
+
     override func handle(_ event: NSEvent!, client sender: Any!) -> Bool {
         guard let event, event.type == .keyDown, let client = sender as? IMKTextInput else { return false }
+        syncFromDefaults()   // pick up a method/layout change made via another session's menu
 
         // Selection mode (entered via Down): digits pick a candidate; Esc just closes the
         // picker and keeps the composition; any other key resumes normal composing.
@@ -211,6 +233,7 @@ final class InputController: IMKInputController {
               let choice = LayoutChoice(rawValue: raw) else { return }
         commitInProgress()
         defaults.set(raw, forKey: layoutDefaultsKey)
+        layout = choice
         // Rebuild the active phonetic engine on the new layout. (No-op shape for Cangjie,
         // but the layout submenu isn't shown for Cangjie so this stays phonetic-only.)
         engine = InputController.makeEngine(method: method, layout: choice, lm: lm, cangjieTable: cangjieTable)
@@ -233,8 +256,12 @@ final class InputController: IMKInputController {
         client.setMarkedText(composing,
                              selectionRange: NSRange(location: composing.utf16.count, length: 0),
                              replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
+        // Only show the numbered candidate window when number keys actually select:
+        // in `selecting` mode (Smart/Plain, after Down) or for Cangjie (direct digit-select).
+        // Otherwise the list would imply number-select while digits are still Bopomofo input.
         let cands = engine.candidates
-        if cands.isEmpty { candidateWindow.hide() }
+        let numbersSelect = selecting || method.usesDirectDigitSelect
+        if cands.isEmpty || !numbersSelect { candidateWindow.hide() }
         else {
             var rect = NSRect.zero
             client.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
