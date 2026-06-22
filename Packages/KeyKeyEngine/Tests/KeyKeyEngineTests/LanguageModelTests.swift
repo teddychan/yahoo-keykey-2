@@ -33,4 +33,22 @@ final class LanguageModelTests: XCTestCase {
         XCTAssertFalse(lm.hasKey("ㄓㄨ"))
         XCTAssertTrue(lm.hasKey("ㄅㄚ"))
     }
+
+    func testCharacterScoresKeepsSingleCharsAndMaxScore() {
+        let lm = LanguageModel(text: Self.fixture)
+        let scores = lm.characterScores()
+        // Single-char values only; multi-char "貓咪" excluded.
+        XCTAssertEqual(Set(scores.keys), Set(["八", "吧", "貓"]))
+        // 貓 appears once at -4.1.
+        XCTAssertEqual(scores["貓"] ?? 0, -4.10000000, accuracy: 1e-6)
+    }
+
+    func testCharacterScoresRecordsMaxAcrossEntries() {
+        // 我 appears under two readings with different scores; keep the larger.
+        let lm = LanguageModel(text: """
+        ㄨㄛ 我 -5.00000000
+        ㄜ 我 -3.00000000
+        """)
+        XCTAssertEqual(lm.characterScores()["我"] ?? 0, -3.00000000, accuracy: 1e-6)
+    }
 }

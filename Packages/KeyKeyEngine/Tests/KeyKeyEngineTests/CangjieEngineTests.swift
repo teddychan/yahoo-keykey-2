@@ -135,6 +135,22 @@ final class CangjieEngineTests: XCTestCase {
         XCTAssertEqual(e.composingText, "*****")   // capped at 5
     }
 
+    func testWildcardCandidatesRerankedByCharacterRank() {
+        // Rank a normally-late char (漏) highest so it leads the "a*" list.
+        let rank: [Character: Double] = ["漏": 0.0, "韻": -1.0]
+        let e = CangjieEngine(table: Self.table, characterRank: rank)
+        _ = e.handleKey("a"); _ = e.handleKey("*")
+        // Default table order is ["明","冒","韻","漏"]; ranked chars move ahead
+        // (漏 > 韻), unranked ("明","冒") keep their relative order after.
+        XCTAssertEqual(e.candidates, ["漏", "韻", "明", "冒"])
+    }
+
+    func testEmptyRankLeavesOrderUnchanged() {
+        let e = CangjieEngine(table: Self.table, characterRank: [:])
+        _ = e.handleKey("a"); _ = e.handleKey("*")
+        XCTAssertEqual(e.candidates, ["明", "冒", "韻", "漏"])
+    }
+
     func testRadicalMapCoversFullAlphabet() {
         for k in "abcdefghijklmnopqrstuvwxyz" {
             XCTAssertNotNil(CangjieEngine.radicals[k], "missing radical for \(k)")

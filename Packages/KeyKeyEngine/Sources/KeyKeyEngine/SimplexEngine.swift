@@ -4,11 +4,13 @@
 // CangjieEngine.radicals for the composing-display glyphs.
 public final class SimplexEngine {
     private let table: SimplexTable
+    private let characterRank: [Character: Double]
     private var code: String = ""
     private var selected: String?
 
-    public init(table: SimplexTable) {
+    public init(table: SimplexTable, characterRank: [Character: Double] = [:]) {
         self.table = table
+        self.characterRank = characterRank
     }
 
     /// Returns true if the key was consumed by the engine. Accepts a–z radical keys.
@@ -29,9 +31,19 @@ public final class SimplexEngine {
         return String(code.map { CangjieEngine.radicals[$0] ?? $0 })
     }
 
-    /// Characters whose Simplex code matches the current radical sequence.
+    /// Characters whose Simplex code matches the current radical sequence,
+    /// stable-sorted so common characters (higher rank) come first. With an empty
+    /// rank the table order is preserved unchanged.
     public var candidates: [String] {
-        code.isEmpty ? [] : table.characters(forCode: code)
+        guard !code.isEmpty else { return [] }
+        let matches = table.characters(forCode: code)
+        if characterRank.isEmpty { return matches }
+        return matches.enumerated().sorted { lhs, rhs in
+            let l = lhs.element.first.flatMap { characterRank[$0] } ?? -.greatestFiniteMagnitude
+            let r = rhs.element.first.flatMap { characterRank[$0] } ?? -.greatestFiniteMagnitude
+            if l != r { return l > r }
+            return lhs.offset < rhs.offset
+        }.map(\.element)
     }
 
     public func selectCandidate(_ index: Int) {
