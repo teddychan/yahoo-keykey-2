@@ -23,18 +23,34 @@
     <dict>
         <key>tsInputModeListKey</key>
         <dict>
-            <key>com.github.teddychan.inputmethod.YahooKeyKey2.Bopomofo</key>
+            <key>com.github.teddychan.inputmethod.YahooKeyKey2.SmartPhonetic</key>
             <dict>
                 <key>TISIntendedLanguage</key><string>zh-Hant</string>
                 <key>tsInputModeCharacterRepertoireKey</key><array><string>Hant</string></array>
-                <key>tsInputModeDefaultStateKey</key><true/>
                 <key>tsInputModeIsVisibleKey</key><true/>
                 <key>tsInputModeScriptKey</key><string>smTradChinese</string>
-                <key>tsInputModePrimaryInScriptKey</key><true/>
+            </dict>
+            <key>com.github.teddychan.inputmethod.YahooKeyKey2.PlainPhonetic</key>
+            <dict>
+                <key>TISIntendedLanguage</key><string>zh-Hant</string>
+                <key>tsInputModeCharacterRepertoireKey</key><array><string>Hant</string></array>
+                <key>tsInputModeIsVisibleKey</key><true/>
+                <key>tsInputModeScriptKey</key><string>smTradChinese</string>
+            </dict>
+            <key>com.github.teddychan.inputmethod.YahooKeyKey2.Cangjie</key>
+            <dict>
+                <key>TISIntendedLanguage</key><string>zh-Hant</string>
+                <key>tsInputModeCharacterRepertoireKey</key><array><string>Hant</string></array>
+                <key>tsInputModeIsVisibleKey</key><true/>
+                <key>tsInputModeScriptKey</key><string>smTradChinese</string>
             </dict>
         </dict>
         <key>tsVisibleInputModeOrderedArrayKey</key>
-        <array><string>com.github.teddychan.inputmethod.YahooKeyKey2.Bopomofo</string></array>
+        <array>
+            <string>com.github.teddychan.inputmethod.YahooKeyKey2.SmartPhonetic</string>
+            <string>com.github.teddychan.inputmethod.YahooKeyKey2.PlainPhonetic</string>
+            <string>com.github.teddychan.inputmethod.YahooKeyKey2.Cangjie</string>
+        </array>
     </dict>
 </dict>
 </plist>

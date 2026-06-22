@@ -1,3 +1,5 @@
 CFBundleName = "Yahoo KeyKey 2";
 CFBundleDisplayName = "Yahoo KeyKey 2";
-"com.github.teddychan.inputmethod.YahooKeyKey2.Bopomofo" = "Yahoo KeyKey 2";
+"com.github.teddychan.inputmethod.YahooKeyKey2.SmartPhonetic" = "Yahoo KeyKey 2 — 智慧注音";
+"com.github.teddychan.inputmethod.YahooKeyKey2.PlainPhonetic" = "Yahoo KeyKey 2 — 傳統注音";
+"com.github.teddychan.inputmethod.YahooKeyKey2.Cangjie" = "Yahoo KeyKey 2 — 倉頡";
