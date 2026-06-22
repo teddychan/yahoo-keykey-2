@@ -137,6 +137,21 @@ final class InputController: IMKInputController {
         Int(NSEvent.EventTypeMask.keyDown.rawValue)
     }
 
+    // IMK input-menu (the menu shown in the input-method menu-bar item). A single
+    // "Preferences…" item opens the SHARED Preferences window — a stateless "open window"
+    // action, independent of which controller instance receives it.
+    override func menu() -> NSMenu! {
+        let menu = NSMenu()
+        let item = NSMenuItem(title: "偏好設定…", action: #selector(openPreferences), keyEquivalent: "")
+        item.target = self
+        menu.addItem(item)
+        return menu
+    }
+
+    @objc private func openPreferences() {
+        PreferencesWindowController.shared.show()
+    }
+
     // IMK calls this when the user selects one of our input modes (Info.plist
     // ComponentInputModeDict). The value is the mode identifier string.
     override func setValue(_ value: Any!, forTag tag: Int, client sender: Any!) {
@@ -196,7 +211,8 @@ final class InputController: IMKInputController {
         // Full-width punctuation when idle: no active composition (and not in association mode,
         // already handled above). A mapped ASCII punctuation key inserts its full-width form.
         // Mid-composition keys are left to the engine below.
-        if engine.composingText.isEmpty, let ch = event.characters?.first,
+        if Preferences.fullWidthPunctuationEnabled,
+           engine.composingText.isEmpty, let ch = event.characters?.first,
            let full = Punctuation.fullWidth(for: ch) {
             client.insertText(full, replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
             return true
@@ -321,7 +337,7 @@ final class InputController: IMKInputController {
                              replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
         // After an explicit user commit of a single character, offer associated phrases (聯想).
         // System-driven commits (focus loss, mode switch) pass offerAssociations: false and stay idle.
-        if offerAssociations, text.count == 1, let first = text.first {
+        if offerAssociations, Preferences.associatedPhrasesEnabled, text.count == 1, let first = text.first {
             let phrases = associatedPhrases.associations(for: first)
             if !phrases.isEmpty {
                 associations = phrases
@@ -363,7 +379,8 @@ final class InputController: IMKInputController {
             let page = Array(cands[start..<min(start + size, cands.count)])
             var rect = NSRect.zero
             client.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
-            candidateWindow.show(page, page: candidatePage, pageCount: pageCount, near: rect.origin)
+            candidateWindow.show(page, page: candidatePage, pageCount: pageCount,
+                                 fontSize: Preferences.candidateFontSize, near: rect.origin)
         }
     }
 }

@@ -8,6 +8,7 @@ guard let connectionName = Bundle.main.infoDictionary?["InputMethodConnectionNam
       let bundleID = Bundle.main.bundleIdentifier else {
     NSLog("YahooKeyKey: missing Info.plist keys"); exit(EXIT_FAILURE)
 }
+Preferences.registerDefaults()
 server = IMKServer(name: connectionName, bundleIdentifier: bundleID)
 if server == nil { NSLog("YahooKeyKey: failed to create IMKServer"); exit(EXIT_FAILURE) }
 NSApplication.shared.run()

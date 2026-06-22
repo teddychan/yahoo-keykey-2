@@ -26,8 +26,10 @@ final class CandidateWindow {
     }
 
     // `pageCandidates` is the already-sliced set for the current page (≤9). When `pageCount`
-    // exceeds 1, a " (page/total)" indicator is appended.
-    func show(_ pageCandidates: [String], page: Int, pageCount: Int, near point: NSPoint) {
+    // exceeds 1, a " (page/total)" indicator is appended. `fontSize` is read live from
+    // Preferences by the caller so size changes apply without restarting the IME.
+    func show(_ pageCandidates: [String], page: Int, pageCount: Int, fontSize: CGFloat, near point: NSPoint) {
+        label.font = .systemFont(ofSize: fontSize)
         var shown = pageCandidates.prefix(9).enumerated()
             .map { "\($0.offset + 1).\($0.element)" }
             .joined(separator: "  ")

@@ -44,7 +44,7 @@ swiftc \
   -swift-version 5 \
   -I "$MODULE_DIR" -L "$MODULE_DIR" -lKeyKeyEngine \
   -framework InputMethodKit -framework Cocoa \
-  "$APP_SRC"/main.swift "$APP_SRC"/InputController.swift "$APP_SRC"/InputEngine.swift "$APP_SRC"/CandidateWindow.swift
+  "$APP_SRC"/main.swift "$APP_SRC"/InputController.swift "$APP_SRC"/InputEngine.swift "$APP_SRC"/CandidateWindow.swift "$APP_SRC"/Preferences.swift "$APP_SRC"/PreferencesWindow.swift
 
 echo "==> Assembling Info.plist (resolving \${EXECUTABLE_NAME})"
 sed "s/\${EXECUTABLE_NAME}/$EXECUTABLE_NAME/g" "$APP_SRC/Info.plist" > "$APP/Contents/Info.plist"
