@@ -64,6 +64,13 @@ if [ ! -f "$ROOT/Resources/cangjie.txt" ]; then
 fi
 cp "$ROOT/Resources/cangjie.txt" "$APP/Contents/Resources/cangjie.txt"
 
+echo "==> Copying bundled Han-conversion table (opencc-TSCharacters.txt)"
+if [ ! -f "$ROOT/Packages/KeyKeyEngine/Resources/opencc-TSCharacters.txt" ]; then
+  echo "ERROR: Packages/KeyKeyEngine/Resources/opencc-TSCharacters.txt missing" >&2
+  exit 1
+fi
+cp "$ROOT/Packages/KeyKeyEngine/Resources/opencc-TSCharacters.txt" "$APP/Contents/Resources/opencc-TSCharacters.txt"
+
 echo "==> Copying localized strings (.lproj)"
 for lproj in "$APP_SRC"/*.lproj; do
   [ -d "$lproj" ] && cp -R "$lproj" "$APP/Contents/Resources/"

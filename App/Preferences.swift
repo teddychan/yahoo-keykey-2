@@ -7,6 +7,7 @@ enum Preferences {
         static let candidateFontSize = "candidateFontSize"
         static let associatedPhrasesEnabled = "associatedPhrasesEnabled"
         static let fullWidthPunctuationEnabled = "fullWidthPunctuationEnabled"
+        static let outputSimplifiedEnabled = "outputSimplifiedEnabled"
     }
 
     static let minFontSize: CGFloat = 14
@@ -19,6 +20,7 @@ enum Preferences {
             Key.candidateFontSize: Double(defaultFontSize),
             Key.associatedPhrasesEnabled: true,
             Key.fullWidthPunctuationEnabled: true,
+            Key.outputSimplifiedEnabled: false,
         ])
     }
 
@@ -41,5 +43,10 @@ enum Preferences {
     static var fullWidthPunctuationEnabled: Bool {
         get { UserDefaults.standard.bool(forKey: Key.fullWidthPunctuationEnabled) }
         set { UserDefaults.standard.set(newValue, forKey: Key.fullWidthPunctuationEnabled) }
+    }
+
+    static var outputSimplifiedEnabled: Bool {
+        get { UserDefaults.standard.bool(forKey: Key.outputSimplifiedEnabled) }
+        set { UserDefaults.standard.set(newValue, forKey: Key.outputSimplifiedEnabled) }
     }
 }
