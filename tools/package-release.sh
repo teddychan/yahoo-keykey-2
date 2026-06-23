@@ -52,9 +52,10 @@ ZIP="$BUILD/YahooKeyKey2-$VERSION.zip"
 SIGN_STATUS="ad-hoc"
 if [ -n "${DEVELOPER_ID_APP:-}" ]; then
   echo "==> Signing with Developer ID: $DEVELOPER_ID_APP"
-  # --options runtime enables the hardened runtime (required for notarization).
-  # --timestamp embeds a secure timestamp. --deep signs nested code (the static
-  # lib is linked in, but --deep is harmless and matches build-app.sh's style).
+  # --options runtime enables the hardened runtime (required for notarization);
+  # --timestamp embeds a secure timestamp. Sparkle is signed inside-out (its XPC
+  # services, Autoupdate, Updater.app, then the framework) before the app — never
+  # with --deep, which corrupts Sparkle's nested code signatures.
   SPARKLE_FW="$APP/Contents/Frameworks/Sparkle.framework"
   SPARKLE_V="$(/bin/ls -d "$SPARKLE_FW"/Versions/* | grep -v '/Current$' | head -1)"
   for item in "$SPARKLE_V"/XPCServices/*.xpc "$SPARKLE_V/Autoupdate" "$SPARKLE_V/Updater.app"; do
@@ -141,6 +142,16 @@ rm -f "$ZIP"
 ditto -c -k --keepParent "$APP" "$ZIP"
 
 rm -rf "$STAGE"
+
+# --- 5b. Sparkle appcast (only for signed release builds) -------------------
+if [ -n "${DEVELOPER_ID_APP:-}" ]; then
+  echo "==> Generating Sparkle appcast"
+  APPCAST="$BUILD/appcast.xml"
+  "$ROOT/tools/update-appcast.sh" "$ZIP" "$VERSION" "$APPCAST"
+  echo "==> Appcast ready: $APPCAST (commit to www.dragonapp.com:docs/keykey/appcast.xml)"
+else
+  echo "==> Skipping appcast (ad-hoc build; Sparkle needs the Developer ID zip)"
+fi
 
 # --- 6. Summary -------------------------------------------------------------
 echo
