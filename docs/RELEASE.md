@@ -4,8 +4,12 @@ This describes how to produce a downloadable build of **Yahoo KeyKey 2** (an
 InputMethodKit input method) for distribution **outside the Mac App Store**.
 App Store distribution is **not** used for this version.
 
-The packaging is handled by `tools/package-release.sh`, which builds the app,
-optionally signs and notarizes it, and produces a `.dmg` and a `.zip`.
+Packaging is handled by `tools/package-release.sh` (builds + signs + notarizes
+the app, and produces a `.zip` containing the app + `Install.txt`) and
+`tools/package-installer.sh` (additionally produces a GUI `.pkg`).
+
+**A release ships exactly two files: the `.pkg` and the `.zip`. No `.dmg`.**
+The `.zip` is both the user download and the Sparkle update payload.
 
 ---
 
@@ -64,12 +68,16 @@ env vars:
 
 ### Artifacts
 
-Both runs produce, in `build/`:
+`tools/package-release.sh` produces, in `build/`:
 
-- `build/YahooKeyKey2-1.0.0.dmg` — the DMG to upload to your release/download page.
-- `build/YahooKeyKey2-1.0.0.zip` — a zip alternative containing the same `.app`.
+- `build/YahooKeyKey2-<version>.zip` — contains `YahooKeyKey2.app` + `Install.txt`
+  (the user download **and** the Sparkle update payload).
 
-The DMG contains `YahooKeyKey2.app` plus an `Install.txt` with the user steps below.
+`tools/package-installer.sh` additionally produces:
+
+- `build/YahooKeyKey2-<version>.pkg` — the GUI installer (see below).
+
+Upload **both** to the release. No `.dmg` is produced.
 
 The script prints a final summary stating the version, signing status
 (Developer ID vs ad-hoc), and notarization status.
@@ -98,7 +106,7 @@ who installed directly (not via Homebrew) get updates automatically.
    `CFBundleVersion` must strictly increase — Sparkle compares it to decide what's
    newer.
 2. Run `tools/package-release.sh` with `DEVELOPER_ID_APP` (and `NOTARY_PROFILE`)
-   set. In addition to the `.dmg`/`.zip`, it now writes **`build/appcast.xml`**
+   set. In addition to the `.zip`, it writes **`build/appcast.xml`**
    (EdDSA-signed; enclosure URL → the GitHub release zip).
 3. Create the GitHub release at tag `v<version>` and upload the `.zip` (Sparkle
    downloads this) alongside the `.pkg` (first-time users). The zip must be named
@@ -106,8 +114,8 @@ who installed directly (not via Homebrew) get updates automatically.
 4. **Publish the appcast:** copy `build/appcast.xml` into the website repo at
    `docs/keykey/appcast.xml`, commit, and push. GitHub Pages serves it at
    `https://www.dragonapp.com/keykey/appcast.xml` — the `SUFeedURL` the app reads.
-5. Bump the Homebrew cask `Casks/yahoo-keykey-2.rb` (version + `.dmg` sha256) in
-   `teddychan/homebrew-tap`.
+5. Bump the Homebrew cask `Casks/yahoo-keykey-2.rb` in `teddychan/homebrew-tap`
+   (version + the `.zip` sha256; the cask installs the app from the `.zip`).
 
 ### Notes
 
@@ -123,8 +131,9 @@ who installed directly (not via Homebrew) get updates automatically.
 
 (Put these in the release notes / download page.)
 
-1. **Download** and open the DMG.
-2. **Copy `YahooKeyKey2.app`** into `~/Library/Input Methods/`
+1. **Easiest:** download and run the `.pkg` installer (click through; no admin
+   password). Skip to step 3. **Or** download the `.zip` and continue:
+2. **Copy `YahooKeyKey2.app`** (from the zip) into `~/Library/Input Methods/`
    (create the folder if it doesn't exist).
 3. **Log out and log back in** — macOS only scans for input methods at login.
 4. Open **System Settings ▸ Keyboard ▸ Input Sources ▸ `+`**, choose

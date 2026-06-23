@@ -44,7 +44,6 @@ if [ -z "$VERSION" ]; then
 fi
 echo "==> Version: $VERSION"
 
-DMG="$BUILD/YahooKeyKey2-$VERSION.dmg"
 ZIP="$BUILD/YahooKeyKey2-$VERSION.zip"
 
 # --- 3. Code signing (optional) ---------------------------------------------
@@ -100,17 +99,22 @@ else
   echo "==> NOTARY_PROFILE not set -- skipping notarization."
 fi
 
-# --- 5. Package: DMG + ZIP --------------------------------------------------
+# --- 5. Package: ZIP (app + Install.txt) ------------------------------------
 # Stage a clean directory holding the app and a plain-text install guide, then
-# turn it into a read-only DMG. The staging dir keeps the DMG contents tidy.
-echo "==> Staging DMG contents"
-STAGE="$BUILD/dmg-stage"
+# zip its CONTENTS at the archive root. The same zip is BOTH the user download
+# and the Sparkle update payload — Sparkle locates YahooKeyKey2.app inside it,
+# the extra Install.txt is ignored. (No DMG: the release ships .pkg + .zip only.)
+echo "==> Staging zip contents (app + Install.txt)"
+STAGE="$BUILD/zip-stage"
 rm -rf "$STAGE"
 mkdir -p "$STAGE"
 cp -R "$APP" "$STAGE/$APP_NAME"
 
 cat > "$STAGE/Install.txt" <<EOF
 Yahoo KeyKey 2 — Install
+
+The easiest way is the .pkg installer (double-click and click through; no admin
+password). To install from this zip manually instead:
 
 1. Copy "YahooKeyKey2.app" into your Input Methods folder:
        ~/Library/Input Methods/
@@ -129,17 +133,10 @@ If macOS reports the app is damaged or from an unidentified developer
        xattr -dr com.apple.quarantine "~/Library/Input Methods/YahooKeyKey2.app"
 EOF
 
-echo "==> Creating DMG: $DMG"
-rm -f "$DMG"
-hdiutil create \
-  -volname "Yahoo KeyKey 2 $VERSION" \
-  -srcfolder "$STAGE" \
-  -ov -format UDZO \
-  "$DMG"
-
 echo "==> Creating ZIP: $ZIP"
 rm -f "$ZIP"
-ditto -c -k --keepParent "$APP" "$ZIP"
+# No --keepParent: archive root holds YahooKeyKey2.app + Install.txt side by side.
+ditto -c -k "$STAGE" "$ZIP"
 
 rm -rf "$STAGE"
 
@@ -159,7 +156,6 @@ echo "==================== RELEASE SUMMARY ===================="
 echo "Version       : $VERSION"
 echo "Signing       : $SIGN_STATUS"
 echo "Notarization  : $NOTARY_STATUS"
-echo "DMG           : $DMG"
 echo "ZIP           : $ZIP"
 echo "========================================================="
 if [ "$SIGN_STATUS" = "ad-hoc" ]; then
