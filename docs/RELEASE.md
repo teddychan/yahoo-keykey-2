@@ -76,6 +76,49 @@ The script prints a final summary stating the version, signing status
 
 ---
 
+## Sparkle auto-update (appcast)
+
+The Developer-ID build ships [Sparkle 2](https://sparkle-project.org) so users
+who installed directly (not via Homebrew) get updates automatically.
+
+### One-time setup
+
+1. `tools/fetch-sparkle.sh` vendors `Sparkle.framework` + Sparkle's tools into
+   `build/sparkle/` (gitignored, pinned + checksum-verified). `tools/build-app.sh`
+   runs this automatically.
+2. `build/sparkle/bin/generate_keys` creates an **EdDSA private key in your login
+   Keychain** and prints the public key. It is already pinned in `App/Info.plist`
+   as `SUPublicEDKey`. **Back up the private key** — losing it means you can no
+   longer ship signed updates. (KeyKey reuses the same Sparkle signing key as
+   ClipMenu 2.)
+
+### Per release
+
+1. Bump `CFBundleShortVersionString` **and** `CFBundleVersion` in `App/Info.plist`.
+   `CFBundleVersion` must strictly increase — Sparkle compares it to decide what's
+   newer.
+2. Run `tools/package-release.sh` with `DEVELOPER_ID_APP` (and `NOTARY_PROFILE`)
+   set. In addition to the `.dmg`/`.zip`, it now writes **`build/appcast.xml`**
+   (EdDSA-signed; enclosure URL → the GitHub release zip).
+3. Create the GitHub release at tag `v<version>` and upload the `.zip` (Sparkle
+   downloads this) alongside the `.pkg` (first-time users). The zip must be named
+   `YahooKeyKey2-<version>.zip` so the appcast URL matches.
+4. **Publish the appcast:** copy `build/appcast.xml` into the website repo at
+   `docs/keykey/appcast.xml`, commit, and push. GitHub Pages serves it at
+   `https://www.dragonapp.com/keykey/appcast.xml` — the `SUFeedURL` the app reads.
+5. Bump the Homebrew cask `Casks/yahoo-keykey-2.rb` (version + `.dmg` sha256) in
+   `teddychan/homebrew-tap`.
+
+### Notes
+
+- KeyKey is an input method: after Sparkle installs an update, the new version
+  takes effect when the input method restarts — toggle the input source or log
+  out and back in.
+- The first Sparkle build is **v1.3.0**; v1.2.1 users (no Sparkle) update to it
+  once manually, then auto-update thereafter.
+
+---
+
 ## End-user install instructions
 
 (Put these in the release notes / download page.)
