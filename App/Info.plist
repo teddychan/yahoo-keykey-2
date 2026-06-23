@@ -17,9 +17,9 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.2.2</string>
+	<string>1.3.0</string>
 	<key>CFBundleVersion</key>
-	<string>5</string>
+	<string>6</string>
 	<key>ComponentInputModeDict</key>
 	<dict>
 		<key>tsInputModeListKey</key>
@@ -69,6 +69,14 @@
 	<true/>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUFeedURL</key>
+	<string>https://www.dragonapp.com/keykey/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>p+F/ivF5bAYcmuNuCMNHcRv123A6LHFpCBagFm7Adu8=</string>
+	<key>SUScheduledCheckInterval</key>
+	<integer>86400</integer>
 	<key>TISInputSourceID</key>
 	<string>com.github.teddychan.inputmethod.YahooKeyKey2</string>
 	<key>TISIntendedLanguage</key>
