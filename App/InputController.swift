@@ -29,68 +29,24 @@ final class InputController: IMKInputController {
     private static let pageSize = 9
 
     override init!(server: IMKServer!, delegate: Any!, client inputClient: Any!) {
-        // Load the bundled LM once; fail safe to an empty model (no candidates) if missing.
-        let lm: LanguageModel
-        if let url = Bundle.main.url(forResource: "data", withExtension: "txt"),
-           let loaded = try? LanguageModel(contentsOf: url) {
-            lm = loaded
-        } else {
-            NSLog("YahooKeyKey: data.txt missing; running with empty LM")
-            lm = LanguageModel(text: "# format org.openvanilla.mcbopomofo.sorted")
-        }
-        self.lm = lm
-
-        // Rank single characters by LM score (higher = more common) so Cangjie/Simplex
-        // wildcard matches surface common characters first. Computed once.
-        let characterRank = lm.characterScores()
+        // All heavy resources are loaded ONCE in SharedResources and shared across every
+        // controller (IMK creates one InputController per client/app). These reads do not
+        // copy: the engine tables are value-type structs and userFreq is a shared class.
+        let shared = SharedResources.shared
+        self.lm = shared.lm
+        let characterRank = shared.characterRank
         self.characterRank = characterRank
-
-        // Build associated phrases from the same bundled data.txt; fail safe to empty if missing.
-        let associatedPhrases: AssociatedPhrases
-        if let url = Bundle.main.url(forResource: "data", withExtension: "txt"),
-           let loaded = try? AssociatedPhrases(contentsOf: url) {
-            associatedPhrases = loaded
-        } else {
-            NSLog("YahooKeyKey: data.txt missing; running with empty associated phrases")
-            associatedPhrases = AssociatedPhrases(text: "")
-        }
-        self.associatedPhrases = associatedPhrases
-
-        // Load the bundled Cangjie table; fail safe to an empty table (no candidates) if missing.
-        let cangjieTable: CangjieTable
-        if let url = Bundle.main.url(forResource: "cangjie", withExtension: "txt"),
-           let loaded = try? CangjieTable(contentsOf: url) {
-            cangjieTable = loaded
-        } else {
-            NSLog("YahooKeyKey: cangjie.txt missing; running with empty Cangjie table")
-            cangjieTable = CangjieTable(text: "")
-        }
+        self.associatedPhrases = shared.associatedPhrases
+        let cangjieTable = shared.cangjieTable
         self.cangjieTable = cangjieTable
-
-        // Derive the Simplex table from the Cangjie table once (Simplex = first one/two
-        // Cangjie radicals → all matching characters).
-        let simplexTable = SimplexTable(cangjie: cangjieTable)
+        let simplexTable = shared.simplexTable
         self.simplexTable = simplexTable
+        self.hanConvertFilter = shared.hanConvertFilter
+        self.userFreq = shared.userFreq
 
-        // Load the bundled TC→SC table for the "輸出簡體字" toggle; fail safe to an empty
-        // (pass-through) table if missing, so the toggle simply leaves text unchanged.
-        let hanConvertTable: HanConvertTable
-        if let url = Bundle.main.url(forResource: "opencc-TSCharacters", withExtension: "txt"),
-           let loaded = try? HanConvertTable(contentsOf: url) {
-            hanConvertTable = loaded
-        } else {
-            NSLog("YahooKeyKey: opencc-TSCharacters.txt missing; Simplified output disabled (pass-through)")
-            hanConvertTable = HanConvertTable(text: "")
-        }
-        self.hanConvertFilter = HanConvertFilter(direction: .traditionalToSimplified, table: hanConvertTable)
-
-        // Load the persisted user-learning store (fail-safe to empty if absent/corrupt).
-        let userFreq = UserFrequency()
-        self.userFreq = userFreq
-
-        // Live user-learning bonus; the closure consults the store on every sort, so a
+        // Live user-learning bonus; the closure consults the shared store on every sort, so a
         // freshly-committed character promotes without rebuilding the engine.
-        let userRank: (Character) -> Double = { [userFreq] in userFreq.bonus(for: $0) }
+        let userRank: (Character) -> Double = { shared.userFreq.bonus(for: $0) }
 
         // The input-method registry. Each module's makeEngine captures the shared tables/ranks.
         // To add a method: append a module here and an Info.plist input mode — nothing else.

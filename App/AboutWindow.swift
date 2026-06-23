@@ -72,7 +72,7 @@ final class AboutWindowController: NSWindowController {
     }
 
     func show() {
-        NSApp.activate(ignoringOtherApps: true)
+        NSApp.activate(ignoringOtherApps: false)
         showWindow(nil)
         window?.makeKeyAndOrderFront(nil)
     }

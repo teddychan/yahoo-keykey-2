@@ -74,7 +74,7 @@ final class PreferencesWindowController: NSWindowController {
 
     func show() {
         syncControls()
-        NSApp.activate(ignoringOtherApps: true)
+        NSApp.activate(ignoringOtherApps: false)
         showWindow(nil)
         window?.makeKeyAndOrderFront(nil)
     }
