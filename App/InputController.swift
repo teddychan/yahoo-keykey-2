@@ -47,6 +47,9 @@ private enum InputMethodChoice: String {
 final class InputController: IMKInputController {
     private let lm: LanguageModel
     private let characterRank: [Character: Double]
+    // User learning: persisted selection-count store providing a live ranking bonus for
+    // Cangjie/Simplex candidates, so committed characters surface higher next time.
+    private let userFreq: UserFrequency
     private let associatedPhrases: AssociatedPhrases
     private let cangjieTable: CangjieTable
     private let simplexTable: SimplexTable
@@ -120,10 +123,15 @@ final class InputController: IMKInputController {
         }
         self.hanConvertFilter = HanConvertFilter(direction: .traditionalToSimplified, table: hanConvertTable)
 
+        // Load the persisted user-learning store (fail-safe to empty if absent/corrupt).
+        let userFreq = UserFrequency()
+        self.userFreq = userFreq
+
         // Start on Cangjie; IMK calls setValue(_:forTag:client:) with the active input mode
         // (and on every mode switch), which rebuilds the engine accordingly.
         self.engine = InputController.makeEngine(method: .cangjie, layout: .standard,
                                                  lm: lm, characterRank: characterRank,
+                                                 userFreq: userFreq,
                                                  cangjieTable: cangjieTable,
                                                  simplexTable: simplexTable)
         super.init(server: server, delegate: delegate, client: inputClient)
@@ -133,17 +141,21 @@ final class InputController: IMKInputController {
     // surface doesn't already match the app-internal InputEngine protocol.
     private static func makeEngine(method: InputMethodChoice, layout: LayoutChoice,
                                    lm: LanguageModel, characterRank: [Character: Double],
+                                   userFreq: UserFrequency,
                                    cangjieTable: CangjieTable,
                                    simplexTable: SimplexTable) -> InputEngine {
+        // Live user-learning bonus; the closure consults the store on every sort, so a
+        // freshly-committed character promotes without rebuilding the engine.
+        let userRank: (Character) -> Double = { [userFreq] in userFreq.bonus(for: $0) }
         switch method {
         case .smartPhonetic:
             return SmartPhoneticEngine(languageModel: lm, layout: layout.makeLayout())
         case .plainPhonetic:
             return PlainPhoneticEngineAdapter(PlainPhoneticEngine(languageModel: lm, layout: layout.makeLayout()))
         case .cangjie:
-            return CangjieEngine(table: cangjieTable, characterRank: characterRank)
+            return CangjieEngine(table: cangjieTable, characterRank: characterRank, userRank: userRank)
         case .simplex:
-            return SimplexEngine(table: simplexTable, characterRank: characterRank)
+            return SimplexEngine(table: simplexTable, characterRank: characterRank, userRank: userRank)
         }
     }
 
@@ -194,7 +206,7 @@ final class InputController: IMKInputController {
         candidateWindow.hide()
         method = choice
         engine = InputController.makeEngine(method: choice, layout: layout, lm: lm,
-                                            characterRank: characterRank,
+                                            characterRank: characterRank, userFreq: userFreq,
                                             cangjieTable: cangjieTable, simplexTable: simplexTable)
     }
 
@@ -356,6 +368,8 @@ final class InputController: IMKInputController {
         let text = engine.commit()
         if !text.isEmpty {
             client.insertText(applyHanConvert(text), replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
+            // User learning: remember single-character selections so they rank higher next time.
+            if text.count == 1, let ch = text.first { userFreq.record(ch) }
         }
         client.setMarkedText("", selectionRange: NSRange(location: 0, length: 0),
                              replacementRange: NSRange(location: NSNotFound, length: NSNotFound))

@@ -15,12 +15,17 @@ public final class CangjieEngine {
 
     private let table: CangjieTable
     private let characterRank: [Character: Double]
+    // Live per-character bonus added on top of the dict rank (user learning). Consulted on
+    // every sort, so newly-learned characters promote without rebuilding the engine.
+    private let userRank: (Character) -> Double
     private var code: String = ""
     private var selected: String?
 
-    public init(table: CangjieTable, characterRank: [Character: Double] = [:]) {
+    public init(table: CangjieTable, characterRank: [Character: Double] = [:],
+                userRank: @escaping (Character) -> Double = { _ in 0 }) {
         self.table = table
         self.characterRank = characterRank
+        self.userRank = userRank
     }
 
     /// Returns true if the key was consumed by the engine.
@@ -49,13 +54,25 @@ public final class CangjieEngine {
     public var candidates: [String] {
         guard !code.isEmpty else { return [] }
         let matches = table.characters(matching: code)
-        if characterRank.isEmpty { return matches }
         return matches.enumerated().sorted { lhs, rhs in
-            let l = lhs.element.first.flatMap { characterRank[$0] } ?? -.greatestFiniteMagnitude
-            let r = rhs.element.first.flatMap { characterRank[$0] } ?? -.greatestFiniteMagnitude
+            let l = Self.score(for: lhs.element, rank: characterRank, userRank: userRank)
+            let r = Self.score(for: rhs.element, rank: characterRank, userRank: userRank)
             if l != r { return l > r }
             return lhs.offset < rhs.offset
         }.map(\.element)
+    }
+
+    // Combined sort score: dict rank (or a finite floor for unranked chars, kept below any
+    // real LM score) plus the live user-learning bonus. A zero bonus leaves the dict-only
+    // ordering unchanged; with no dict rank and no bonus all scores tie, so the stable sort
+    // preserves the table's order.
+    private static func score(for candidate: String, rank: [Character: Double],
+                              userRank: (Character) -> Double) -> Double {
+        guard let c = candidate.first else { return -.greatestFiniteMagnitude }
+        // Finite floor, far below any real LM score (log-probs ~[-12, 0]) yet leaving
+        // headroom for a finite user bonus to lift an otherwise-unranked character.
+        let base = rank[c] ?? -1e9
+        return base + userRank(c)
     }
 
     public func selectCandidate(_ index: Int) {

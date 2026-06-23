@@ -120,6 +120,19 @@ final class SimplexEngineTests: XCTestCase {
         XCTAssertEqual(e.candidates, ["明", "昌"])
     }
 
+    func testUserRankPromotesLearnedChar() {
+        // No dict rank; userRank boosts the second char (昌) so it leads.
+        let e = SimplexEngine(table: Self.table, userRank: { $0 == "昌" ? 100 : 0 })
+        _ = e.handleKey("a"); _ = e.handleKey("b")
+        XCTAssertEqual(e.candidates, ["昌", "明"])
+    }
+
+    func testZeroUserRankLeavesOrderUnchanged() {
+        let e = SimplexEngine(table: Self.table, userRank: { _ in 0 })
+        _ = e.handleKey("a"); _ = e.handleKey("b")
+        XCTAssertEqual(e.candidates, ["明", "昌"])
+    }
+
     func testNonLetterIgnored() {
         let e = make()
         _ = e.handleKey("a")

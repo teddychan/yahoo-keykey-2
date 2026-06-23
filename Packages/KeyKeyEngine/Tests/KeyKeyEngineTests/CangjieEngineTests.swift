@@ -151,6 +151,31 @@ final class CangjieEngineTests: XCTestCase {
         XCTAssertEqual(e.candidates, ["明", "冒", "韻", "漏"])
     }
 
+    func testUserRankPromotesLearnedChar() {
+        // No dict rank; a userRank closure boosts an otherwise-last char (漏) to the top.
+        let e = CangjieEngine(table: Self.table, userRank: { $0 == "漏" ? 100 : 0 })
+        _ = e.handleKey("a"); _ = e.handleKey("*")
+        XCTAssertEqual(e.candidates, ["漏", "明", "冒", "韻"])
+    }
+
+    func testZeroUserRankLeavesOrderUnchanged() {
+        // Default (zero) userRank must not perturb dict-only ordering: existing behaviour.
+        let rank: [Character: Double] = ["漏": 0.0, "韻": -1.0]
+        let e = CangjieEngine(table: Self.table, characterRank: rank, userRank: { _ in 0 })
+        _ = e.handleKey("a"); _ = e.handleKey("*")
+        XCTAssertEqual(e.candidates, ["漏", "韻", "明", "冒"])
+    }
+
+    func testUserRankAddsToCharacterRank() {
+        // userRank is added on top of the dict rank, lifting a learned char above a
+        // higher-dict-ranked one.
+        let rank: [Character: Double] = ["韻": 1.0, "漏": 0.0]
+        let e = CangjieEngine(table: Self.table, characterRank: rank, userRank: { $0 == "漏" ? 5 : 0 })
+        _ = e.handleKey("a"); _ = e.handleKey("*")
+        // 漏: 0+5=5 leads; 韻: 1+0=1; then unranked 明,冒 keep order.
+        XCTAssertEqual(e.candidates, ["漏", "韻", "明", "冒"])
+    }
+
     func testRadicalMapCoversFullAlphabet() {
         for k in "abcdefghijklmnopqrstuvwxyz" {
             XCTAssertNotNil(CangjieEngine.radicals[k], "missing radical for \(k)")
