@@ -72,8 +72,11 @@ final class AboutWindowController: NSWindowController {
     }
 
     func show() {
-        NSApp.activate(ignoringOtherApps: false)
+        // LSUIElement background app: must activate (ignoringOtherApps: true) for the window
+        // to actually come forward when the user picks 關於 from the input menu.
+        NSApp.activate(ignoringOtherApps: true)
         showWindow(nil)
+        window?.level = .floating
         window?.makeKeyAndOrderFront(nil)
     }
 }

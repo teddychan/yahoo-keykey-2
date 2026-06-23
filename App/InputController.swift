@@ -103,11 +103,8 @@ final class InputController: IMKInputController {
             methodItems.forEach(menu.addItem)
         }
 
-        // 3. Preferences and About.
+        // 3. About (settings live as the toggles above; no separate Preferences window).
         menu.addItem(.separator())
-        let prefs = NSMenuItem(title: "偏好設定…", action: #selector(openPreferences), keyEquivalent: "")
-        prefs.target = self
-        menu.addItem(prefs)
         let about = NSMenuItem(title: "關於 Yahoo KeyKey 2…", action: #selector(openAbout), keyEquivalent: "")
         about.target = self
         menu.addItem(about)
@@ -124,10 +121,6 @@ final class InputController: IMKInputController {
 
     @objc private func toggleSimplified() {
         Preferences.outputSimplifiedEnabled.toggle()
-    }
-
-    @objc private func openPreferences() {
-        PreferencesWindowController.shared.show()
     }
 
     @objc private func openAbout() {
@@ -177,9 +170,14 @@ final class InputController: IMKInputController {
             if let chars = event.characters, let d = Int(chars), (1...9).contains(d) {
                 let index = candidatePage * InputController.pageSize + (d - 1)
                 if index < count {
-                    let phrase = associations[index]
+                    // Associations are full phrases that START with the just-committed
+                    // character (already in the document), so insert only the remainder
+                    // after it (好 + association "好像" -> insert "像", giving 好像).
+                    let suffix = String(associations[index].dropFirst())
                     clearAssociations()
-                    client.insertText(applyHanConvert(phrase), replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
+                    if !suffix.isEmpty {
+                        client.insertText(applyHanConvert(suffix), replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
+                    }
                     return true
                 }
                 return true // digit beyond this page: swallow, no insert
@@ -330,7 +328,7 @@ final class InputController: IMKInputController {
             var rect = NSRect.zero
             client.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
             candidateWindow.show(page, page: candidatePage, pageCount: pageCount,
-                                 fontSize: Preferences.candidateFontSize, near: rect.origin)
+                                 fontSize: Preferences.candidateFontSize, near: rect)
         }
     }
 }
