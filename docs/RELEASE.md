@@ -107,3 +107,77 @@ The script prints a final summary stating the version, signing status
 - **Input method doesn't appear** in System Settings: confirm the app is in
   `~/Library/Input Methods/`, then **log out and back in** — the login scan is
   required.
+
+---
+
+## GUI installer (`.pkg`)
+
+For a native double-click experience, `tools/package-installer.sh` builds a
+**GUI `.pkg`** that drives the macOS **Installer.app** flow: it installs
+`YahooKeyKey2.app` into **`~/Library/Input Methods/`** (the **current user's
+home — no admin password**) and ends with a **Log Out** button so the user can
+log out/in to activate the input method.
+
+It first builds the app — via `tools/package-release.sh` when `DEVELOPER_ID_APP`
+is set (signed/notarized app), otherwise via `tools/build-app.sh` (ad-hoc) — then
+wraps it with `pkgbuild` + `productbuild`.
+
+### Prerequisites (for a signed + notarized installer)
+
+A `.pkg` distributed by download must be signed with a **"Developer ID
+Installer"** certificate (distinct from the **Developer ID Application** cert
+that signs the app) and notarized. You need:
+
+1. The app-signing prerequisites above (Developer ID Application cert + the same
+   notarytool keychain profile).
+
+2. A **"Developer ID Installer"** certificate in your login keychain. Create it
+   once in **Xcode ▸ Settings ▸ Accounts ▸ Manage Certificates ▸ "+" ▸
+   "Developer ID Installer"**. Confirm it is present:
+
+   ```sh
+   security find-identity -v   # look for: Developer ID Installer: Teddy Chan (TEAMID)
+   ```
+
+> Without `DEVELOPER_ID_INSTALLER` the script still builds an **UNSIGNED** `.pkg`,
+> which is fine for **local testing** (right-click ▸ **Open** to bypass
+> Gatekeeper). It just can't be distributed by download.
+
+### Build the installer
+
+```sh
+export DEVELOPER_ID_APP="Developer ID Application: Teddy Chan (TEAMID)"
+export DEVELOPER_ID_INSTALLER="Developer ID Installer: Teddy Chan (TEAMID)"
+export NOTARY_PROFILE="YahooKeyKeyNotary"
+./tools/package-installer.sh
+```
+
+For a quick **local / unsigned** installer, run it with no env vars:
+
+```sh
+./tools/package-installer.sh
+```
+
+Either way it produces, in `build/`:
+
+- `build/YahooKeyKey2-1.0.0.pkg` — the GUI installer.
+
+The installer resources (`distribution.xml.template`, `welcome.txt`,
+`conclusion.txt`, `postinstall`) live in `installer/`; the script materializes
+them into temp build dirs at run time and cleans up afterwards. The component
+pkg uses `enable_currentUserHome` (current-user-home domain → no admin) and
+`onConclusion="RequireLogout"` (the Log Out prompt). The summary states the
+version, pkg signing status, and notarization status.
+
+### End-user experience
+
+1. **Double-click `YahooKeyKey2-1.0.0.pkg`** → the macOS Installer GUI opens.
+   (For an unsigned pkg, right-click ▸ **Open** the first time.)
+2. Click through; it installs **without** an admin password into
+   **`~/Library/Input Methods/`**.
+3. At the end, click **Log Out** (then log back in) — required so macOS
+   registers the new input method.
+4. Open **System Settings ▸ Keyboard ▸ Input Sources ▸ `+`**, choose
+   **Traditional Chinese**, and add **Yahoo KeyKey 2 — Cangjie** and/or
+   **Yahoo KeyKey 2 — Simplex**.
+5. Switch input source with **Ctrl-Space** and start typing.

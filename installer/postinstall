@@ -1,0 +1,7 @@
+#!/bin/bash
+# postinstall for Yahoo KeyKey 2.
+# Refresh any running instance so a re-install picks up the new bundle.
+# macOS still requires a logout/login to register a freshly added input method;
+# Installer handles that via the onConclusion="RequireLogout" prompt.
+killall YahooKeyKey2 2>/dev/null || true
+exit 0

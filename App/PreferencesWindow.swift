@@ -10,9 +10,10 @@ final class PreferencesWindowController: NSWindowController {
     private let fontSizeLabel = NSTextField(labelWithString: "")
     private let associatedPhrasesCheckbox = NSButton(checkboxWithTitle: "", target: nil, action: nil)
     private let fullWidthPunctuationCheckbox = NSButton(checkboxWithTitle: "", target: nil, action: nil)
+    private let outputSimplifiedCheckbox = NSButton(checkboxWithTitle: "", target: nil, action: nil)
 
     private init() {
-        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 360, height: 170),
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 360, height: 200),
                               styleMask: [.titled, .closable],
                               backing: .buffered, defer: false)
         window.title = "偏好設定"
@@ -41,11 +42,15 @@ final class PreferencesWindowController: NSWindowController {
         fullWidthPunctuationCheckbox.target = self
         fullWidthPunctuationCheckbox.action = #selector(fullWidthPunctuationChanged)
 
+        outputSimplifiedCheckbox.title = "輸出簡體字"
+        outputSimplifiedCheckbox.target = self
+        outputSimplifiedCheckbox.action = #selector(outputSimplifiedChanged)
+
         let fontRow = NSStackView(views: [fontTitle, fontSizeStepper, fontSizeLabel])
         fontRow.spacing = 8
         fontRow.alignment = .centerY
 
-        let stack = NSStackView(views: [fontRow, associatedPhrasesCheckbox, fullWidthPunctuationCheckbox])
+        let stack = NSStackView(views: [fontRow, associatedPhrasesCheckbox, fullWidthPunctuationCheckbox, outputSimplifiedCheckbox])
         stack.orientation = .vertical
         stack.alignment = .leading
         stack.spacing = 16
@@ -64,6 +69,7 @@ final class PreferencesWindowController: NSWindowController {
         fontSizeLabel.stringValue = "\(Int(Preferences.candidateFontSize)) pt"
         associatedPhrasesCheckbox.state = Preferences.associatedPhrasesEnabled ? .on : .off
         fullWidthPunctuationCheckbox.state = Preferences.fullWidthPunctuationEnabled ? .on : .off
+        outputSimplifiedCheckbox.state = Preferences.outputSimplifiedEnabled ? .on : .off
     }
 
     func show() {
@@ -84,5 +90,9 @@ final class PreferencesWindowController: NSWindowController {
 
     @objc private func fullWidthPunctuationChanged() {
         Preferences.fullWidthPunctuationEnabled = (fullWidthPunctuationCheckbox.state == .on)
+    }
+
+    @objc private func outputSimplifiedChanged() {
+        Preferences.outputSimplifiedEnabled = (outputSimplifiedCheckbox.state == .on)
     }
 }

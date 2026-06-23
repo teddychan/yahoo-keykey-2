@@ -50,6 +50,8 @@ final class InputController: IMKInputController {
     private let associatedPhrases: AssociatedPhrases
     private let cangjieTable: CangjieTable
     private let simplexTable: SimplexTable
+    // Traditional→Simplified character converter, applied only when Preferences.outputSimplifiedEnabled.
+    private let hanConvertFilter: HanConvertFilter
     private let layout: LayoutChoice = .standard
     private var method: InputMethodChoice = .cangjie
     private var engine: InputEngine
@@ -106,6 +108,18 @@ final class InputController: IMKInputController {
         let simplexTable = SimplexTable(cangjie: cangjieTable)
         self.simplexTable = simplexTable
 
+        // Load the bundled TC→SC table for the "輸出簡體字" toggle; fail safe to an empty
+        // (pass-through) table if missing, so the toggle simply leaves text unchanged.
+        let hanConvertTable: HanConvertTable
+        if let url = Bundle.main.url(forResource: "opencc-TSCharacters", withExtension: "txt"),
+           let loaded = try? HanConvertTable(contentsOf: url) {
+            hanConvertTable = loaded
+        } else {
+            NSLog("YahooKeyKey: opencc-TSCharacters.txt missing; Simplified output disabled (pass-through)")
+            hanConvertTable = HanConvertTable(text: "")
+        }
+        self.hanConvertFilter = HanConvertFilter(direction: .traditionalToSimplified, table: hanConvertTable)
+
         // Start on Cangjie; IMK calls setValue(_:forTag:client:) with the active input mode
         // (and on every mode switch), which rebuilds the engine accordingly.
         self.engine = InputController.makeEngine(method: .cangjie, layout: .standard,
@@ -142,10 +156,20 @@ final class InputController: IMKInputController {
     // action, independent of which controller instance receives it.
     override func menu() -> NSMenu! {
         let menu = NSMenu()
+        // Quick toggle: convert committed output Traditional -> Simplified. Check reflects state.
+        let convert = NSMenuItem(title: "輸出簡體字", action: #selector(toggleSimplified), keyEquivalent: "")
+        convert.target = self
+        convert.state = Preferences.outputSimplifiedEnabled ? .on : .off
+        menu.addItem(convert)
+        menu.addItem(.separator())
         let item = NSMenuItem(title: "偏好設定…", action: #selector(openPreferences), keyEquivalent: "")
         item.target = self
         menu.addItem(item)
         return menu
+    }
+
+    @objc private func toggleSimplified() {
+        Preferences.outputSimplifiedEnabled.toggle()
     }
 
     @objc private func openPreferences() {
@@ -199,7 +223,7 @@ final class InputController: IMKInputController {
                 if index < count {
                     let phrase = associations[index]
                     clearAssociations()
-                    client.insertText(phrase, replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
+                    client.insertText(applyHanConvert(phrase), replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
                     return true
                 }
                 return true // digit beyond this page: swallow, no insert
@@ -331,7 +355,7 @@ final class InputController: IMKInputController {
         candidatePage = 0
         let text = engine.commit()
         if !text.isEmpty {
-            client.insertText(text, replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
+            client.insertText(applyHanConvert(text), replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
         }
         client.setMarkedText("", selectionRange: NSRange(location: 0, length: 0),
                              replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
@@ -349,6 +373,12 @@ final class InputController: IMKInputController {
         associations = []
         candidateWindow.hide()
         return true
+    }
+
+    // Apply Traditional→Simplified conversion iff the user enabled "輸出簡體字" (read live).
+    // Used for both committed text and candidate/association display so they stay WYSIWYG.
+    private func applyHanConvert(_ text: String) -> String {
+        Preferences.outputSimplifiedEnabled ? hanConvertFilter.convert(text) : text
     }
 
     // Leave association mode: drop the suggestions, reset paging, hide the candidate window.
@@ -376,7 +406,8 @@ final class InputController: IMKInputController {
             // Guard against a stale candidatePage pointing past the end (would trap on slice).
             if candidatePage * size >= cands.count { candidatePage = 0 }
             let start = candidatePage * size
-            let page = Array(cands[start..<min(start + size, cands.count)])
+            // Convert only the displayed strings (WYSIWYG); selection still indexes `cands`.
+            let page = cands[start..<min(start + size, cands.count)].map(applyHanConvert)
             var rect = NSRect.zero
             client.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
             candidateWindow.show(page, page: candidatePage, pageCount: pageCount,

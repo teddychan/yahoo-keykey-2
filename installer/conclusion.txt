@@ -1,0 +1,18 @@
+Yahoo KeyKey 2 was installed into:
+
+    ~/Library/Input Methods/YahooKeyKey2.app
+
+To finish setup:
+
+  1. LOG OUT and log back in (or restart). macOS only scans for input
+     methods at login, so this step is required before it appears.
+     Use the "Log Out" button below to do this now.
+
+  2. Open System Settings ▸ Keyboard ▸ Input Sources ▸ "+",
+     choose Traditional Chinese, and add:
+         Yahoo KeyKey 2 — Cangjie    and/or
+         Yahoo KeyKey 2 — Simplex
+
+  3. Switch input source with Ctrl-Space and start typing.
+
+Enjoy Yahoo KeyKey 2!

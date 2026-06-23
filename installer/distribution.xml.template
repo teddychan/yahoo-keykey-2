@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  productbuild distribution definition for "Yahoo KeyKey 2".
+
+  Placeholders below are substituted by tools/package-installer.sh at build time:
+    __VERSION__        CFBundleShortVersionString read from the built app
+    __COMPONENT_PKG__  filename of the pkgbuild component pkg (e.g. component.pkg)
+
+  Key behaviours:
+    * <domains enable_currentUserHome="true" ...>  -> installs into the CURRENT
+      user's home (~/Library/Input Methods), so NO admin password is needed.
+    * onConclusion="RequireLogout"  -> Installer shows the "Log Out" button at the
+      end, which is what activates the input method (macOS only scans Input Methods
+      at login).
+    * customize="never"  -> single straightforward flow, no component selection.
+-->
+<installer-gui-script minSpecVersion="1">
+    <title>Yahoo KeyKey 2</title>
+
+    <welcome file="welcome.txt" mime-type="text/plain"/>
+    <conclusion file="conclusion.txt" mime-type="text/plain"/>
+
+    <domains enable_currentUserHome="true" enable_anywhere="false" enable_localSystem="false"/>
+    <options customize="never" require-scripts="false" rootVolumeOnly="false"/>
+
+    <choices-outline>
+        <line choice="default">
+            <line choice="com.github.teddychan.inputmethod.YahooKeyKey2.pkg"/>
+        </line>
+    </choices-outline>
+
+    <choice id="default"/>
+    <choice id="com.github.teddychan.inputmethod.YahooKeyKey2.pkg" visible="false">
+        <pkg-ref id="com.github.teddychan.inputmethod.YahooKeyKey2.pkg"/>
+    </choice>
+
+    <pkg-ref id="com.github.teddychan.inputmethod.YahooKeyKey2.pkg"
+             version="__VERSION__"
+             onConclusion="RequireLogout">__COMPONENT_PKG__</pkg-ref>
+</installer-gui-script>
