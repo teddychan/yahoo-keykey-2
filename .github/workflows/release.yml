@@ -1,285 +1,36 @@
 name: Release
 
-# Build, Developer ID-sign, notarize, staple, and publish Yahoo KeyKey 2 whenever
-# a v* tag is pushed. Also publishes the EdDSA-signed Sparkle appcast to the
-# marketing site and bumps the Homebrew cask. Runs on a GitHub-hosted macOS
-# runner (public repo → free Actions minutes); no self-hosted runner needed.
+# Thin caller: delegates to the shared macOS release pipeline
+# (teddychan/dragon-release-ci). Build via tools/build-lm.sh + tools/build-app.sh
+# (swiftc), Developer ID-sign, notarize, staple, publish Yahoo KeyKey 2, push the
+# EdDSA-signed Sparkle appcast to docs/yahoo-keykey-2/, and bump the Homebrew
+# cask. Triggered by a v* tag on this repo.
 #
-# The compile is delegated to tools/build-app.sh (pure swiftc, no credentials);
-# signing/notarization/appcast are inlined here from repository secrets, because
-# the local tools/*.sh assume a developer Keychain (notarytool profile + the
-# Sparkle EdDSA key) that doesn't exist on CI.
-#
-# Required repository secrets (Settings -> Secrets and variables -> Actions):
-#   DEVELOPER_ID_CERT_P12_BASE64  base64 of the "Developer ID Application" .p12
-#   DEVELOPER_ID_CERT_PASSWORD    password set when exporting the .p12
-#   NOTARY_KEY_P8_BASE64          base64 of the App Store Connect API key (.p8)
-#   NOTARY_KEY_ID                 the API key's Key ID
-#   NOTARY_ISSUER_ID              the API key's Issuer ID
-#   PUBLIC_RELEASE_TOKEN          PAT with write to teddychan/www.dragonapp.com + homebrew-tap
-#   SPARKLE_EDDSA_PRIVATE_KEY     the shared Sparkle EdDSA private key
+# Secrets are inherited from this repo's Actions secrets:
+#   DEVELOPER_ID_CERT_P12_BASE64, DEVELOPER_ID_CERT_PASSWORD,
+#   NOTARY_KEY_P8_BASE64, NOTARY_KEY_ID, NOTARY_ISSUER_ID,
+#   PUBLIC_RELEASE_TOKEN, SPARKLE_EDDSA_PRIVATE_KEY
 on:
   push:
     tags:
       - 'v*'
   workflow_dispatch: {}
 
-permissions:
-  contents: write   # upload assets / create the release on this repo
-
 jobs:
-  build:
-    # GitHub-hosted Apple-Silicon macOS runner (macos-14+ are arm64, matching
-    # KeyKey's arm64-only build). The "Select Xcode" step picks the newest Xcode;
-    # bump to `macos-26` if a newer SDK is required.
-    runs-on: macos-15
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Select Xcode
-        run: |
-          set -euo pipefail
-          latest="$(ls -d /Applications/Xcode_*.app 2>/dev/null | sort -V | tail -1)"
-          if [ -n "$latest" ]; then sudo xcode-select -s "$latest/Contents/Developer"; fi
-          swift --version
-
-      - name: Resolve version
-        run: |
-          set -euo pipefail
-          TAG="${GITHUB_REF_NAME}"
-          echo "TAG=${TAG}" >> "$GITHUB_ENV"
-          echo "VERSION=${TAG#v}" >> "$GITHUB_ENV"
-
-      - name: Build the LM data + app (swiftc, ad-hoc)
-        run: |
-          set -euo pipefail
-          # build-lm.sh produces Resources/data.txt (required by build-app.sh).
-          if [ -x tools/build-lm.sh ] && [ ! -f Resources/data.txt ]; then
-            tools/build-lm.sh
-          fi
-          tools/build-app.sh
-          APP="$GITHUB_WORKSPACE/build/YahooKeyKey2.app"
-          test -d "$APP" || { echo "::error::build-app.sh did not produce $APP" >&2; exit 1; }
-          BUILT_VERSION="$(/usr/bin/plutil -extract CFBundleShortVersionString raw "$APP/Contents/Info.plist")"
-          if [ "$BUILT_VERSION" != "$VERSION" ]; then
-            echo "::error::Tag version ($VERSION) != Info.plist CFBundleShortVersionString ($BUILT_VERSION). Bump the plist or fix the tag." >&2
-            exit 1
-          fi
-          echo "APP=$APP" >> "$GITHUB_ENV"
-
-      - name: Import Developer ID certificate
-        env:
-          CERT_P12_BASE64: ${{ secrets.DEVELOPER_ID_CERT_P12_BASE64 }}
-          CERT_PASSWORD: ${{ secrets.DEVELOPER_ID_CERT_PASSWORD }}
-        run: |
-          set -euo pipefail
-          if [ -z "${CERT_P12_BASE64:-}" ]; then
-            echo "::error::DEVELOPER_ID_CERT_P12_BASE64 secret is not set." >&2
-            exit 1
-          fi
-          KEYCHAIN_PATH="$RUNNER_TEMP/app-signing.keychain-db"
-          KEYCHAIN_PASSWORD="$(openssl rand -base64 24)"
-          CERT_PATH="$RUNNER_TEMP/developer_id.p12"
-          echo "$CERT_P12_BASE64" | base64 --decode > "$CERT_PATH"
-          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security import "$CERT_PATH" -P "$CERT_PASSWORD" -A -t cert -f pkcs12 \
-            -k "$KEYCHAIN_PATH" -T /usr/bin/codesign
-          for url in \
-            https://www.apple.com/certificateauthority/DeveloperIDG2CA.cer \
-            https://www.apple.com/certificateauthority/DeveloperIDCA.cer \
-            https://www.apple.com/certificateauthority/AppleWWDRCAG3.cer; do
-            f="$RUNNER_TEMP/$(basename "$url")"
-            curl -fsSL -o "$f" "$url" && security import "$f" -k "$KEYCHAIN_PATH" >/dev/null 2>&1 || true
-          done
-          security set-key-partition-list -S apple-tool:,apple:,codesign: \
-            -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH" >/dev/null
-          security list-keychains -d user -s "$KEYCHAIN_PATH" \
-            $(security list-keychains -d user | sed s/\"//g)
-          IDENTITY="$(security find-identity -v -p codesigning "$KEYCHAIN_PATH" \
-            | grep 'Developer ID Application' | head -1 | awk '{print $2}')"
-          if [ -z "$IDENTITY" ]; then
-            echo "::error::No 'Developer ID Application' identity found in the imported certificate." >&2
-            exit 1
-          fi
-          echo "Signing identity (SHA-1): $IDENTITY"
-          echo "SIGN_IDENTITY=$IDENTITY" >> "$GITHUB_ENV"
-          echo "KEYCHAIN_PATH=$KEYCHAIN_PATH" >> "$GITHUB_ENV"
-
-      - name: Sign (Developer ID + hardened runtime)
-        run: |
-          set -euo pipefail
-          # Mirror tools/package-release.sh: sign Sparkle inside-out (XPC services,
-          # Autoupdate, Updater.app, framework), then the app last with entitlements.
-          # No --deep — it corrupts Sparkle's nested signatures.
-          ENTITLEMENTS="$GITHUB_WORKSPACE/App/YahooKeyKey2.entitlements"
-          SPARKLE_FW="$APP/Contents/Frameworks/Sparkle.framework"
-          if [ -d "$SPARKLE_FW" ]; then
-            SPARKLE_V="$(/bin/ls -d "$SPARKLE_FW"/Versions/* | grep -v '/Current$' | head -1)"
-            for item in "$SPARKLE_V"/XPCServices/*.xpc "$SPARKLE_V/Autoupdate" "$SPARKLE_V/Updater.app"; do
-              [ -e "$item" ] || continue
-              codesign --force --options runtime --timestamp \
-                --sign "$SIGN_IDENTITY" --keychain "$KEYCHAIN_PATH" "$item"
-            done
-            codesign --force --options runtime --timestamp \
-              --sign "$SIGN_IDENTITY" --keychain "$KEYCHAIN_PATH" "$SPARKLE_FW"
-          fi
-          codesign --force --options runtime --timestamp \
-            --entitlements "$ENTITLEMENTS" \
-            --sign "$SIGN_IDENTITY" --keychain "$KEYCHAIN_PATH" "$APP"
-          codesign --verify --strict --verbose=2 "$APP"
-
-      - name: Notarize and staple
-        env:
-          NOTARY_KEY_P8_BASE64: ${{ secrets.NOTARY_KEY_P8_BASE64 }}
-          NOTARY_KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
-          NOTARY_ISSUER_ID: ${{ secrets.NOTARY_ISSUER_ID }}
-        run: |
-          set -euo pipefail
-          if [ -z "${NOTARY_KEY_P8_BASE64:-}" ]; then
-            echo "::error::NOTARY_KEY_P8_BASE64 secret is not set." >&2
-            exit 1
-          fi
-          KEY_PATH="$RUNNER_TEMP/notary_key.p8"
-          echo "$NOTARY_KEY_P8_BASE64" | base64 --decode > "$KEY_PATH"
-          NOTARIZE_ZIP="$RUNNER_TEMP/notarize.zip"
-          ditto -c -k --sequesterRsrc --keepParent "$APP" "$NOTARIZE_ZIP"
-          CREDS=(--key "$KEY_PATH" --key-id "$NOTARY_KEY_ID" --issuer "$NOTARY_ISSUER_ID")
-          SUBMIT_JSON="$RUNNER_TEMP/submit.json"
-          xcrun notarytool submit "$NOTARIZE_ZIP" "${CREDS[@]}" --output-format json > "$SUBMIT_JSON"
-          SUBMISSION_ID="$(plutil -extract id raw -o - "$SUBMIT_JSON")"
-          echo "Notarization submission: $SUBMISSION_ID"
-          DEADLINE=$(( SECONDS + 3600 )); STATUS="In Progress"
-          while [ "$STATUS" = "In Progress" ]; do
-            if [ "$SECONDS" -ge "$DEADLINE" ]; then
-              echo "::error::Notarization timed out after 60m. Submission: $SUBMISSION_ID" >&2; exit 1
-            fi
-            sleep 30
-            if xcrun notarytool info "$SUBMISSION_ID" "${CREDS[@]}" --output-format json > "$RUNNER_TEMP/info.json" 2>/dev/null; then
-              STATUS="$(plutil -extract status raw -o - "$RUNNER_TEMP/info.json")"
-              echo "Status: $STATUS"
-            else
-              echo "::warning::notarytool info poll failed (transient); re-polling $SUBMISSION_ID"
-            fi
-          done
-          if [ "$STATUS" != "Accepted" ]; then
-            echo "::error::Notarization did not succeed (status: $STATUS). Log follows:" >&2
-            xcrun notarytool log "$SUBMISSION_ID" "${CREDS[@]}" || true
-            exit 1
-          fi
-          xcrun stapler staple "$APP"
-          xcrun stapler validate "$APP"
-
-      - name: Stage and zip (app + Install.txt)
-        run: |
-          set -euo pipefail
-          # Mirror tools/package-release.sh step 5: the same zip is BOTH the user
-          # download and the Sparkle update payload. ditto without --keepParent puts
-          # YahooKeyKey2.app + Install.txt at the archive root. Install.txt is built
-          # with printf (no heredoc) to avoid YAML/heredoc indentation pitfalls.
-          ZIP="$GITHUB_WORKSPACE/YahooKeyKey2-${VERSION}.zip"
-          STAGE="$RUNNER_TEMP/zip-stage"
-          rm -rf "$STAGE"; mkdir -p "$STAGE"
-          cp -R "$APP" "$STAGE/YahooKeyKey2.app"
-          {
-            printf '%s\n' "Yahoo KeyKey 2 — Install" ""
-            printf '%s\n' "The easiest way is the .pkg installer. To install from this zip manually:" ""
-            printf '%s\n' "1. Copy \"YahooKeyKey2.app\" into your Input Methods folder:"
-            printf '%s\n' "       ~/Library/Input Methods/"
-            printf '%s\n' "   (Create the folder if it does not exist.)" ""
-            printf '%s\n' "2. Log out and log back in. macOS only scans input methods at login." ""
-            printf '%s\n' "3. System Settings > Keyboard > Input Sources > \"+\", choose Traditional"
-            printf '%s\n' "   Chinese, and add Yahoo KeyKey 2 — Cangjie and/or — Simplex." ""
-            printf '%s\n' "4. Switch input source with Ctrl-Space and start typing."
-          } > "$STAGE/Install.txt"
-          rm -f "$ZIP"
-          ditto -c -k "$STAGE" "$ZIP"
-          echo "ZIP=$ZIP" >> "$GITHUB_ENV"
-          echo "ZIP_NAME=YahooKeyKey2-${VERSION}.zip" >> "$GITHUB_ENV"
-
-      - name: Upload to release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 \
-            || gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --title "Yahoo KeyKey 2 $TAG" --generate-notes
-          gh release upload "$TAG" "$ZIP" --repo "$GITHUB_REPOSITORY" --clobber
-
-      - name: Publish appcast (Sparkle auto-update)
-        env:
-          PUBLIC_RELEASE_TOKEN: ${{ secrets.PUBLIC_RELEASE_TOKEN }}
-          SPARKLE_EDDSA_PRIVATE_KEY: ${{ secrets.SPARKLE_EDDSA_PRIVATE_KEY }}
-        run: |
-          set -euo pipefail
-          SITE_REPO="teddychan/www.dragonapp.com"
-          if [ -z "${PUBLIC_RELEASE_TOKEN:-}" ] || [ -z "${SPARKLE_EDDSA_PRIVATE_KEY:-}" ]; then
-            echo "::warning::PUBLIC_RELEASE_TOKEN and/or SPARKLE_EDDSA_PRIVATE_KEY not set — skipping appcast."
-            exit 0
-          fi
-          GEN="$GITHUB_WORKSPACE/build/sparkle/bin/generate_appcast"
-          test -x "$GEN" || { echo "::error::generate_appcast missing (tools/fetch-sparkle.sh should have cached it)." >&2; exit 1; }
-          WORK="$RUNNER_TEMP/appcast"; mkdir -p "$WORK"
-          cp "$ZIP" "$WORK/"
-          KEY_FILE="$RUNNER_TEMP/sparkle_ed_key"
-          printf '%s\n' "$SPARKLE_EDDSA_PRIVATE_KEY" > "$KEY_FILE"
-          OUT="$WORK/appcast.xml"
-          "$GEN" --ed-key-file "$KEY_FILE" \
-            --download-url-prefix "https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/" \
-            --maximum-deltas 0 \
-            -o "$OUT" \
-            "$WORK"
-          # KeyKey declares min system version / hw requirements only in the appcast.
-          # Inject them with perl (robust newline handling) if absent.
-          if ! grep -q "sparkle:minimumSystemVersion" "$OUT"; then
-            perl -0777 -pi -e 's{</item>}{    <sparkle:minimumSystemVersion>12.0</sparkle:minimumSystemVersion>\n    <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>\n</item>}g' "$OUT"
-          fi
-          # Feed is path-scoped per app, matching SUFeedURL in App/Info.plist:
-          # https://www.dragonapp.com/yahoo-keykey-2/appcast.xml
-          PAGES="$RUNNER_TEMP/pages"
-          REMOTE="https://x-access-token:${PUBLIC_RELEASE_TOKEN}@github.com/${SITE_REPO}.git"
-          git clone --depth 1 "$REMOTE" "$PAGES"
-          mkdir -p "$PAGES/docs/yahoo-keykey-2"
-          cp "$OUT" "$PAGES/docs/yahoo-keykey-2/appcast.xml"
-          ( cd "$PAGES"
-            git config user.name "KeyKey Release Bot"
-            git config user.email "release-bot@users.noreply.github.com"
-            git add docs/yahoo-keykey-2/appcast.xml
-            if git diff --cached --quiet; then echo "appcast unchanged"; exit 0; fi
-            git commit --no-verify -m "appcast: yahoo-keykey-2 ${TAG}"
-            git push origin HEAD:main )
-          echo "Published appcast → https://www.dragonapp.com/yahoo-keykey-2/appcast.xml"
-
-      - name: Bump Homebrew cask
-        env:
-          PUBLIC_RELEASE_TOKEN: ${{ secrets.PUBLIC_RELEASE_TOKEN }}
-        run: |
-          set -euo pipefail
-          TAP_REPO="teddychan/homebrew-tap"
-          ASSET_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/${ZIP_NAME}"
-          if [ -z "${PUBLIC_RELEASE_TOKEN:-}" ]; then
-            echo "::warning::PUBLIC_RELEASE_TOKEN not set — skipping cask bump."; exit 0
-          fi
-          if [ "$(curl -sI -L -o /dev/null -w '%{http_code}' "$ASSET_URL")" != "200" ]; then
-            echo "::warning::Public asset not live ($ASSET_URL) — skipping cask bump."; exit 0
-          fi
-          SHA="$(shasum -a 256 "$ZIP" | awk '{print $1}')"
-          TAP_DIR="$RUNNER_TEMP/homebrew-tap"
-          REMOTE="https://x-access-token:${PUBLIC_RELEASE_TOKEN}@github.com/${TAP_REPO}.git"
-          if ! git clone --depth 1 "$REMOTE" "$TAP_DIR" 2>/dev/null; then
-            echo "::warning::Could not clone ${TAP_REPO} (token lacks access?) — skipping cask bump."; exit 0
-          fi
-          CASK="$TAP_DIR/Casks/yahoo-keykey-2.rb"
-          /usr/bin/sed -i '' -E \
-            -e "s/^  version \".*\"/  version \"${VERSION}\"/" \
-            -e "s/^  sha256 \".*\"/  sha256 \"${SHA}\"/" \
-            "$CASK"
-          ( cd "$TAP_DIR"
-            git config user.name "KeyKey Release Bot"
-            git config user.email "release-bot@users.noreply.github.com"
-            git add Casks/yahoo-keykey-2.rb
-            if git diff --cached --quiet; then echo "cask unchanged"; exit 0; fi
-            git commit --no-verify -m "yahoo-keykey-2 ${VERSION}"
-            git push origin HEAD:main )
-          echo "Bumped Homebrew cask → yahoo-keykey-2 ${VERSION} (${SHA})"
+  release:
+    uses: teddychan/dragon-release-ci/.github/workflows/release-macos.yml@v1
+    secrets: inherit
+    with:
+      build_kind: script
+      app_slug: yahoo-keykey-2
+      release_title_prefix: Yahoo KeyKey 2
+      bot_name: KeyKey Release Bot
+      assert_tag_matches_plist: true
+      script_entitlements_path: App/YahooKeyKey2.entitlements
+      zip_name_template: 'YahooKeyKey2-{VERSION}.zip'
+      zip_keep_parent: false
+      stage_install_txt: true
+      staged_app_name: YahooKeyKey2.app
+      generate_appcast_glob: keykey-cache
+      appcast_maximum_deltas_zero: true
+      appcast_inject_keykey_requirements: true
