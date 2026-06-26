@@ -21,7 +21,9 @@ ENTITLEMENTS="$APP_SRC/YahooKeyKey2.entitlements"
 SPARKLE_CACHE="$ROOT/build/sparkle"
 
 SDK="$(xcrun --show-sdk-path)"
-TARGET="$(uname -m)-apple-macosx12.0"
+# Apple Silicon only: pin the target to arm64 regardless of the build host's
+# architecture. Yahoo KeyKey 2 does not ship an Intel (x86_64) slice.
+TARGET="arm64-apple-macosx12.0"
 
 echo "==> Ensuring Sparkle is vendored"
 "$ROOT/tools/fetch-sparkle.sh"

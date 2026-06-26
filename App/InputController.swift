@@ -95,6 +95,22 @@ final class InputController: IMKInputController {
         convert.state = Preferences.outputSimplifiedEnabled ? .on : .off
         menu.addItem(convert)
 
+        // Candidate-window font size (候選字大小): a submenu of named sizes. The chosen
+        // size is read live by CandidateWindow on the next composition; the checkmark
+        // marks the active size.
+        let fontSize = NSMenuItem(title: "候選字大小", action: nil, keyEquivalent: "")
+        let fontSubmenu = NSMenu()
+        let currentFontSize = Preferences.candidateFontSize
+        for (title, size) in Self.candidateFontSizeChoices {
+            let item = NSMenuItem(title: title, action: #selector(setCandidateFontSize(_:)), keyEquivalent: "")
+            item.target = self
+            item.tag = Int(size)
+            item.state = (currentFontSize == size) ? .on : .off
+            fontSubmenu.addItem(item)
+        }
+        fontSize.submenu = fontSubmenu
+        menu.addItem(fontSize)
+
         // 2. Settings specific to the active input method (grouped with their method).
         // Empty for Cangjie/Simplex today; future methods supply items via methodMenuItems.
         let methodItems = currentModule.methodMenuItems()
@@ -124,6 +140,16 @@ final class InputController: IMKInputController {
 
     @objc private func toggleSimplified() {
         Preferences.outputSimplifiedEnabled.toggle()
+    }
+
+    // Named candidate-window font sizes (display title → point size), all within the
+    // Preferences clamp (14–28); the default 18 is "中".
+    private static let candidateFontSizeChoices: [(String, CGFloat)] = [
+        ("小", 14), ("中", 18), ("大", 24),
+    ]
+
+    @objc private func setCandidateFontSize(_ sender: NSMenuItem) {
+        Preferences.candidateFontSize = CGFloat(sender.tag)
     }
 
     @objc private func checkForUpdates() {
