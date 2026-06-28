@@ -14,7 +14,6 @@ import KeyKeyEngine
 protocol InputEngine: AnyObject {
     func handleKey(_ key: Character) -> Bool
     var composingText: String { get }
-    var isComposingSyllable: Bool { get }
     var candidates: [String] { get }
     func selectCandidate(_ index: Int)
     func backspace()

@@ -10,7 +10,7 @@ loved. It brings the familiar Cangjie (倉頡) and Simplex (速成) typing exper
 modern macOS — native, fast, and free.
 
 [![Download](https://img.shields.io/badge/download-latest-brightgreen?style=flat-square)](https://github.com/teddychan/yahoo-keykey-2/releases/latest)
-![Platform](https://img.shields.io/badge/platform-macOS%2012%2B-blue?style=flat-square)
+![Platform](https://img.shields.io/badge/platform-macOS%2026%2B-blue?style=flat-square)
 ![Architecture](https://img.shields.io/badge/arch-Apple%20Silicon-blue?style=flat-square)
 [![License](https://img.shields.io/github/license/teddychan/yahoo-keykey-2?style=flat-square)](LICENSE)
 [![Website](https://img.shields.io/badge/Website-dragonapp.com-015FBA?style=flat-square)](https://www.dragonapp.com/yahoo-keykey-2/)
@@ -36,7 +36,7 @@ modern macOS — native, fast, and free.
 ## Requirements
 
 - A Mac with **Apple Silicon (arm64)**
-- **macOS 12 Monterey** or later
+- **macOS 26 Tahoe** or later
 - Signed with a Developer ID and notarized by Apple, so it opens cleanly
 
 ## Install

@@ -2,6 +2,16 @@
 
 A plain-language list of changes in each version, newest first.
 
+## 1.5.0
+
+- **Cangjie wildcard now works from the first key.** Typing **`*`** as the very
+  first radical starts a wildcard search instead of inserting a full-width **＊**.
+  (Mid-word wildcards already worked; this fixes the start-of-word case.)
+- **Lower memory use.** The language-model data is now used to build the ranking
+  and then released, so the app keeps less in memory while you type.
+- **Now requires macOS 26 Tahoe or later** (Apple Silicon). If you're on an older
+  macOS, stay on version 1.4.1.
+
 ## 1.4.1
 
 - **Fixed: the candidate text size now sticks.** Picking 小 / 中 / 大 from the

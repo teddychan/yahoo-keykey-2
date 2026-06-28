@@ -24,10 +24,12 @@ permissions:
 
 jobs:
   release:
-    uses: teddychan/dragon-release-ci/.github/workflows/release-macos.yml@v1
+    uses: teddychan/dragon-release-ci/.github/workflows/release-macos.yml@v2
     secrets: inherit
     with:
       build_kind: script
+      # Yahoo KeyKey 2 now targets the macOS 26 SDK, so build on the macos-26 image.
+      swiftpm_runner: macos-26
       app_slug: yahoo-keykey-2
       release_title_prefix: Yahoo KeyKey 2
       bot_name: KeyKey Release Bot

@@ -9,7 +9,6 @@ import KeyKeyEngine
 final class SharedResources {
     static let shared = SharedResources()
 
-    let lm: LanguageModel
     // Single-character LM ranking (higher = more common), used so Cangjie/Simplex
     // wildcard matches surface common characters first. Computed once.
     let characterRank: [Character: Double]
@@ -30,7 +29,9 @@ final class SharedResources {
             dataText = nil
         }
 
-        // Load the bundled LM once; fail safe to an empty model (no candidates) if missing.
+        // Build the LM from data.txt ONLY to derive the character ranking, then let it go:
+        // nothing at runtime needs the full model, so it is not retained (frees ~55–80 MB).
+        let lm: LanguageModel
         if let text = dataText {
             lm = LanguageModel(text: text)
         } else {

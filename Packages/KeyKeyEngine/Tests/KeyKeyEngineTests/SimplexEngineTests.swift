@@ -24,12 +24,6 @@ final class SimplexEngineTests: XCTestCase {
         XCTAssertEqual(e.composingText, "日月")
     }
 
-    func testIsComposingSyllableAlwaysFalse() {
-        let e = make()
-        _ = e.handleKey("a")
-        XCTAssertFalse(e.isComposingSyllable)
-    }
-
     func testCandidatesFromSimplexCode() {
         let e = make()
         _ = e.handleKey("a"); _ = e.handleKey("b")

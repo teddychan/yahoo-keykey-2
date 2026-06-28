@@ -22,8 +22,15 @@ SPARKLE_CACHE="$ROOT/build/sparkle"
 
 SDK="$(xcrun --show-sdk-path)"
 # Apple Silicon only: pin the target to arm64 regardless of the build host's
-# architecture. Yahoo KeyKey 2 does not ship an Intel (x86_64) slice.
-TARGET="arm64-apple-macosx12.0"
+# architecture. Yahoo KeyKey 2 does not ship an Intel (x86_64) slice. macOS 26 minimum.
+TARGET="arm64-apple-macosx26.0"
+
+# Optional: regenerate the bundled LM (Resources/data.txt) first. A clean checkout omits
+# data.txt by design; pass --build-lm to generate it via tools/build-lm.sh before building.
+if [[ "${1:-}" == "--build-lm" ]]; then
+  echo "==> Building language model (data.txt)"
+  "$ROOT/tools/build-lm.sh"
+fi
 
 echo "==> Ensuring Sparkle is vendored"
 "$ROOT/tools/fetch-sparkle.sh"

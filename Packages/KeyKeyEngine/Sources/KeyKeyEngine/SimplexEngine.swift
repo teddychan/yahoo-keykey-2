@@ -31,9 +31,6 @@ public final class SimplexEngine {
         return true
     }
 
-    /// Simplex has no tone concept, so it never holds a tone-pending syllable.
-    public var isComposingSyllable: Bool { false }
-
     /// The radical glyphs accumulated so far (selected char once chosen).
     public var composingText: String {
         if let selected { return selected }

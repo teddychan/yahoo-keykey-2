@@ -4,14 +4,10 @@ import KeyKeyEngine
 
 @objc(InputController)
 final class InputController: IMKInputController {
-    private let lm: LanguageModel
-    private let characterRank: [Character: Double]
     // User learning: persisted selection-count store providing a live ranking bonus for
     // Cangjie/Simplex candidates, so committed characters surface higher next time.
     private let userFreq: UserFrequency
     private let associatedPhrases: AssociatedPhrases
-    private let cangjieTable: CangjieTable
-    private let simplexTable: SimplexTable
     // Traditional→Simplified character converter, applied only when Preferences.outputSimplifiedEnabled.
     private let hanConvertFilter: HanConvertFilter
     // Registry of available input methods (the first is the default). Adding a method is a
@@ -33,14 +29,10 @@ final class InputController: IMKInputController {
         // controller (IMK creates one InputController per client/app). These reads do not
         // copy: the engine tables are value-type structs and userFreq is a shared class.
         let shared = SharedResources.shared
-        self.lm = shared.lm
         let characterRank = shared.characterRank
-        self.characterRank = characterRank
-        self.associatedPhrases = shared.associatedPhrases
         let cangjieTable = shared.cangjieTable
-        self.cangjieTable = cangjieTable
         let simplexTable = shared.simplexTable
-        self.simplexTable = simplexTable
+        self.associatedPhrases = shared.associatedPhrases
         self.hanConvertFilter = shared.hanConvertFilter
         self.userFreq = shared.userFreq
 
@@ -229,6 +221,15 @@ final class InputController: IMKInputController {
             }
             // Any other key: dismiss suggestions, then fall through to process the key normally.
             clearAssociations()
+        }
+
+        // `*` is a Cangjie wildcard radical. When idle, let the engine start a wildcard
+        // composition before full-width punctuation would turn it into ＊. Simplex rejects
+        // `*`, so handleKey returns false and it falls through to punctuation below.
+        if event.characters?.first == "*", engine.composingText.isEmpty, engine.handleKey("*") {
+            candidatePage = 0
+            refresh(client)
+            return true
         }
 
         // Full-width punctuation when idle: no active composition (and not in association mode,

@@ -16,4 +16,15 @@ if server == nil { NSLog("YahooKeyKey: failed to create IMKServer"); exit(EXIT_F
 DispatchQueue.global(qos: .userInitiated).async { _ = SharedResources.shared }
 // Start Sparkle auto-update (no-op on builds without SUPublicEDKey).
 _ = Updater.shared
+
+// Flush pending user-learning counts on a clean quit. Best-effort: IMK agents can also be
+// killed without terminating, but this closes the common-quit gap within the save debounce.
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    func applicationWillTerminate(_ notification: Notification) {
+        SharedResources.shared.userFreq.flush()
+    }
+}
+let appDelegate = AppDelegate()
+NSApplication.shared.delegate = appDelegate
+
 NSApplication.shared.run()
