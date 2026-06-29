@@ -11,7 +11,7 @@ final class AboutWindowController: NSWindowController {
         let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 460, height: 380),
                               styleMask: [.titled, .closable],
                               backing: .buffered, defer: false)
-        window.title = "關於 Yahoo KeyKey 2"
+        window.title = "關於 Yahoo! KeyKey 2"
         super.init(window: window)
         buildUI()
         window.center()
@@ -24,7 +24,7 @@ final class AboutWindowController: NSWindowController {
 
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
 
-        let nameLabel = NSTextField(labelWithString: "Yahoo KeyKey 2")
+        let nameLabel = NSTextField(labelWithString: "Yahoo! KeyKey 2")
         nameLabel.font = NSFont.systemFont(ofSize: 18, weight: .semibold)
 
         let versionLabel = NSTextField(labelWithString: "版本 \(version)")

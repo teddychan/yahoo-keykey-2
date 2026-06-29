@@ -63,31 +63,36 @@ final class InputController: IMKInputController {
         Int(NSEvent.EventTypeMask.keyDown.rawValue)
     }
 
-    // IMK input-menu (the menu shown in the input-method menu-bar item), grouped to
-    // mirror the original Yahoo! KeyKey settings layout:
-    //   1. general toggles (聯想字詞 / 全形標點 / 輸出簡體字), checkmarks reflect live prefs;
-    //   2. any settings specific to the active input method (none for Cangjie/Simplex today);
-    //   3. 偏好設定… and 關於… (stateless "open window" actions, shared windows).
+    // IMK input-menu (the menu shown in the input-method menu-bar item), organized to the
+    // shared Dragon-App app-menu standard (liquid-glass-macos SKILL §5A) for an IME:
+    //   1. quick-toggles zone (輸出簡體字 / 全形標點 / 聯想字詞), checkmarks reflect live prefs;
+    //   2. 候選字大小 (candidate size) flat choices;
+    //   3. any settings specific to the active input method (none for Cangjie/Simplex today);
+    //   4. App menu grouping — About Yahoo! KeyKey 2 + 檢查更新… (stateless "open window" actions).
+    //      Per §5A the IME app menu omits Quit (an IME is system-managed; quitting only makes
+    //      typing unresponsive until macOS relaunches it). Settings… and Uninstall… are omitted
+    //      this pass — there is no Settings window today, and a correct IME uninstaller needs TIS
+    //      deselect/unregister + logout; both are out of scope for a menu-structure pass.
     override func menu() -> NSMenu! {
         let menu = NSMenu()
 
-        // 1. General toggles. Each flips its Preferences value live; checkmark reflects state.
-        let associate = NSMenuItem(title: "聯想字詞", action: #selector(toggleAssociated), keyEquivalent: "")
-        associate.target = self
-        associate.state = Preferences.associatedPhrasesEnabled ? .on : .off
-        menu.addItem(associate)
+        // 1. Quick-toggles zone. Each flips its Preferences value live; checkmark reflects state.
+        let convert = NSMenuItem(title: "輸出簡體字", action: #selector(toggleSimplified), keyEquivalent: "")
+        convert.target = self
+        convert.state = Preferences.outputSimplifiedEnabled ? .on : .off
+        menu.addItem(convert)
 
         let fullWidth = NSMenuItem(title: "全形標點", action: #selector(toggleFullWidth), keyEquivalent: "")
         fullWidth.target = self
         fullWidth.state = Preferences.fullWidthPunctuationEnabled ? .on : .off
         menu.addItem(fullWidth)
 
-        let convert = NSMenuItem(title: "輸出簡體字", action: #selector(toggleSimplified), keyEquivalent: "")
-        convert.target = self
-        convert.state = Preferences.outputSimplifiedEnabled ? .on : .off
-        menu.addItem(convert)
+        let associate = NSMenuItem(title: "聯想字詞", action: #selector(toggleAssociated), keyEquivalent: "")
+        associate.target = self
+        associate.state = Preferences.associatedPhrasesEnabled ? .on : .off
+        menu.addItem(associate)
 
-        // Candidate-window font size (候選字大小). The macOS input menu routes only
+        // 2. Candidate-window font size (候選字大小). The macOS input menu routes only
         // TOP-LEVEL item selections back to the controller — items nested in a submenu
         // are shown but never fire — so the sizes are flat items under a disabled
         // header. The chosen size is read live by CandidateWindow on the next
@@ -103,7 +108,7 @@ final class InputController: IMKInputController {
             menu.addItem(item)
         }
 
-        // 2. Settings specific to the active input method (grouped with their method).
+        // 3. Settings specific to the active input method (grouped with their method).
         // Empty for Cangjie/Simplex today; future methods supply items via methodMenuItems.
         let methodItems = currentModule.methodMenuItems()
         if !methodItems.isEmpty {
@@ -111,14 +116,15 @@ final class InputController: IMKInputController {
             methodItems.forEach(menu.addItem)
         }
 
-        // 3. Check for updates + About (stateless "open" actions).
+        // 4. App menu grouping (§5A): About + Check for updates (stateless "open" actions).
+        // Quit omitted by design (system-managed IME); Settings… / Uninstall… omitted this pass.
         menu.addItem(.separator())
+        let about = NSMenuItem(title: "關於 Yahoo! KeyKey 2…", action: #selector(openAbout), keyEquivalent: "")
+        about.target = self
+        menu.addItem(about)
         let update = NSMenuItem(title: "檢查更新…", action: #selector(checkForUpdates), keyEquivalent: "")
         update.target = self
         menu.addItem(update)
-        let about = NSMenuItem(title: "關於 Yahoo KeyKey 2…", action: #selector(openAbout), keyEquivalent: "")
-        about.target = self
-        menu.addItem(about)
         return menu
     }
 
