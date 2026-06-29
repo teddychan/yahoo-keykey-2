@@ -36,6 +36,13 @@ final class Updater: NSObject, SPUStandardUserDriverDelegate {
         )
     }
 
+    /// Auto-check preference, surfaced in the Settings 更新 pane. Backed by Sparkle (persisted
+    /// in the same UserDefaults domain). No-op when the updater is disabled (missing SUPublicEDKey).
+    var automaticallyChecksForUpdates: Bool {
+        get { controller?.updater.automaticallyChecksForUpdates ?? false }
+        set { controller?.updater.automaticallyChecksForUpdates = newValue }
+    }
+
     /// Manual check, wired to the "檢查更新…" input-menu item.
     func checkForUpdates() {
         // Background agent: bring the app forward so the check/result window is visible.

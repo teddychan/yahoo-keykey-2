@@ -68,11 +68,12 @@ final class InputController: IMKInputController {
     //   1. quick-toggles zone (輸出簡體字 / 全形標點 / 聯想字詞), checkmarks reflect live prefs;
     //   2. 候選字大小 (candidate size) flat choices;
     //   3. any settings specific to the active input method (none for Cangjie/Simplex today);
-    //   4. App menu grouping — About Yahoo! KeyKey 2 + 檢查更新… (stateless "open window" actions).
+    //   4. App menu grouping (§5A) — About Yahoo! KeyKey 2 · 檢查更新… · 設定… · — · 解除安裝….
     //      Per §5A the IME app menu omits Quit (an IME is system-managed; quitting only makes
-    //      typing unresponsive until macOS relaunches it). Settings… and Uninstall… are omitted
-    //      this pass — there is no Settings window today, and a correct IME uninstaller needs TIS
-    //      deselect/unregister + logout; both are out of scope for a menu-structure pass.
+    //      typing unresponsive until macOS relaunches it). All items are TOP-LEVEL: the macOS
+    //      input menu only routes top-level selections back to the controller, so a "⋯ Yahoo!
+    //      KeyKey 2" submenu would render but never fire — the flat grouping is the correct
+    //      IMK adaptation of the shared App-menu spec.
     override func menu() -> NSMenu! {
         let menu = NSMenu()
 
@@ -116,8 +117,8 @@ final class InputController: IMKInputController {
             methodItems.forEach(menu.addItem)
         }
 
-        // 4. App menu grouping (§5A): About + Check for updates (stateless "open" actions).
-        // Quit omitted by design (system-managed IME); Settings… / Uninstall… omitted this pass.
+        // 4. App menu grouping (§5A): About · Check for updates · Settings · — · Uninstall.
+        // Quit omitted by design (system-managed IME). All top-level so IMK routes them.
         menu.addItem(.separator())
         let about = NSMenuItem(title: "關於 Yahoo! KeyKey 2…", action: #selector(openAbout), keyEquivalent: "")
         about.target = self
@@ -125,6 +126,13 @@ final class InputController: IMKInputController {
         let update = NSMenuItem(title: "檢查更新…", action: #selector(checkForUpdates), keyEquivalent: "")
         update.target = self
         menu.addItem(update)
+        let settings = NSMenuItem(title: "設定…", action: #selector(openSettings), keyEquivalent: ",")
+        settings.target = self
+        menu.addItem(settings)
+        menu.addItem(.separator())
+        let uninstall = NSMenuItem(title: "解除安裝 Yahoo! KeyKey 2…", action: #selector(uninstall), keyEquivalent: "")
+        uninstall.target = self
+        menu.addItem(uninstall)
         return menu
     }
 
@@ -160,6 +168,14 @@ final class InputController: IMKInputController {
 
     @objc private func openAbout() {
         AboutWindowController.shared.show()
+    }
+
+    @objc private func openSettings() {
+        SettingsWindowController.shared.show()
+    }
+
+    @objc private func uninstall() {
+        Uninstaller.run()
     }
 
     // IMK calls this when the user selects one of our input modes (Info.plist

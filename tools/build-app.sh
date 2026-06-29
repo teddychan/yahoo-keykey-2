@@ -60,7 +60,7 @@ swiftc \
   -framework InputMethodKit -framework Cocoa \
   -F "$SPARKLE_CACHE" -framework Sparkle \
   -Xlinker -rpath -Xlinker @executable_path/../Frameworks \
-  "$APP_SRC"/main.swift "$APP_SRC"/InputController.swift "$APP_SRC"/SharedResources.swift "$APP_SRC"/InputEngine.swift "$APP_SRC"/InputMethodModule.swift "$APP_SRC"/CandidateWindow.swift "$APP_SRC"/Preferences.swift "$APP_SRC"/AboutWindow.swift "$APP_SRC"/Updater.swift
+  "$APP_SRC"/main.swift "$APP_SRC"/InputController.swift "$APP_SRC"/SharedResources.swift "$APP_SRC"/InputEngine.swift "$APP_SRC"/InputMethodModule.swift "$APP_SRC"/CandidateWindow.swift "$APP_SRC"/Preferences.swift "$APP_SRC"/AboutWindow.swift "$APP_SRC"/SettingsWindow.swift "$APP_SRC"/Uninstaller.swift "$APP_SRC"/Updater.swift
 
 echo "==> Assembling Info.plist (resolving \${EXECUTABLE_NAME})"
 sed "s/\${EXECUTABLE_NAME}/$EXECUTABLE_NAME/g" "$APP_SRC/Info.plist" > "$APP/Contents/Info.plist"
