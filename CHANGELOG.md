@@ -2,6 +2,10 @@
 
 A plain-language list of changes in each version, newest first.
 
+## 2.0.0
+
+- Version numbers now start at **2.x** to match the product name, **Yahoo! KeyKey 2**. No functional change from 1.7.2.
+
 ## 1.7.2
 
 - The About window now links to the Yahoo! KeyKey 2 website (dragonapp.com/keykey) and to GitHub Issues for support, alongside the existing homage to the original Yahoo! KeyKey.
