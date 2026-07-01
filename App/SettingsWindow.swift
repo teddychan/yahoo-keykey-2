@@ -24,6 +24,12 @@ final class SettingsWindowController: NSWindowController {
     private var associatedCheckbox: NSButton!
     private var fontSizeSlider: NSSlider!
     private var autoUpdateCheckbox: NSButton!
+    private var cangjieVersionPopup: NSPopUpButton!
+
+    // Popup item order ↔ CangjieVersion. 五代 first (the default); 三代 is the Yahoo-compatible
+    // table. Titles are indexed by the same order.
+    private static let cangjieVersionOrder: [CangjieVersion] = [.v5, .v3]
+    private static let cangjieVersionTitles = ["五代倉頡", "三代倉頡（Yahoo KeyKey 相容）"]
 
     private init() {
         let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 460, height: 320),
@@ -152,9 +158,30 @@ final class SettingsWindowController: NSWindowController {
         let status = NSTextField(wrappingLabelWithString: "已安裝的輸入模式：倉頡、速成\n切換輸入模式請使用系統的輸入來源切換器。")
         status.textColor = .secondaryLabelColor
 
+        // 倉頡版本 (Cangjie table): 五代 (default, standard) or 三代 (Yahoo! KeyKey 相容). The
+        // choice drives both 倉頡 and 速成 and applies immediately (SharedResources reloads and
+        // notifies the live engines).
+        let versionHeading = NSTextField(labelWithString: "倉頡版本")
+        let popup = NSPopUpButton(frame: .zero, pullsDown: false)
+        popup.addItems(withTitles: Self.cangjieVersionTitles)
+        popup.target = self
+        popup.action = #selector(cangjieVersionChanged)
+        cangjieVersionPopup = popup
+
+        let versionNote = NSTextField(wrappingLabelWithString: "選擇「三代倉頡」會使用 Yahoo! KeyKey 原版的拆碼與候選字順序（同時套用到倉頡與速成），立即生效。")
+        versionNote.textColor = .secondaryLabelColor
+        versionNote.font = NSFont.systemFont(ofSize: 11)
+
         let openButton = NSButton(title: "打開系統設定 ▸ 鍵盤 ▸ 輸入來源",
                                   target: self, action: #selector(openInputSourceSettings))
-        return tabContainer([status, openButton])
+        return tabContainer([status, versionHeading, popup, versionNote, openButton])
+    }
+
+    @objc private func cangjieVersionChanged(_ sender: NSPopUpButton) {
+        let index = sender.indexOfSelectedItem
+        guard Self.cangjieVersionOrder.indices.contains(index) else { return }
+        Preferences.cangjieVersion = Self.cangjieVersionOrder[index]
+        SharedResources.shared.reloadCangjieTables()
     }
 
     @objc private func openInputSourceSettings() {
@@ -196,6 +223,9 @@ final class SettingsWindowController: NSWindowController {
         fontSizeSlider.doubleValue = Double(Preferences.candidateFontSize)
         refreshFontPreview()
         autoUpdateCheckbox.state = Updater.shared.automaticallyChecksForUpdates ? .on : .off
+        if let index = Self.cangjieVersionOrder.firstIndex(of: Preferences.cangjieVersion) {
+            cangjieVersionPopup.selectItem(at: index)
+        }
     }
 
     func show() {

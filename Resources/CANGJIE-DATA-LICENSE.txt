@@ -28,3 +28,41 @@ Note: the individual table file declares itself "Freely redistributable
 without restriction" (a permissive, non-copyleft term). The surrounding
 ibus-table-chinese repository packaging is GPLv3; only the data table itself
 is reused here, under the table's own freely-redistributable declaration.
+
+
+Yahoo! KeyKey 三代 tables (倉頡第三代 / 速成)
+============================================
+
+Files:   Resources/cangjie-yahoo.txt  (Cangjie 3rd Generation, 倉頡第三代)
+         Resources/simplex-yahoo.txt  (Simplex / 速成, quick codes)
+Content: <code>\t<char> mapping used by the "三代倉頡（Yahoo KeyKey 相容）" mode.
+         The line order is preserved verbatim — it is the original Yahoo! KeyKey
+         candidate order, which that mode surfaces directly.
+Format:  Extracted from the source .cin %chardef sections; only rows whose code is
+         a pure a–z sequence are kept; the trailing frequency column is dropped and
+         CRLF line endings are normalised to LF. Reproduce with:
+           curl -s <raw-url> | tr -d '\r' \
+             | awk '/%chardef begin/{f=1;next}/%chardef end/{f=0}f{n=split($0,a,/[ \t]+/); \
+                    if(a[1] ~ /^[a-z]+$/ && a[2]!="") print a[1]"\t"a[2]}'
+
+Source repository
+-----------------
+bency/YahooKeyKey  (the open-sourced Yahoo! KeyKey, New BSD)
+  https://github.com/bency/YahooKeyKey
+  Files: YahooKeyKey-Source-1.1.2528/DataTables/cj-ext.cin
+         YahooKeyKey-Source-1.1.2528/DataTables/simplex-ext.cin
+
+Upstream data origin / attribution
+-----------------------------------
+Both tables are the "large character set" builds based on opendesktop.org.tw's
+cj.cin / simplex.cin, merged/extended by yylin and b6s, and shipped inside the
+Yahoo! KeyKey source release (Copyright (c) 2007-2010 Yahoo! Taiwan / Lithoglyph;
+project licensed New BSD).
+
+License note / caveat
+---------------------
+The Yahoo! KeyKey project is released under the New BSD license (see the project's
+COPYING). Unlike the ibus cangjie5 header, the cj-ext.cin / simplex-ext.cin table
+files carry no explicit per-file license line; reuse here relies on the project's
+BSD release and the OpenVanilla-community (opendesktop.org.tw) origin of the tables.
+Only the data tables are reused, with attribution as above.

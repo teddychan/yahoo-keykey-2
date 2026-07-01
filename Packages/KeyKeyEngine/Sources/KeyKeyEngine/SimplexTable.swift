@@ -1,3 +1,5 @@
+import Foundation
+
 // Simplex (簡易) index: maps a 2-letter "quick" code to the characters that share it.
 // The Simplex code of a Cangjie code is its first + last radical letter (a single
 // letter when the Cangjie code has length 1). Many Cangjie codes collapse onto the
@@ -19,6 +21,26 @@ public struct SimplexTable {
             guard !simplex.isEmpty else { continue }
             for char in chars { add(char, to: simplex) }
         }
+    }
+
+    /// Builds the index directly from already-Simplex-coded "<quickCode>\t<char>" lines,
+    /// preserving the file's native character order per code (no first+last re-derivation).
+    /// Used for the Yahoo! KeyKey 速成 table (simplex-ext.cin), whose rows are already quick
+    /// codes and whose line order is the intended candidate order.
+    public init(quickCodeText: String) {
+        for rawLine in quickCodeText.split(separator: "\n", omittingEmptySubsequences: true) {
+            let line = rawLine.trimmingCharacters(in: .whitespaces)
+            if line.isEmpty || line.hasPrefix("#") { continue }
+            let parts = line.split(separator: "\t")
+            guard parts.count >= 2 else { continue }
+            let code = String(parts[0])
+            guard !code.isEmpty else { continue }
+            add(String(parts[1]), to: code)
+        }
+    }
+
+    public init(quickCodeContentsOf url: URL) throws {
+        try self.init(quickCodeText: String(contentsOf: url, encoding: .utf8))
     }
 
     /// Builds the index directly from "<cangjieCode>\t<char>" lines (test fixtures).
