@@ -7,11 +7,17 @@ import Cocoa
 final class AboutWindowController: NSWindowController {
     static let shared = AboutWindowController()
 
+    // Local ad-hoc debug builds re-id the bundle to <release-id>.debug (see tools/build-app.sh).
+    // Detect that at runtime and append " Debug" to the shown name/title so a test build is
+    // never mistaken for the installed release. Release builds have no suffix, so this is a no-op.
+    private static let isDebugBuild = Bundle.main.bundleIdentifier?.hasSuffix(".debug") ?? false
+    private static let appName = "Yahoo! KeyKey 2" + (isDebugBuild ? " Debug" : "")
+
     private init() {
         let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 460, height: 380),
                               styleMask: [.titled, .closable],
                               backing: .buffered, defer: false)
-        window.title = "關於 Yahoo! KeyKey 2"
+        window.title = "關於 \(Self.appName)"
         super.init(window: window)
         buildUI()
         window.center()
@@ -24,7 +30,7 @@ final class AboutWindowController: NSWindowController {
 
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
 
-        let nameLabel = NSTextField(labelWithString: "Yahoo! KeyKey 2")
+        let nameLabel = NSTextField(labelWithString: Self.appName)
         nameLabel.font = NSFont.systemFont(ofSize: 18, weight: .semibold)
 
         let versionLabel = NSTextField(labelWithString: "版本 \(version)")

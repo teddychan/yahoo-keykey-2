@@ -153,12 +153,18 @@ chmod -R u+w "$APP/Contents/Frameworks/Sparkle.framework"
 echo "==> Code-signing Sparkle inside-out, then the app (ad-hoc)"
 SPARKLE_FW="$APP/Contents/Frameworks/Sparkle.framework"
 SPARKLE_V="$(/bin/ls -d "$SPARKLE_FW"/Versions/* | grep -v '/Current$' | head -1)"
+# Hardened runtime is required for notarized RELEASE builds. For a local ad-hoc DEBUG build it
+# must be OMITTED: ad-hoc code carries no Team ID, and the hardened runtime's Library Validation
+# then refuses to load the (also ad-hoc) Sparkle.framework — the app dies on launch with a dyld
+# "different Team IDs" error, so the IME never registers its menu. A local debug build doesn't
+# need the hardened runtime. Unquoted on purpose: empty string must expand to no argument.
+if [[ "${KEYKEY_DEBUG_ID:-}" == "1" ]]; then RUNTIME_OPT=""; else RUNTIME_OPT="--options runtime"; fi
 for item in "$SPARKLE_V"/XPCServices/*.xpc "$SPARKLE_V/Autoupdate" "$SPARKLE_V/Updater.app"; do
-  [ -e "$item" ] && codesign --force --options runtime -s - "$item"
+  [ -e "$item" ] && codesign --force $RUNTIME_OPT -s - "$item"
 done
-codesign --force --options runtime -s - "$SPARKLE_FW"
+codesign --force $RUNTIME_OPT -s - "$SPARKLE_FW"
 # Sign the app last. No --deep: nested code (Sparkle) is already signed above.
-codesign --force --options runtime --entitlements "$ENTITLEMENTS" -s - "$APP"
+codesign --force $RUNTIME_OPT --entitlements "$ENTITLEMENTS" -s - "$APP"
 codesign -dv "$APP"
 
 echo "==> Done: $APP"

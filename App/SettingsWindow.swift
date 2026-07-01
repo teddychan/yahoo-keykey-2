@@ -16,6 +16,15 @@ final class SettingsWindowController: NSWindowController {
     private let fontPreview = NSTextField(labelWithString: "")
     private let fontValueLabel = NSTextField(labelWithString: "")
 
+    // Controls whose state mirrors Preferences/Updater. Retained so show() can re-read the
+    // live values into them — the window is a long-lived singleton built once, but the same
+    // settings are also changed from the input menu, so its controls would otherwise go stale.
+    private var simplifiedCheckbox: NSButton!
+    private var fullWidthCheckbox: NSButton!
+    private var associatedCheckbox: NSButton!
+    private var fontSizeSlider: NSSlider!
+    private var autoUpdateCheckbox: NSButton!
+
     private init() {
         let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 460, height: 320),
                               styleMask: [.titled, .closable],
@@ -74,13 +83,13 @@ final class SettingsWindowController: NSWindowController {
     // MARK: - 一般 (the three real input toggles, same set as the input menu)
 
     private func generalView() -> NSView {
-        let simplified = makeCheckbox("輸出簡體字", state: Preferences.outputSimplifiedEnabled,
-                                      action: #selector(toggleSimplified))
-        let fullWidth = makeCheckbox("全形標點", state: Preferences.fullWidthPunctuationEnabled,
-                                     action: #selector(toggleFullWidth))
-        let associated = makeCheckbox("聯想字詞", state: Preferences.associatedPhrasesEnabled,
-                                      action: #selector(toggleAssociated))
-        return tabContainer([simplified, fullWidth, associated])
+        simplifiedCheckbox = makeCheckbox("輸出簡體字", state: Preferences.outputSimplifiedEnabled,
+                                          action: #selector(toggleSimplified))
+        fullWidthCheckbox = makeCheckbox("全形標點", state: Preferences.fullWidthPunctuationEnabled,
+                                         action: #selector(toggleFullWidth))
+        associatedCheckbox = makeCheckbox("聯想字詞", state: Preferences.associatedPhrasesEnabled,
+                                          action: #selector(toggleAssociated))
+        return tabContainer([simplifiedCheckbox, fullWidthCheckbox, associatedCheckbox])
     }
 
     private func makeCheckbox(_ title: String, state: Bool, action: Selector) -> NSButton {
@@ -112,6 +121,7 @@ final class SettingsWindowController: NSWindowController {
         slider.allowsTickMarkValuesOnly = true
         slider.translatesAutoresizingMaskIntoConstraints = false
         slider.widthAnchor.constraint(equalToConstant: 240).isActive = true
+        fontSizeSlider = slider
 
         fontValueLabel.textColor = .secondaryLabelColor
         let sliderRow = NSStackView(views: [slider, fontValueLabel])
@@ -158,12 +168,12 @@ final class SettingsWindowController: NSWindowController {
     // MARK: - 更新 (Sparkle: auto-check toggle + manual check)
 
     private func updatesView() -> NSView {
-        let auto = NSButton(checkboxWithTitle: "自動檢查更新",
-                            target: self, action: #selector(toggleAutoUpdate))
-        auto.state = Updater.shared.automaticallyChecksForUpdates ? .on : .off
+        autoUpdateCheckbox = NSButton(checkboxWithTitle: "自動檢查更新",
+                                      target: self, action: #selector(toggleAutoUpdate))
+        autoUpdateCheckbox.state = Updater.shared.automaticallyChecksForUpdates ? .on : .off
 
         let checkNow = NSButton(title: "立即檢查更新…", target: self, action: #selector(checkForUpdatesNow))
-        return tabContainer([auto, checkNow])
+        return tabContainer([autoUpdateCheckbox, checkNow])
     }
 
     @objc private func toggleAutoUpdate(_ sender: NSButton) {
@@ -175,7 +185,23 @@ final class SettingsWindowController: NSWindowController {
 
     // MARK: - Presentation
 
+    // Re-read the live Preferences/Updater values into the retained controls. The window is
+    // built once and kept alive, while the same settings are also toggled from the input menu,
+    // so without this the controls would show whatever they held when the window was first
+    // built — the reported "設定 window not in sync with the quick menu" bug.
+    private func refreshControls() {
+        simplifiedCheckbox.state = Preferences.outputSimplifiedEnabled ? .on : .off
+        fullWidthCheckbox.state = Preferences.fullWidthPunctuationEnabled ? .on : .off
+        associatedCheckbox.state = Preferences.associatedPhrasesEnabled ? .on : .off
+        fontSizeSlider.doubleValue = Double(Preferences.candidateFontSize)
+        refreshFontPreview()
+        autoUpdateCheckbox.state = Updater.shared.automaticallyChecksForUpdates ? .on : .off
+    }
+
     func show() {
+        // Sync controls to the current values before presenting — they may have changed via
+        // the input menu since the window was built.
+        refreshControls()
         // LSUIElement background app: activate (ignoringOtherApps) so the window comes forward
         // when picked from the input menu. Mirrors AboutWindowController.show().
         NSApp.activate(ignoringOtherApps: true)
