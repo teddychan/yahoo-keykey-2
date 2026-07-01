@@ -92,6 +92,15 @@ if [ ! -f "$ROOT/Resources/cangjie.txt" ]; then
 fi
 cp "$ROOT/Resources/cangjie.txt" "$APP/Contents/Resources/cangjie.txt"
 
+echo "==> Copying Yahoo! KeyKey 三代 tables (cangjie-yahoo.txt, simplex-yahoo.txt)"
+for f in cangjie-yahoo.txt simplex-yahoo.txt; do
+  if [ ! -f "$ROOT/Resources/$f" ]; then
+    echo "ERROR: Resources/$f missing" >&2
+    exit 1
+  fi
+  cp "$ROOT/Resources/$f" "$APP/Contents/Resources/$f"
+done
+
 echo "==> Copying bundled Han-conversion table (opencc-TSCharacters.txt)"
 if [ ! -f "$ROOT/Packages/KeyKeyEngine/Resources/opencc-TSCharacters.txt" ]; then
   echo "ERROR: Packages/KeyKeyEngine/Resources/opencc-TSCharacters.txt missing" >&2

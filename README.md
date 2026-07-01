@@ -33,6 +33,20 @@ modern macOS — native, fast, and free.
   never gets clipped off-screen.
 - **Lightweight &amp; open source** — full source on GitHub, MIT licensed.
 
+## Cangjie generation (倉頡版本)
+
+Choose the decomposition table in **設定… ▸ 輸入方式**. The choice drives both 倉頡 and
+速成 and applies immediately.
+
+| Mode | Table source | Candidate order | Example codes |
+|---|---|---|---|
+| **五代倉頡** (default) | ibus `cangjie5` (`Resources/cangjie.txt`) | frequency / adaptive ranking | 面 `一田尸中`, 鬼 `竹山戈` |
+| **三代倉頡（Yahoo KeyKey 相容）** | original Yahoo! KeyKey `cj-ext.cin` / `simplex-ext.cin` | Yahoo's original native order | 面 `一田卜中`, 鬼 `竹戈` |
+
+The default is **五代**, so existing users are unaffected until they opt in. Note that
+Yahoo! KeyKey's *associated-phrase (關聯字表) ranking* cannot be reproduced — that data was
+never open-sourced — so associations use Yahoo KeyKey 2's own ordering in both modes.
+
 ## Requirements
 
 - A Mac with **Apple Silicon (arm64)**

@@ -29,9 +29,6 @@ final class InputController: IMKInputController {
         // controller (IMK creates one InputController per client/app). These reads do not
         // copy: the engine tables are value-type structs and userFreq is a shared class.
         let shared = SharedResources.shared
-        let characterRank = shared.characterRank
-        let cangjieTable = shared.cangjieTable
-        let simplexTable = shared.simplexTable
         self.associatedPhrases = shared.associatedPhrases
         self.hanConvertFilter = shared.hanConvertFilter
         self.userFreq = shared.userFreq
@@ -40,14 +37,16 @@ final class InputController: IMKInputController {
         // freshly-committed character promotes without rebuilding the engine.
         let userRank: (Character) -> Double = { shared.userFreq.bonus(for: $0) }
 
-        // The input-method registry. Each module's makeEngine captures the shared tables/ranks.
+        // The input-method registry. Each module's makeEngine reads the shared tables and
+        // rank LIVE, so rebuilding an engine after a 倉頡版本 change picks up the new table
+        // (三代 uses an empty cangjieRank → the table's native order is preserved).
         // To add a method: append a module here and an Info.plist input mode — nothing else.
         let modules = [
             InputMethodModule(modeSuffix: "Cangjie", displayName: "倉頡") {
-                CangjieEngine(table: cangjieTable, characterRank: characterRank, userRank: userRank)
+                CangjieEngine(table: shared.cangjieTable, characterRank: shared.cangjieRank, userRank: userRank)
             },
             InputMethodModule(modeSuffix: "Simplex", displayName: "速成") {
-                SimplexEngine(table: simplexTable, characterRank: characterRank, userRank: userRank)
+                SimplexEngine(table: shared.simplexTable, characterRank: shared.cangjieRank, userRank: userRank)
             },
         ]
         self.modules = modules
@@ -57,6 +56,29 @@ final class InputController: IMKInputController {
         self.currentModule = modules[0]
         self.engine = modules[0].makeEngine()
         super.init(server: server, delegate: delegate, client: inputClient)
+
+        // Rebuild the live engine when the user changes 倉頡版本 in Settings, so the new
+        // table/order applies immediately without re-selecting the input method.
+        NotificationCenter.default.addObserver(self, selector: #selector(cangjieVersionChanged),
+                                               name: .cangjieVersionChanged, object: nil)
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+
+    // Rebuild the active engine after a 倉頡版本 change. Mirrors the reset in
+    // setValue(_:forTag:client:): commit any in-progress composition, then swap engines.
+    @objc private func cangjieVersionChanged() {
+        if let client = client() {
+            _ = commitCurrent(to: client)
+        } else {
+            _ = engine.commit()
+        }
+        candidatePage = 0
+        associations = []
+        candidateWindow.hide()
+        engine = currentModule.makeEngine()
     }
 
     override func recognizedEvents(_ sender: Any!) -> Int {

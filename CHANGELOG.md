@@ -2,6 +2,10 @@
 
 A plain-language list of changes in each version, newest first.
 
+## 2.1.0
+
+- **New: choose your 倉頡版本 (Cangjie generation).** In **設定… ▸ 輸入方式** you can now switch between **五代倉頡** (the standard 5th-generation table, the default) and **三代倉頡（Yahoo KeyKey 相容）**. The 三代 option uses the original Yahoo! KeyKey code table and its candidate order, so characters like 面 (`一田卜中`), 鬼 (`竹戈`), and 樓 (`木中田女`) take the codes long-time Yahoo users remember instead of the 5th-generation forms (`一田尸中`, `竹山戈`, `木中中女`). The choice applies to both 倉頡 and 速成 and takes effect immediately — no need to re-select the input method. The default stays 五代 so existing users are unaffected until they opt in.
+
 ## 2.0.2
 
 - **Fixed: the Settings window now matches the quick menu.** Toggling **輸出簡體字**, **全形標點**, **聯想字詞**, or the **候選字大小** from the menu-bar input menu changed the behaviour correctly, but the checkboxes and slider in **設定…** still showed their old values. The Settings window now re-reads the current values each time it opens, so it always reflects what you set in the menu.
