@@ -1,4 +1,4 @@
-# Cangjie generation selector (三代倉頡 / 五代倉頡)
+# Cangjie generation selector (五代倉頡 / 三代倉頡 · Yahoo KeyKey 相容)
 
 **Issue:** [#30](https://github.com/teddychan/yahoo-keykey-2/issues/30)
 **Date:** 2026-07-02
@@ -6,161 +6,180 @@
 
 ## Problem
 
-KeyKey currently ships only the Cangjie **5th-generation** decomposition table
-(`Resources/cangjie.txt`, from `ibus-table-chinese/tables/cangjie/cangjie5.txt`).
-Yahoo! KeyKey's Cangjie is **3rd-generation** (第三代倉頡). The generations share
-the same radical keys but differ in **character-decomposition rules** — i.e. the
-letter code you type to produce a character. Long-time Yahoo!/old-Windows Cangjie
-users have 三代 muscle memory, so 五代-only breaks familiar codes.
+KeyKey ships only the Cangjie **5th-generation** decomposition table
+(`Resources/cangjie.txt`, from `ibus-table-chinese/cangjie5.txt`) and orders
+candidates by the McBopomofo LM. Yahoo! KeyKey's Cangjie is **3rd-generation**:
+same radical keys, different **decomposition rules** (the code you type for a
+character) and its own **candidate order**. Long-time Yahoo users have 三代 muscle
+memory, so 五代-only breaks familiar codes and first-candidates.
 
-This is a **decomposition-table** feature. It is **not** about candidate sorting;
-candidate ordering stays driven by the McBopomofo LM rank + user-learning, exactly
-as today, for both generations.
+Two distinct "orders" are involved, with opposite data availability:
+- **Cangjie candidate order** (which char is first for a code) — **available** as
+  the line order of Yahoo's `cj-ext.cin`. We use it.
+- **關聯字表 / phrase ranking** (associated words after committing a char) —
+  **not available**: `bency/YahooKeyKey` `.gitignore`s the ranking corpora
+  (`SinicaCorpus`, `YahooSearchTerms`, `BPMFMappings` — README placeholders only)
+  and shipped them via a commercial encrypted SQLite (CEROD) DB. Open code ≠ open
+  data. Left as the current McBopomofo associations.
 
-### Verified difference (ibus data matches Yahoo KeyKey and the reporter's examples)
+### Verified 三代 vs 五代 (ibus data matches Yahoo `cj-ext.cin` and the reporter's examples)
 
-| Char | 三代 (ibus `cangjie3` = Yahoo `cj-ext.cin`) | 五代 (ibus `cangjie5`) |
+| Char | 三代 (`cj-ext.cin` = ibus `cangjie3`) | 五代 (ibus `cangjie5`) |
 |---|---|---|
 | 面 | `mwyl` 一田卜中 | `mwsl` 一田尸中 |
-| 假 | `orye` | `orse` |
-| 非 | `lmyyy` 中一卜卜卜 | `lmsy` 中一尸卜 |
 | 鬼 | `hi` 竹戈 | `hui` 竹山戈 |
 | 醜 | `mwhi` | `mwhui` |
 | 樓 | `dlwv` 木中田女 | `dllv` 木中中女 |
 | 涵 | `enue` 水弓山水 | `eune` 水山弓水 |
 
-The ibus `cangjie3.txt` codes are **identical to Yahoo's own `cj-ext.cin`** for
-every example, so ibus `cangjie3.txt` is a faithful, clean source for the
-Yahoo-compatible 三代 table — no need to import `cj-ext.cin`.
-
 ## Scope
 
-**In scope:** one Settings control selecting the Cangjie generation (三代 / 五代)
-for both the 倉頡 and 速成 engines. Default 三代 (Yahoo-compatible).
+**In scope:** one Settings control selecting the Cangjie generation (五代 default /
+三代 Yahoo-compatible) for both the 倉頡 and 速成 engines. The 三代 mode uses
+Yahoo's table **and its native candidate order**.
 
 **Out of scope (with reasons):**
-- **Candidate / associated-phrase sorting.** The issue's point 1 (聯想 ordering ≠
-  Yahoo) cannot be reproduced: Yahoo's ranking corpus (`SinicaCorpus`,
-  `YahooSearchTerms`, `BPMFMappings`) was never open-sourced and its runtime used a
-  commercial encrypted SQLite DB. Recorded on issue #30; associations unchanged.
-- **Compatibility mode** (accept both 三代 and 五代 codes at once). Considered,
-  deferred by owner; can be added later as a third option.
-- **Cangjie 4th generation.** No distributable v4 table exists upstream.
+- **關聯字 / associated-phrase Yahoo ordering.** Data was never open-sourced (see
+  above). Associations stay as current McBopomofo ordering for both modes. Recorded
+  on issue #30. (This is where a competing spec's "must reproduce Yahoo 關聯字表"
+  requirement is not satisfiable — no data exists to import or reconstruct.)
+- **Compatibility mode** (accept both 三代 and 五代 codes at once). Deferred; can be
+  added later as a third option.
+- **Cangjie 4th generation.** No distributable v4 table exists.
 
 ## Decisions (confirmed with owner)
 
-1. Two options: `三代倉頡（Yahoo KeyKey 相容）` and `五代倉頡`, under a `倉頡版本` control.
-2. **Default = 三代** (Yahoo fidelity). This changes decompositions for existing
-   users on update (they're implicitly on 五代 today) — intended; documented in
-   CHANGELOG + About.
-3. The setting drives **both** 倉頡 and 速成 (速成 is derived from the selected
-   Cangjie table, as today).
-4. Candidate ordering unchanged (LM rank + user-learning) for both generations.
-5. Live reload on change (no IME reselect/restart).
-6. Control lives in the **Settings ▸ 輸入方式** tab only.
-7. v3 data = **commit the converted file** + document the conversion command
-   (matches the existing v5 `cangjie.txt` handling). No converter script.
+1. Two options under a `倉頡版本` control: `五代倉頡` and `三代倉頡（Yahoo KeyKey 相容）`.
+2. **Default = 五代** — existing behavior preserved; 三代 is opt-in (no surprise
+   for current users).
+3. The setting drives **both** 倉頡 and 速成.
+4. **三代 candidate order = Yahoo `cj-ext.cin` native (table) order** — not the LM.
+   **五代 keeps the current LM ranking** (unchanged). User-learning applies on top
+   in both modes.
+5. 三代 data source = Yahoo's own `cj-ext.cin` / `simplex-ext.cin` (faithful to
+   "Yahoo original order"), not ibus `cangjie3.txt`.
+6. Live reload on change (no IME reselect/restart).
+7. Control lives in the **Settings ▸ 輸入方式** tab only.
+8. Data = **commit converted files** + document the conversion commands. No script.
 
-## Data
+## Data files
 
-- **New:** `Resources/cangjie3.txt`, converted from
-  `ibus-table-chinese/tables/cangjie/cangjie3.txt` with the same transform as the
-  existing v5 file: keep only rows between `BEGIN_TABLE`/`END_TABLE`, take the
-  first two tab-separated columns (`<code>\t<char>`) via `awk -F'\t'`, drop the
-  header and the trailing frequency column.
-- **Unchanged:** `Resources/cangjie.txt` stays the 五代 table.
-- **Updated:** `Resources/CANGJIE-DATA-LICENSE.txt` documents the 三代 file (same
-  "Freely redistributable without restriction" license; author Roy Hiu-yueng Chan /
-  chinesecj.com; source `cangjie3.txt`) and records the exact conversion command.
+Converted to the `<code>\t<char>` (Cangjie) / `<quickcode>\t<char>` (Simplex)
+format the engines already parse; header + trailing `%`-directives dropped;
+**line order preserved** (it is Yahoo's native candidate order).
 
-Both files use the format `CangjieTable(text:)` already parses — parser unchanged.
+| Mode | Cangjie table | Simplex table | Source |
+|---|---|---|---|
+| 五代 (default) | `Resources/cangjie.txt` (existing) | derived via `SimplexTable(cangjie:)` | ibus `cangjie5.txt` |
+| 三代 (Yahoo) | `Resources/cangjie-yahoo.txt` (new) | `Resources/simplex-yahoo.txt` (new) | `bency/YahooKeyKey` `cj-ext.cin`, `simplex-ext.cin` |
+
+- `cj-ext.cin` chardef format is `<code><ws><char>` (mixed tab/space); convert with
+  first-whitespace split, keep code + char, preserve order. The `CangjieTable`
+  renderable filter drops CNS/Ext-B tofu entries at load (as it already does for v5).
+- Yahoo 速成: `simplex-ext.cin` is already quick-coded (`<quickcode><ws><char>`,
+  native order); load directly (see SimplexTable) rather than re-deriving.
+- **License caveat to flag:** `cj-ext.cin`/`simplex-ext.cin` derive from
+  opendesktop.org.tw's `cj.cin`/`simplex.cin` (yylin & b6s) within the New-BSD
+  Yahoo! KeyKey project, but carry **no explicit per-file license line**. Provenance
+  + attribution + this caveat documented in `CANGJIE-DATA-LICENSE.txt`.
 
 ## Components
 
 ### Preferences (`App/Preferences.swift`)
-- `enum CangjieVersion: String { case v3 = "3"; case v5 = "5" }`.
-- `static var cangjieVersion: CangjieVersion` (UserDefaults key `"cangjieVersion"`;
-  unknown/missing → `.v3`).
-- Register default `"cangjieVersion": "3"`.
+- `enum CangjieVersion: String { case v5 = "5"; case v3 = "3" }`.
+- `static var cangjieVersion` (UserDefaults `"cangjieVersion"`; unknown → `.v5`).
+- Register default `"cangjieVersion": "5"`.
+
+### SimplexTable (`Packages/KeyKeyEngine/.../SimplexTable.swift`)
+- Add an initializer that loads **already-quick-coded** `<quickcode>\t<char>` lines
+  directly (no first+last re-derivation), preserving order — for `simplex-yahoo.txt`
+  (e.g. `init(quickCodeText:)`). Existing `init(cangjie:)` / `init(text:)` unchanged.
 
 ### SharedResources (`App/SharedResources.swift`)
-- `cangjieTable`, `simplexTable` → `private(set) var`.
-- `private func loadCangjieTables(version:)`: v3 → bundle resource `cangjie3.txt`;
-  v5 → `cangjie.txt`. Fail-safe to empty `CangjieTable` if missing, then
-  `simplexTable = SimplexTable(cangjie: cangjieTable)` (unchanged derivation).
+- `cangjieTable`, `simplexTable` → `private(set) var`. Add
+  `private(set) var cangjieRank: [Character: Double]` — the effective single-char
+  rank the engines use: `characterRank` (LM) for 五代, `[:]` for 三代 (empty →
+  engine's stable sort preserves Yahoo native table order).
+- `private func loadCangjieTables(version:)`:
+  - 五代 → `cangjie.txt`, `simplexTable = SimplexTable(cangjie:)`, `cangjieRank =
+    characterRank`.
+  - 三代 → `cangjie-yahoo.txt`, `simplexTable = SimplexTable(quickCodeText:)` from
+    `simplex-yahoo.txt` (fail-safe: derive from cangjie if missing), `cangjieRank = [:]`.
+  - Fail-safe to empty `CangjieTable` if a file is missing (as today).
 - `init` calls it with `Preferences.cangjieVersion`.
-- `func reloadCangjieTables()`: re-reads the preference, rebuilds both tables, posts
+- `func reloadCangjieTables()`: re-read preference, rebuild the three, post
   `.cangjieVersionChanged`.
 - `extension Notification.Name { static let cangjieVersionChanged }`.
-
-`characterRank`, `associatedPhrases`, `hanConvertFilter`, `userFreq` unchanged.
+- `characterRank` (full LM rank) still computed once at init and retained (switching
+  back to 五代 needs no LM rebuild).
 
 ### InputController (`App/InputController.swift`)
-- The two module `makeEngine` closures read `SharedResources.shared.cangjieTable` /
-  `.simplexTable` **live** instead of capturing copies at `init`. `characterRank`
-  and `userRank` capture unchanged (ranking + learning behave as today).
+- Both module `makeEngine` closures read `SharedResources.shared.cangjieTable`,
+  `.simplexTable`, and **`.cangjieRank`** live (not captured copies). `userRank`
+  (user-learning) unchanged → learning stays on in both modes.
 - Observe `.cangjieVersionChanged` (added in `init`, removed in `deinit`): commit
   any in-progress composition, reset `candidatePage`/`associations`, hide the
-  candidate window, then `engine = currentModule.makeEngine()` — the same reset
-  path `setValue(_:forTag:client:)` already uses on a mode switch.
+  candidate window, then `engine = currentModule.makeEngine()` — same reset path
+  `setValue(_:forTag:client:)` uses on a mode switch.
 
 ### SettingsWindow (`App/SettingsWindow.swift`)
-- In `inputMethodsView()`, add a labeled `NSPopUpButton` "倉頡版本" with items
-  `三代倉頡（Yahoo KeyKey 相容）` (tag → v3) and `五代倉頡` (tag → v5), selection
-  reflecting `Preferences.cangjieVersion`.
+- In `inputMethodsView()`, add an `NSPopUpButton` "倉頡版本": `五代倉頡` (tag → v5,
+  default) and `三代倉頡（Yahoo KeyKey 相容）` (tag → v3), reflecting the preference.
 - On change: set `Preferences.cangjieVersion`; call
-  `SharedResources.shared.reloadCangjieTables()`.
-- Retain the popup; set its selection in `refreshControls()` (sync parity).
-- Short 說明 label: applies immediately; affects 倉頡 and 速成.
+  `SharedResources.shared.reloadCangjieTables()`. Retain the popup; set selection in
+  `refreshControls()`. Short 說明: applies immediately; affects 倉頡 and 速成; 三代
+  uses Yahoo's original codes and candidate order.
 
 ### Build & packaging
-- `tools/build-app.sh` and `tools/run-debug.sh`: copy `Resources/cangjie3.txt` into
-  `Contents/Resources/` (same error-if-missing pattern as `cangjie.txt`).
+- `tools/build-app.sh` and `tools/run-debug.sh`: copy `cangjie-yahoo.txt` and
+  `simplex-yahoo.txt` into `Contents/Resources/` (same error-if-missing pattern).
 
 ## Data flow
 
 ```
 Settings popup change
-  → Preferences.cangjieVersion = v3 | v5
+  → Preferences.cangjieVersion = v5 | v3
   → SharedResources.reloadCangjieTables()
-      → loadCangjieTables(version:)   (rebuild cangjieTable + simplexTable)
+      → loadCangjieTables(version:)   (rebuild cangjieTable, simplexTable, cangjieRank)
       → post .cangjieVersionChanged
   → each InputController observer
       → commit in-progress composition, reset paging/associations, hide window
-      → engine = currentModule.makeEngine()   (reads new shared tables live)
-  → next keystroke uses the selected generation's decomposition
+      → engine = currentModule.makeEngine()   (reads new shared tables + rank live)
+  → next keystroke uses the selected generation's table and (三代) native order
 ```
 
 ## Error handling
-- Missing `cangjie3.txt` at runtime → fail-safe to an empty Cangjie table (logs, no
-  candidates), identical to the existing missing-`cangjie.txt` handling.
-- Unknown/absent stored `cangjieVersion` → `.v3` (the default).
-- Reload **commits** (not discards) any in-progress composition so switching
-  mid-composition never silently drops typed input.
+- Missing 三代 data file → fail-safe (empty Cangjie table / derive Simplex from
+  cangjie), logged; matches current missing-file handling.
+- Unknown/absent stored `cangjieVersion` → `.v5` (the default).
+- Reload **commits** (not discards) any in-progress composition.
 
 ## Testing
-- **Decomposition difference (locks the feature):** load both bundled tables and
-  assert the reporter's examples — e.g. `characters(forCode:)` contains 面 for
-  `mwyl` in v3 and for `mwsl` in v5; 鬼 for `hi` (v3) vs `hui` (v5); 樓 for `dlwv`
-  (v3) vs `dllv` (v5). Confirms the tables really differ.
-- **v3 table loads** non-empty from the bundle.
-- **Preferences round-trip:** set/read `v3` and `v5`; unknown stored value → `.v3`.
-- Existing CangjieTable / Simplex / engine tests remain green (parser unchanged).
+- **Decomposition difference:** load `cangjie.txt` (v5) and `cangjie-yahoo.txt`
+  (v3); assert the reporter's examples — 面 for `mwyl`(v3)/`mwsl`(v5), 鬼 for
+  `hi`(v3)/`hui`(v5), 樓 `dlwv`/`dllv`. Confirms tables differ.
+- **三代 native order:** `CangjieEngine(table: yahooTable, characterRank: [:])`
+  returns candidates in table order (e.g. 我 first for `hqi`).
+- **Yahoo Simplex:** `SimplexTable(quickCodeText:)` parses `simplex-yahoo.txt`,
+  preserves native order for a known quick code (e.g. `hi`).
+- **五代 unchanged:** v5 candidates still ordered by LM rank (regression guard).
+- **Preferences round-trip:** set/read `v5`/`v3`; unknown → `.v5`.
+- Existing engine/table tests remain green (parsers unchanged; new Simplex
+  initializer additive).
 
 ## Docs & release
-- **`README.md`:** add a short table — 倉頡版本 · 資料來源 · 範例 (面/鬼) — so the
-  三代/五代 distinction and the Yahoo-compatibility default are explicit.
-- `CHANGELOG.md`: new-feature entry; explicitly note the **default is 三代倉頡
-  (Yahoo KeyKey 相容)**, changing decompositions for users implicitly on 五代.
-- Version bump to **v2.1.0** (additive feature).
-- About window note if space allows.
-- Issue #30: comment confirming Yahoo Cangjie = 三代 (now the default), and that the
-  聯想 ordering (point 1) can't be reproduced (data withheld).
+- **`README.md`:** add the mode table (Mode · Table source · example codes) making
+  the 三代/五代 distinction and the 三代-uses-Yahoo-order behavior explicit.
+- `CHANGELOG.md`: new-feature entry (opt-in 三代倉頡 Yahoo 相容; default stays 五代).
+- Version bump to **v2.1.0**.
+- Issue #30: comment — 三代 mode reproduces Yahoo's Cangjie codes **and candidate
+  order**; the 關聯字 phrase ranking cannot be reproduced (corpus withheld, evidence).
 - Memory: update `yahoo-keykey-2-project.md`.
 
 ## Non-goals / risks
-- Not changing candidate/association ordering (LM rank stays).
-- Default flip to 三代 changes decompositions for existing users on update
-  (intended; documented). User-learning and all other settings are unaffected.
-- Reload reparses a table on an explicit, rare user action — acceptable; not on a
-  hot path.
+- Not reproducing Yahoo's 關聯字 phrase ranking (data withheld — see Scope).
+- 三代 and 五代 order candidates differently by design (native vs LM); intended.
+- `cj-ext.cin`/`simplex-ext.cin` lack explicit per-file license lines (flagged;
+  provenance documented).
+- Reload reparses a table (cj-ext ~82.9k lines) on a rare explicit action —
+  acceptable; not a hot path.
