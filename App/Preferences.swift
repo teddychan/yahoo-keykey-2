@@ -17,6 +17,7 @@ enum Preferences {
         static let fullWidthPunctuationEnabled = "fullWidthPunctuationEnabled"
         static let outputSimplifiedEnabled = "outputSimplifiedEnabled"
         static let cangjieVersion = "cangjieVersion"
+        static let associationContinuationOnly = "associationContinuationOnly"
     }
 
     static let minFontSize: CGFloat = 14
@@ -31,6 +32,7 @@ enum Preferences {
             Key.fullWidthPunctuationEnabled: true,
             Key.outputSimplifiedEnabled: false,
             Key.cangjieVersion: CangjieVersion.v5.rawValue,
+            Key.associationContinuationOnly: false,
         ])
     }
 
@@ -64,5 +66,13 @@ enum Preferences {
     static var cangjieVersion: CangjieVersion {
         get { CangjieVersion(rawValue: UserDefaults.standard.string(forKey: Key.cangjieVersion) ?? "") ?? .v5 }
         set { UserDefaults.standard.set(newValue.rawValue, forKey: Key.cangjieVersion) }
+    }
+
+    // When true, the 聯想 (associated-phrase) candidate window shows only the continuation
+    // after the just-committed character (係／心／於) instead of the whole word (關係／關心／
+    // 關於) — the classic Yahoo! KeyKey display. Off by default (shows the whole word).
+    static var associationContinuationOnly: Bool {
+        get { UserDefaults.standard.bool(forKey: Key.associationContinuationOnly) }
+        set { UserDefaults.standard.set(newValue, forKey: Key.associationContinuationOnly) }
     }
 }

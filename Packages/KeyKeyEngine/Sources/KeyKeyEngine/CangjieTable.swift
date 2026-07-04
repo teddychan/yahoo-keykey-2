@@ -31,15 +31,20 @@ public struct CangjieTable {
         }
     }
 
-    /// True only for single-scalar characters in the commonly-renderable CJK ranges.
-    /// Drops Private Use Areas and supplementary-plane ideographs (Ext-B and beyond),
-    /// which render as tofu/`[?]` on most systems.
+    /// True only for single-scalar characters we can render safely: the common CJK
+    /// ideograph ranges, plus the CJK punctuation/full-width ranges used by the Yahoo
+    /// table's `z`-code punctuation (e.g. `zxcd`→「, `zxab`→，). Drops Private Use Areas
+    /// and supplementary-plane ideographs (Ext-B and beyond), which render as tofu.
     static func isRenderableCJK(_ ch: Character) -> Bool {
         let scalars = ch.unicodeScalars
         guard scalars.count == 1, let v = scalars.first?.value else { return false }
         return (0x4E00...0x9FFF).contains(v)   // CJK Unified Ideographs
             || (0x3400...0x4DBF).contains(v)   // CJK Extension A
             || (0xF900...0xFAFF).contains(v)   // CJK Compatibility Ideographs
+            || (0x3000...0x303F).contains(v)   // CJK Symbols and Punctuation (、。「」『』…)
+            || (0xFE30...0xFE4F).contains(v)   // CJK Compatibility Forms (vertical ︰﹁ etc.)
+            || (0xFF00...0xFFEF).contains(v)   // Halfwidth & Fullwidth Forms (，（）：？！)
+            || (0x2010...0x2027).contains(v)   // General punctuation used by z-codes (–—‥…)
     }
 
     public init(contentsOf url: URL) throws {
