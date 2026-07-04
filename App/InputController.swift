@@ -421,8 +421,14 @@ final class InputController: IMKInputController {
             // Guard against a stale candidatePage pointing past the end (would trap on slice).
             if candidatePage * size >= cands.count { candidatePage = 0 }
             let start = candidatePage * size
+            // In association mode, optionally show only the continuation after the committed
+            // character (係／心／於) instead of the whole word (關係) — the classic Yahoo display.
+            // Selection still indexes `associations` (unchanged) and inserts the dropFirst suffix.
+            let continuationOnly = !associations.isEmpty && Preferences.associationContinuationOnly
             // Convert only the displayed strings (WYSIWYG); selection still indexes `cands`.
-            let page = cands[start..<min(start + size, cands.count)].map(applyHanConvert)
+            let page = cands[start..<min(start + size, cands.count)].map { item -> String in
+                applyHanConvert(continuationOnly ? String(item.dropFirst()) : item)
+            }
             var rect = NSRect.zero
             client.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
             candidateWindow.show(page, page: candidatePage, pageCount: pageCount,

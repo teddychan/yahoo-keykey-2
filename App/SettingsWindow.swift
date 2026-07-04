@@ -22,6 +22,7 @@ final class SettingsWindowController: NSWindowController {
     private var simplifiedCheckbox: NSButton!
     private var fullWidthCheckbox: NSButton!
     private var associatedCheckbox: NSButton!
+    private var associationContinuationCheckbox: NSButton!
     private var fontSizeSlider: NSSlider!
     private var autoUpdateCheckbox: NSButton!
     private var cangjieVersionPopup: NSPopUpButton!
@@ -95,7 +96,11 @@ final class SettingsWindowController: NSWindowController {
                                          action: #selector(toggleFullWidth))
         associatedCheckbox = makeCheckbox("聯想字詞", state: Preferences.associatedPhrasesEnabled,
                                           action: #selector(toggleAssociated))
-        return tabContainer([simplifiedCheckbox, fullWidthCheckbox, associatedCheckbox])
+        associationContinuationCheckbox = makeCheckbox("聯想只顯示接續字（如「係／心／於」而非「關係」）",
+                                                       state: Preferences.associationContinuationOnly,
+                                                       action: #selector(toggleAssociationContinuation))
+        return tabContainer([simplifiedCheckbox, fullWidthCheckbox, associatedCheckbox,
+                             associationContinuationCheckbox])
     }
 
     private func makeCheckbox(_ title: String, state: Bool, action: Selector) -> NSButton {
@@ -112,6 +117,9 @@ final class SettingsWindowController: NSWindowController {
     }
     @objc private func toggleAssociated(_ sender: NSButton) {
         Preferences.associatedPhrasesEnabled = (sender.state == .on)
+    }
+    @objc private func toggleAssociationContinuation(_ sender: NSButton) {
+        Preferences.associationContinuationOnly = (sender.state == .on)
     }
 
     // MARK: - 外觀 (candidate-window font size, clamped 14–28, with a live preview)
@@ -220,6 +228,7 @@ final class SettingsWindowController: NSWindowController {
         simplifiedCheckbox.state = Preferences.outputSimplifiedEnabled ? .on : .off
         fullWidthCheckbox.state = Preferences.fullWidthPunctuationEnabled ? .on : .off
         associatedCheckbox.state = Preferences.associatedPhrasesEnabled ? .on : .off
+        associationContinuationCheckbox.state = Preferences.associationContinuationOnly ? .on : .off
         fontSizeSlider.doubleValue = Double(Preferences.candidateFontSize)
         refreshFontPreview()
         autoUpdateCheckbox.state = Updater.shared.automaticallyChecksForUpdates ? .on : .off

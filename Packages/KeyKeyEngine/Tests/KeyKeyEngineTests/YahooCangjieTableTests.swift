@@ -49,6 +49,22 @@ final class YahooCangjieTableTests: XCTestCase {
         XCTAssertEqual(engine.candidates.first, "我")
     }
 
+    // The Yahoo table's z-code punctuation loads (was previously dropped by the CJK-only
+    // filter): zxcd→「, zxce→」, zxab→，. Confirms both the data and the broadened filter.
+    func testYahooZCodePunctuationLoads() throws {
+        guard let v3URL = resourceURL("cangjie-yahoo.txt") else {
+            throw XCTSkip("cangjie-yahoo.txt not present")
+        }
+        let v3 = try CangjieTable(contentsOf: v3URL)
+        XCTAssertEqual(v3.characters(forCode: "zxcd"), ["「"])
+        XCTAssertEqual(v3.characters(forCode: "zxce"), ["」"])
+        XCTAssertTrue(v3.characters(forCode: "zxab").contains("，"))
+        // And the engine composes it end-to-end (type z,x,c,d → first candidate 「).
+        let engine = CangjieEngine(table: v3, characterRank: [:])
+        for key in "zxcd" { _ = engine.handleKey(key) }
+        XCTAssertEqual(engine.candidates.first, "「")
+    }
+
     // The Yahoo 速成 table loads via the quick-code initializer and preserves native order.
     func testYahooSimplexLoadsAndPreservesOrder() throws {
         guard let url = resourceURL("simplex-yahoo.txt") else {
