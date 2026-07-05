@@ -6,7 +6,7 @@
 # RELEASE IME (com.dragonapp.inputmethod.yahoo-keykey). Two bundles sharing the release id register as
 # duplicates in Launch Services and hide the real input source from the Input Sources picker.
 #
-# Safe to run alongside the App Store / GitHub release install. Any extra args are forwarded
+# Safe to run alongside the GitHub release install. Any extra args are forwarded
 # to build-app.sh (e.g. --build-lm to regenerate data.txt first).
 set -euo pipefail
 

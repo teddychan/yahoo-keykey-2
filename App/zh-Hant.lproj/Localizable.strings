@@ -1,0 +1,45 @@
+/* App-specific strings for Yahoo! KeyKey 2. DragonKit's own UI strings live in its own
+   bundle (7 languages) and are not duplicated here. */
+
+/* Sidebar pane title (General). Other panes use DragonKit's built-in titles. */
+"keykey.pane.general" = "一般";
+
+/* General pane */
+"keykey.general.input" = "輸入";
+"keykey.general.outputSimplified" = "輸出簡體字";
+"keykey.general.fullWidthPunctuation" = "全形標點";
+"keykey.general.associatedPhrases" = "聯想字詞";
+"keykey.general.associationContinuationOnly" = "聯想只顯示接續字";
+"keykey.general.associationContinuationOnlyHint" = "顯示「係／心／於」而非「關係」，如原版 Yahoo! KeyKey。所提交的字不變。";
+"keykey.general.appearance" = "外觀";
+"keykey.general.candidateFontSize" = "候選字大小";
+"keykey.general.inputMethod" = "輸入方式";
+"keykey.general.cangjieVersion" = "倉頡版本";
+"keykey.general.cangjieV5" = "五代倉頡";
+"keykey.general.cangjieV3" = "三代倉頡（Yahoo KeyKey 相容）";
+"keykey.general.cangjieVersionHint" = "「三代倉頡」使用 Yahoo! KeyKey 原版的拆碼與候選字順序（同時套用到倉頡與速成），立即生效。";
+"keykey.general.language" = "語言";
+
+/* About pane */
+"keykey.about.website" = "網站";
+"keykey.about.support" = "在 GitHub 回報問題";
+"keykey.about.origin" = "向原版致敬";
+"keykey.about.languageModel" = "語言模型";
+"keykey.about.cangjieTable" = "倉頡碼表";
+"keykey.about.hanConversion" = "漢字轉換";
+
+/* What's New pane (2.2.0) */
+"keykey.whatsNew.summary" = "本版新增三代倉頡的 z 碼標點，以及聯想只顯示接續字的選項。";
+"keykey.whatsNew.zcode" = "新增：三代倉頡的 z 碼標點。在「三代倉頡（Yahoo KeyKey 相容）」模式，現在可以用經典的 Yahoo z 碼輸入標點，例如 zxcd → 「、zxce → 」、zxab → ，、zxbe → （。這些原本就在 Yahoo 碼表中，現已重新提供。";
+"keykey.whatsNew.continuationOnly" = "新增：聯想只顯示接續字選項。「設定 ▸ 一般」新增一個選項，可讓聯想視窗只顯示所輸入字之後的接續字 — 例如輸入「關」後顯示 係／心／於，而非整個詞 關係／關心／關於，如經典的 Yahoo! KeyKey。預設關閉；所提交的字不變。";
+
+/* Uninstall pane checklist */
+"keykey.uninstall.item.inputSources" = "從輸入來源中停用倉頡與速成";
+"keykey.uninstall.item.learningAndSettings" = "刪除使用者學習資料與偏好設定";
+"keykey.uninstall.item.trash" = "將 Yahoo! KeyKey 2 移到垃圾桶";
+
+/* IMK input-menu app items */
+"keykey.menu.about" = "關於 Yahoo! KeyKey 2…";
+"keykey.menu.checkForUpdates" = "檢查更新…";
+"keykey.menu.settings" = "設定…";
+"keykey.menu.uninstall" = "解除安裝 Yahoo! KeyKey 2…";

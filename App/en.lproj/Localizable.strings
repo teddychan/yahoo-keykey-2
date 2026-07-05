@@ -1,0 +1,45 @@
+/* App-specific strings for Yahoo! KeyKey 2. DragonKit's own UI strings live in its own
+   bundle (7 languages) and are not duplicated here. */
+
+/* Sidebar pane title (General). Other panes use DragonKit's built-in titles. */
+"keykey.pane.general" = "General";
+
+/* General pane */
+"keykey.general.input" = "Input";
+"keykey.general.outputSimplified" = "Output Simplified Chinese";
+"keykey.general.fullWidthPunctuation" = "Full-width punctuation";
+"keykey.general.associatedPhrases" = "Associated phrases (聯想)";
+"keykey.general.associationContinuationOnly" = "Show only the continuation in associated phrases";
+"keykey.general.associationContinuationOnlyHint" = "Show 係／心／於 instead of 關係, like the original Yahoo! KeyKey. What you commit is unchanged.";
+"keykey.general.appearance" = "Appearance";
+"keykey.general.candidateFontSize" = "Candidate text size";
+"keykey.general.inputMethod" = "Input Method";
+"keykey.general.cangjieVersion" = "Cangjie version";
+"keykey.general.cangjieV5" = "5th-generation Cangjie";
+"keykey.general.cangjieV3" = "3rd-generation Cangjie (Yahoo KeyKey compatible)";
+"keykey.general.cangjieVersionHint" = "3rd-generation Cangjie uses the original Yahoo! KeyKey code table and candidate order (applied to both Cangjie and Simplex), effective immediately.";
+"keykey.general.language" = "Language";
+
+/* About pane */
+"keykey.about.website" = "Website";
+"keykey.about.support" = "Report an issue on GitHub";
+"keykey.about.origin" = "Homage to the original";
+"keykey.about.languageModel" = "Language model";
+"keykey.about.cangjieTable" = "Cangjie table";
+"keykey.about.hanConversion" = "Han conversion";
+
+/* What's New pane (2.2.0) */
+"keykey.whatsNew.summary" = "This release adds z-code punctuation in 3rd-generation Cangjie, plus a continuation-only option for associated phrases.";
+"keykey.whatsNew.zcode" = "New: z-code punctuation in 三代倉頡. In the 三代倉頡（Yahoo KeyKey 相容）mode you can now type punctuation with the classic Yahoo z codes — e.g. zxcd → 「, zxce → 」, zxab → ，, zxbe → （. These were part of the original Yahoo table and are available again.";
+"keykey.whatsNew.continuationOnly" = "New: 聯想只顯示接續字 option. A new checkbox in Settings ▸ General makes the associated-phrase (聯想) window show only the continuation after the character you just typed — e.g. after 關 it shows 係／心／於 instead of the full words 關係／關心／關於, like the classic Yahoo! KeyKey. Off by default; what you commit is unchanged either way.";
+
+/* Uninstall pane checklist */
+"keykey.uninstall.item.inputSources" = "Disable Cangjie and Simplex from Input Sources";
+"keykey.uninstall.item.learningAndSettings" = "Delete user-learning data and preferences";
+"keykey.uninstall.item.trash" = "Move Yahoo! KeyKey 2 to the Trash";
+
+/* IMK input-menu app items */
+"keykey.menu.about" = "About Yahoo! KeyKey 2…";
+"keykey.menu.checkForUpdates" = "Check for Updates…";
+"keykey.menu.settings" = "Settings…";
+"keykey.menu.uninstall" = "Uninstall Yahoo! KeyKey 2…";
