@@ -11,6 +11,8 @@
 "keykey.general.associatedPhrases" = "Associated phrases (聯想)";
 "keykey.general.associationContinuationOnly" = "Show only the continuation in associated phrases";
 "keykey.general.associationContinuationOnlyHint" = "Show 係／心／於 instead of 關係, like the original Yahoo! KeyKey. What you commit is unchanged.";
+"keykey.general.codeHint" = "Show Cangjie code hint";
+"keykey.general.codeHintHint" = "Show each character's Cangjie code beside the candidate (e.g. 倉 → 人口竹口) to help you learn and verify its decomposition.";
 "keykey.general.appearance" = "Appearance";
 "keykey.general.candidateFontSize" = "Candidate text size";
 "keykey.general.inputMethod" = "Input Method";
@@ -18,6 +20,10 @@
 "keykey.general.cangjieV5" = "5th-generation Cangjie";
 "keykey.general.cangjieV3" = "3rd-generation Cangjie (Yahoo KeyKey compatible)";
 "keykey.general.cangjieVersionHint" = "3rd-generation Cangjie uses the original Yahoo! KeyKey code table and candidate order (applied to both Cangjie and Simplex), effective immediately.";
+"keykey.general.english" = "English input";
+"keykey.general.englishToggleShortcut" = "中/英 toggle shortcut";
+"keykey.general.englishToggleShortcutHint" = "Click the field and press a key to set it; the default is right Shift (tap). In English mode you type letters and numbers directly, without switching input methods.";
+"keykey.general.reset" = "Reset";
 "keykey.general.language" = "Language";
 
 /* About pane */

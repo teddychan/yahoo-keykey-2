@@ -18,6 +18,8 @@ enum Preferences {
         static let outputSimplifiedEnabled = "outputSimplifiedEnabled"
         static let cangjieVersion = "cangjieVersion"
         static let associationContinuationOnly = "associationContinuationOnly"
+        static let codeHintEnabled = "codeHintEnabled"
+        static let englishToggleShortcut = "englishToggleShortcut"
     }
 
     static let minFontSize: CGFloat = 14
@@ -33,6 +35,7 @@ enum Preferences {
             Key.outputSimplifiedEnabled: false,
             Key.cangjieVersion: CangjieVersion.v5.rawValue,
             Key.associationContinuationOnly: false,
+            Key.codeHintEnabled: false,
         ])
     }
 
@@ -74,5 +77,22 @@ enum Preferences {
     static var associationContinuationOnly: Bool {
         get { UserDefaults.standard.bool(forKey: Key.associationContinuationOnly) }
         set { UserDefaults.standard.set(newValue, forKey: Key.associationContinuationOnly) }
+    }
+
+    // When true, the candidate window shows each single character's 倉頡 code as radical glyphs
+    // (反查/拆碼提示). Off by default; read live so the menu/Settings toggle applies immediately.
+    static var codeHintEnabled: Bool {
+        get { UserDefaults.standard.bool(forKey: Key.codeHintEnabled) }
+        set { UserDefaults.standard.set(newValue, forKey: Key.codeHintEnabled) }
+    }
+
+    // The user-chosen shortcut that toggles 中/英 (quick-English) mode. Falls back to the
+    // classic KeyKey default (right-Shift tap) when unset or unparseable.
+    static var englishToggleShortcut: ShortcutSpec {
+        get {
+            UserDefaults.standard.string(forKey: Key.englishToggleShortcut)
+                .flatMap(ShortcutSpec.init(serialized:)) ?? .default
+        }
+        set { UserDefaults.standard.set(newValue.serialized, forKey: Key.englishToggleShortcut) }
     }
 }

@@ -24,6 +24,10 @@ final class InputController: IMKInputController {
     // association mode. Paged with `candidatePage`, shown in the same numbered candidate window.
     private var associations: [String] = []
     private static let pageSize = 9
+    // Modifier-tap detection for the 中/英 toggle: set when the configured modifier goes down
+    // alone; a matching release fires the toggle. Any keyDown/other modifier disarms it, so
+    // using the modifier normally (e.g. Shift for a capital) never toggles.
+    private var armedTapModifier: ShortcutSpec.Modifier?
 
     override init!(server: IMKServer!, delegate: Any!, client inputClient: Any!) {
         // All heavy resources are loaded ONCE in SharedResources and shared across every
@@ -83,7 +87,9 @@ final class InputController: IMKInputController {
     }
 
     override func recognizedEvents(_ sender: Any!) -> Int {
-        Int(NSEvent.EventTypeMask.keyDown.rawValue)
+        // keyDown drives composition; flagsChanged lets us detect a modifier-tap toggle
+        // (e.g. right-Shift) for 中/英 quick-English switching.
+        Int(NSEvent.EventTypeMask.keyDown.rawValue | NSEvent.EventTypeMask.flagsChanged.rawValue)
     }
 
     // IMK input-menu (the menu shown in the input-method menu-bar item), organized to the
@@ -115,6 +121,16 @@ final class InputController: IMKInputController {
         associate.target = self
         associate.state = Preferences.associatedPhrasesEnabled ? .on : .off
         menu.addItem(associate)
+
+        let codeHint = NSMenuItem(title: "反查提示", action: #selector(toggleCodeHint), keyEquivalent: "")
+        codeHint.target = self
+        codeHint.state = Preferences.codeHintEnabled ? .on : .off
+        menu.addItem(codeHint)
+
+        let english = NSMenuItem(title: "英文輸入", action: #selector(toggleEnglishModeMenu), keyEquivalent: "")
+        english.target = self
+        english.state = SharedResources.shared.englishMode ? .on : .off
+        menu.addItem(english)
 
         // 2. Candidate-window font size (候選字大小). The macOS input menu routes only
         // TOP-LEVEL item selections back to the controller — items nested in a submenu
@@ -178,6 +194,16 @@ final class InputController: IMKInputController {
         Preferences.outputSimplifiedEnabled.toggle()
     }
 
+    @objc private func toggleCodeHint() {
+        Preferences.codeHintEnabled.toggle()
+    }
+
+    // Menu fallback for the 中/英 toggle (for users who don't set a shortcut). The input menu
+    // only opens when idle, so there's no active composition to commit here.
+    @objc private func toggleEnglishModeMenu() {
+        SharedResources.shared.englishMode.toggle()
+    }
+
     // Named candidate-window font sizes (display title → point size → menu action),
     // all within the Preferences clamp (14–28); the default 18 is "中". Each size has
     // its own no-argument selector so it dispatches exactly like the toggles above —
@@ -231,7 +257,35 @@ final class InputController: IMKInputController {
     }
 
     override func handle(_ event: NSEvent!, client sender: Any!) -> Bool {
-        guard let event, event.type == .keyDown, let client = sender as? IMKTextInput else { return false }
+        guard let event else { return false }
+
+        // Modifier-tap detection for the 中/英 toggle runs on flagsChanged (which the rest of
+        // this keyDown-only method never sees). Always return false so the modifier still
+        // behaves normally for the app (Shift still shifts).
+        if event.type == .flagsChanged {
+            handleModifierTap(event, client: sender as? IMKTextInput)
+            return false
+        }
+
+        guard event.type == .keyDown, let client = sender as? IMKTextInput else { return false }
+
+        // A key press disarms any pending modifier-tap, so Shift+key types a capital and never
+        // toggles 中/英.
+        armedTapModifier = nil
+
+        // Combo form of the toggle shortcut (e.g. ⇧Space).
+        if case .combo(let keyCode, let mods) = Preferences.englishToggleShortcut,
+           event.keyCode == keyCode,
+           event.modifierFlags.intersection([.control, .option, .shift, .command]) == mods {
+            toggleEnglishMode(client: client)
+            return true
+        }
+
+        // 英 (English) passthrough: hand raw ASCII straight to the app, skipping composition
+        // and full-width punctuation. The toggle shortcut above still flips back to 中.
+        if SharedResources.shared.englishMode {
+            return false
+        }
 
         // Association mode (聯想): after committing a single character we offer follow-on phrases.
         // The engine has no active composition here. Digits pick a phrase; arrows page; Esc
@@ -415,6 +469,36 @@ final class InputController: IMKInputController {
         candidateWindow.hide()
     }
 
+    // Detect a modifier-tap toggle from a flagsChanged event. Arms on a clean press of the
+    // configured modifier (alone); fires on the matching release. Any other change disarms.
+    private func handleModifierTap(_ event: NSEvent, client: IMKTextInput?) {
+        guard case .modifierTap(let target) = Preferences.englishToggleShortcut else {
+            armedTapModifier = nil
+            return
+        }
+        guard let changed = ShortcutSpec.Modifier.from(keyCode: event.keyCode) else { return }
+        let active = event.modifierFlags.intersection([.control, .option, .shift, .command, .capsLock])
+        if event.modifierFlags.contains(changed.flag) { // press
+            // Arm only when it's exactly the target modifier with nothing else held.
+            armedTapModifier = (changed == target && active == target.flag) ? target : nil
+        } else { // release
+            let fire = (changed == target && armedTapModifier == target)
+            armedTapModifier = nil
+            if fire, let client { toggleEnglishMode(client: client) }
+        }
+    }
+
+    // Flip 中/英 mode, committing any in-progress composition/association first.
+    private func toggleEnglishMode(client: IMKTextInput) {
+        if !engine.composingText.isEmpty {
+            _ = commitCurrent(to: client)
+        } else if !associations.isEmpty {
+            clearAssociations()
+        }
+        SharedResources.shared.englishMode.toggle()
+        candidateWindow.hide()
+    }
+
     private func refresh(_ client: IMKTextInput) {
         let composing = engine.composingText
         client.setMarkedText(composing,
@@ -435,14 +519,28 @@ final class InputController: IMKInputController {
             // character (係／心／於) instead of the whole word (關係) — the classic Yahoo display.
             // Selection still indexes `associations` (unchanged) and inserts the dropFirst suffix.
             let continuationOnly = !associations.isEmpty && Preferences.associationContinuationOnly
+            let slice = Array(cands[start..<min(start + size, cands.count)])
+            // The string actually shown for each row (continuation-only drops the leading char).
+            let shown = slice.map { continuationOnly ? String($0.dropFirst()) : $0 }
             // Convert only the displayed strings (WYSIWYG); selection still indexes `cands`.
-            let page = cands[start..<min(start + size, cands.count)].map { item -> String in
-                applyHanConvert(continuationOnly ? String(item.dropFirst()) : item)
+            let page = shown.map { applyHanConvert($0) }
+            // 反查/拆碼提示: the 倉頡 code of each single-character row, from the traditional
+            // (pre-conversion) glyph so it matches the code you'd actually type. Whole-word 聯想
+            // rows get no hint. Empty array when the feature is off → unchanged rendering.
+            let hints: [String?]
+            if Preferences.codeHintEnabled {
+                let codeIndex = SharedResources.shared.cangjieCodeIndex
+                hints = shown.map { s -> String? in
+                    guard s.count == 1, let ch = s.first else { return nil }
+                    return codeIndex.codeGlyphs(for: ch)
+                }
+            } else {
+                hints = []
             }
             var rect = NSRect.zero
             client.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
             candidateWindow.show(page, page: candidatePage, pageCount: pageCount,
-                                 fontSize: Preferences.candidateFontSize, near: rect)
+                                 fontSize: Preferences.candidateFontSize, hints: hints, near: rect)
         }
     }
 }

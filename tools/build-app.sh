@@ -103,7 +103,7 @@ swiftc \
   -framework InputMethodKit -framework Cocoa \
   -F "$SPARKLE_CACHE" -framework Sparkle \
   -Xlinker -rpath -Xlinker @executable_path/../Frameworks \
-  "$APP_SRC"/main.swift "$APP_SRC"/InputController.swift "$APP_SRC"/SharedResources.swift "$APP_SRC"/InputEngine.swift "$APP_SRC"/InputMethodModule.swift "$APP_SRC"/CandidateWindow.swift "$APP_SRC"/Preferences.swift "$APP_SRC"/SettingsModel.swift "$APP_SRC"/GeneralPane.swift "$APP_SRC"/AboutConfig.swift "$APP_SRC"/WhatsNewConfig.swift "$APP_SRC"/AppMenuController.swift
+  "$APP_SRC"/main.swift "$APP_SRC"/InputController.swift "$APP_SRC"/SharedResources.swift "$APP_SRC"/InputEngine.swift "$APP_SRC"/InputMethodModule.swift "$APP_SRC"/CandidateWindow.swift "$APP_SRC"/Preferences.swift "$APP_SRC"/SettingsModel.swift "$APP_SRC"/GeneralPane.swift "$APP_SRC"/ShortcutSpec.swift "$APP_SRC"/ShortcutRecorderView.swift "$APP_SRC"/AboutConfig.swift "$APP_SRC"/WhatsNewConfig.swift "$APP_SRC"/AppMenuController.swift
 
 echo "==> Assembling Info.plist (resolving \${EXECUTABLE_NAME})"
 sed "s/\${EXECUTABLE_NAME}/$EXECUTABLE_NAME/g" "$APP_SRC/Info.plist" > "$APP/Contents/Info.plist"

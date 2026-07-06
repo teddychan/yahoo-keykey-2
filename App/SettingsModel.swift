@@ -41,6 +41,22 @@ final class SettingsModel {
         set { Preferences.associationContinuationOnly = newValue }
     }
 
+    // 反查/拆碼提示: show each single character's 倉頡 code in the candidate window.
+    var codeHint: Bool {
+        get { Preferences.codeHintEnabled }
+        set { Preferences.codeHintEnabled = newValue }
+    }
+
+    // 中/英 (quick-English) toggle shortcut; editable via the recorder in the General pane.
+    var englishToggleShortcut: ShortcutSpec {
+        get { Preferences.englishToggleShortcut }
+        set { Preferences.englishToggleShortcut = newValue }
+    }
+
+    func resetEnglishToggleShortcut() {
+        Preferences.englishToggleShortcut = .default
+    }
+
     var candidateFontSize: Double {
         get { Double(Preferences.candidateFontSize) }
         set { Preferences.candidateFontSize = CGFloat(newValue) }

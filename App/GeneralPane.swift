@@ -25,6 +25,8 @@ private struct GeneralPaneView: View {
                 Toggle(L("keykey.general.associatedPhrases"), isOn: $model.associatedPhrases)
                 Toggle(L("keykey.general.associationContinuationOnly"), isOn: $model.associationContinuationOnly)
                     .dragonAnnotation(LocalizedStringKey(L("keykey.general.associationContinuationOnlyHint")))
+                Toggle(L("keykey.general.codeHint"), isOn: $model.codeHint)
+                    .dragonAnnotation(LocalizedStringKey(L("keykey.general.codeHintHint")))
             }
 
             DragonSection(LocalizedStringKey(L("keykey.general.appearance"))) {
@@ -48,6 +50,17 @@ private struct GeneralPaneView: View {
                     Text(L("keykey.general.cangjieV3")).tag(CangjieVersion.v3)
                 }
                 .dragonAnnotation(LocalizedStringKey(L("keykey.general.cangjieVersionHint")))
+            }
+
+            DragonSection(LocalizedStringKey(L("keykey.general.english"))) {
+                HStack {
+                    Text(L("keykey.general.englishToggleShortcut"))
+                    Spacer()
+                    ShortcutRecorderView(spec: $model.englishToggleShortcut)
+                        .frame(width: 160, height: 24)
+                    Button(L("keykey.general.reset")) { model.resetEnglishToggleShortcut() }
+                }
+                .dragonAnnotation(LocalizedStringKey(L("keykey.general.englishToggleShortcutHint")))
             }
 
             DragonSection(LocalizedStringKey(L("keykey.general.language"))) {

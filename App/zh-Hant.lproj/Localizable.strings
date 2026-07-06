@@ -11,6 +11,8 @@
 "keykey.general.associatedPhrases" = "聯想字詞";
 "keykey.general.associationContinuationOnly" = "聯想只顯示接續字";
 "keykey.general.associationContinuationOnlyHint" = "顯示「係／心／於」而非「關係」，如原版 Yahoo! KeyKey。所提交的字不變。";
+"keykey.general.codeHint" = "反查提示";
+"keykey.general.codeHintHint" = "在候選字旁顯示該字的倉頡拆碼（例：倉 → 人口竹口），方便學習與核對。";
 "keykey.general.appearance" = "外觀";
 "keykey.general.candidateFontSize" = "候選字大小";
 "keykey.general.inputMethod" = "輸入方式";
@@ -18,6 +20,10 @@
 "keykey.general.cangjieV5" = "五代倉頡";
 "keykey.general.cangjieV3" = "三代倉頡（Yahoo KeyKey 相容）";
 "keykey.general.cangjieVersionHint" = "「三代倉頡」使用 Yahoo! KeyKey 原版的拆碼與候選字順序（同時套用到倉頡與速成），立即生效。";
+"keykey.general.english" = "英文輸入";
+"keykey.general.englishToggleShortcut" = "中／英 切換快速鍵";
+"keykey.general.englishToggleShortcutHint" = "點一下欄位後按下按鍵即可設定；預設為右 Shift（單按）。切換到英文模式後可直接輸入英數字，不需切換輸入法。";
+"keykey.general.reset" = "重設";
 "keykey.general.language" = "語言";
 
 /* About pane */

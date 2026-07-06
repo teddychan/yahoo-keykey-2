@@ -20,9 +20,16 @@ final class SharedResources {
     // Single-char rank the engines sort by: the LM `characterRank` for 五代, or empty for
     // 三代 so the Yahoo table's native line order is preserved. User-learning applies on top.
     private(set) var cangjieRank: [Character: Double]
+    // Reverse index (char → 倉頡 code) for the 反查/拆碼提示 hint; rebuilt with the tables so it
+    // always matches the selected 倉頡版本.
+    private(set) var cangjieCodeIndex: CangjieCodeIndex
     let hanConvertFilter: HanConvertFilter
     // One shared user-learning store across all controllers.
     let userFreq: UserFrequency
+
+    // 中/英 (quick-English) mode, shared across every controller instance (IMK makes one per
+    // client app) so the toggle is global. Deliberately NOT persisted — each launch starts 中.
+    var englishMode = false
 
     private init() {
         // Read data.txt to a String ONCE, then build both the LM and the associated
@@ -59,6 +66,7 @@ final class SharedResources {
         cangjieTable = CangjieTable(text: "")
         simplexTable = SimplexTable(cangjie: cangjieTable)
         cangjieRank = characterRank
+        cangjieCodeIndex = CangjieCodeIndex(table: cangjieTable)
 
         // Load the bundled TC→SC table for the "輸出簡體字" toggle; fail safe to an empty
         // (pass-through) table if missing, so the toggle simply leaves text unchanged.
@@ -102,6 +110,8 @@ final class SharedResources {
             }
             cangjieRank = [:]   // native table order
         }
+        // Rebuild the reverse index from whichever table we just loaded.
+        cangjieCodeIndex = CangjieCodeIndex(table: cangjieTable)
     }
 
     private static func loadCangjie(resource: String) -> CangjieTable {
