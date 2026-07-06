@@ -1,0 +1,46 @@
+/* App-specific strings for Yahoo! KeyKey 2. DragonKit's own UI strings live in its own
+   bundle (7 languages) and are not duplicated here. */
+
+/* Sidebar pane title (General). Other panes use DragonKit's built-in titles. */
+"keykey.pane.general" = "General";
+
+/* General pane */
+"keykey.general.input" = "Input";
+"keykey.general.outputSimplified" = "Output Simplified Chinese";
+"keykey.general.fullWidthPunctuation" = "Full-width punctuation";
+"keykey.general.associatedPhrases" = "Associated phrases (聯想)";
+"keykey.general.associationContinuationOnly" = "Show only the continuation in associated phrases";
+"keykey.general.associationContinuationOnlyHint" = "Show 係／心／於 instead of 關係, like the original Yahoo! KeyKey. What you commit is unchanged.";
+"keykey.general.appearance" = "Appearance";
+"keykey.general.candidateFontSize" = "Candidate text size";
+"keykey.general.inputMethod" = "Input Method";
+"keykey.general.cangjieVersion" = "Cangjie version";
+"keykey.general.cangjieV5" = "5th-generation Cangjie";
+"keykey.general.cangjieV3" = "3rd-generation Cangjie (Yahoo KeyKey compatible)";
+"keykey.general.cangjieVersionHint" = "3rd-generation Cangjie uses the original Yahoo! KeyKey code table and candidate order (applied to both Cangjie and Simplex), effective immediately.";
+"keykey.general.language" = "Language";
+
+/* About pane */
+"keykey.about.website" = "Website";
+"keykey.about.support" = "Report an issue on GitHub";
+"keykey.about.origin" = "Homage to the original";
+"keykey.about.languageModel" = "Language model";
+"keykey.about.cangjieTable" = "Cangjie table";
+"keykey.about.hanConversion" = "Han conversion";
+
+/* What's New pane (2.3.0) */
+"keykey.whatsNew.summary" = "This release refreshes KeyKey's settings and app screens, adds Backup & Restore, and lets you switch the app's language on the fly. Your typing and input options are unchanged.";
+"keykey.whatsNew.backup" = "New: Sync & Backup. Back up your KeyKey settings to a folder and restore them later — handy when setting up a new Mac.";
+"keykey.whatsNew.language" = "New: switch the app's language live. Settings, About, and the other screens can now display in English, 繁體中文, 简体中文, 日本語, 한국어, Español, or Français — no restart needed.";
+"keykey.whatsNew.redesign" = "Refreshed the Settings, About, What's New, and Uninstall screens with a cleaner, more native macOS look. Your input options (輸出簡體字, 全形標點, 聯想字詞, candidate text size, Cangjie version) are unchanged and in the same place.";
+
+/* Uninstall pane checklist */
+"keykey.uninstall.item.inputSources" = "Disable Cangjie and Simplex from Input Sources";
+"keykey.uninstall.item.learningAndSettings" = "Delete user-learning data and preferences";
+"keykey.uninstall.item.trash" = "Move Yahoo! KeyKey 2 to the Trash";
+
+/* IMK input-menu app items */
+"keykey.menu.about" = "About Yahoo! KeyKey 2…";
+"keykey.menu.checkForUpdates" = "Check for Updates…";
+"keykey.menu.settings" = "Settings…";
+"keykey.menu.uninstall" = "Uninstall Yahoo! KeyKey 2…";

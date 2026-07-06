@@ -1,6 +1,7 @@
 import Cocoa
 import InputMethodKit
 import KeyKeyEngine
+import DragonKit
 
 @objc(InputController)
 final class InputController: IMKInputController {
@@ -141,18 +142,25 @@ final class InputController: IMKInputController {
 
         // 4. App menu grouping (§5A): About · Check for updates · Settings · — · Uninstall.
         // Quit omitted by design (system-managed IME). All top-level so IMK routes them.
+        // Titles resolve via DragonKit's L() so they follow the picked language; IMK pulls
+        // menu() fresh each time the input menu opens, so no cached menu to rebuild on change.
+        // IMK calls menu() on the main thread, so entering the main actor to call L() is safe.
+        let (aboutTitle, updateTitle, settingsTitle, uninstallTitle) = MainActor.assumeIsolated {
+            (L("keykey.menu.about"), L("keykey.menu.checkForUpdates"),
+             L("keykey.menu.settings"), L("keykey.menu.uninstall"))
+        }
         menu.addItem(.separator())
-        let about = NSMenuItem(title: "關於 Yahoo! KeyKey 2…", action: #selector(openAbout), keyEquivalent: "")
+        let about = NSMenuItem(title: aboutTitle, action: #selector(openAbout), keyEquivalent: "")
         about.target = self
         menu.addItem(about)
-        let update = NSMenuItem(title: "檢查更新…", action: #selector(checkForUpdates), keyEquivalent: "")
+        let update = NSMenuItem(title: updateTitle, action: #selector(checkForUpdates), keyEquivalent: "")
         update.target = self
         menu.addItem(update)
-        let settings = NSMenuItem(title: "設定…", action: #selector(openSettings), keyEquivalent: ",")
+        let settings = NSMenuItem(title: settingsTitle, action: #selector(openSettings), keyEquivalent: ",")
         settings.target = self
         menu.addItem(settings)
         menu.addItem(.separator())
-        let uninstall = NSMenuItem(title: "解除安裝 Yahoo! KeyKey 2…", action: #selector(uninstall), keyEquivalent: "")
+        let uninstall = NSMenuItem(title: uninstallTitle, action: #selector(uninstall), keyEquivalent: "")
         uninstall.target = self
         menu.addItem(uninstall)
         return menu
@@ -184,20 +192,22 @@ final class InputController: IMKInputController {
     @objc private func setCandidateFontSizeMedium() { Preferences.candidateFontSize = 18 }
     @objc private func setCandidateFontSizeLarge() { Preferences.candidateFontSize = 24 }
 
+    // IMK invokes these input-menu selectors on the main thread, so entering the main actor
+    // to reach the (main-actor) shared settings window controller is safe.
     @objc private func checkForUpdates() {
-        Updater.shared.checkForUpdates()
+        MainActor.assumeIsolated { AppMenuController.shared.checkForUpdates() }
     }
 
     @objc private func openAbout() {
-        AboutWindowController.shared.show()
+        MainActor.assumeIsolated { AppMenuController.shared.openAbout() }
     }
 
     @objc private func openSettings() {
-        SettingsWindowController.shared.show()
+        MainActor.assumeIsolated { AppMenuController.shared.openSettings() }
     }
 
     @objc private func uninstall() {
-        Uninstaller.run()
+        MainActor.assumeIsolated { AppMenuController.shared.openUninstall() }
     }
 
     // IMK calls this when the user selects one of our input modes (Info.plist

@@ -4,3 +4,5 @@ Packages/KeyKeyEngine/.build/
 Resources/data.txt
 .lm-build/
 build/
+# Pinned DragonKit checkout (tag v1.2.1); recreated by cloning, not committed.
+vendor/

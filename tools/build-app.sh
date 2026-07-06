@@ -31,6 +31,10 @@ MODULE_DIR="$BUILD/modules"
 EXECUTABLE_NAME="YahooKeyKey2"
 ENTITLEMENTS="$APP_SRC/YahooKeyKey2.entitlements"
 SPARKLE_CACHE="$ROOT/build/sparkle"
+# Pinned DragonKit checkout (tag v1.2.1). Cloned under vendor/ (see the adoption notes); its
+# SwiftPM build produces the DragonKit / DragonKitUpdates modules and the DragonKit resource
+# bundle. Never copied into App/ sources.
+KIT_DIR="$ROOT/vendor/dragon-kit"
 
 SDK="$(xcrun --show-sdk-path)"
 # Apple Silicon only: pin the target to arm64 regardless of the build host's
@@ -62,17 +66,44 @@ swiftc \
   -swift-version 5 \
   "$ENGINE_SRC"/*.swift
 
-echo "==> Compiling App against KeyKeyEngine"
+echo "==> Building DragonKit (SwiftPM, release) in pinned checkout"
+# swift build produces the module .swiftmodules, the DragonKit resource bundle
+# (DragonKit_DragonKit.bundle), and resolves Sparkle. It emits per-module object files (not a
+# .a), so archive them into static libraries the app's swiftc link can consume. Uses the
+# package's own tools version (6.1) — a separate compilation from the app's -swift-version 5.
+# Clone the pinned tag on first use (e.g. a fresh CI checkout); vendor/ is gitignored, never
+# committed. Idempotent: an existing checkout (local dev) is reused as-is.
+DRAGONKIT_TAG="v1.2.1"
+if [ ! -d "$KIT_DIR" ]; then
+  echo "==> Cloning DragonKit $DRAGONKIT_TAG into vendor/ (not committed)"
+  git clone --depth 1 --branch "$DRAGONKIT_TAG" https://github.com/teddychan/dragon-kit "$KIT_DIR"
+fi
+( cd "$KIT_DIR" && swift build -c release )
+KIT_REL="$(cd "$KIT_DIR" && swift build -c release --show-bin-path)"
+KIT_MODULES="$KIT_REL/Modules"
+KIT_BUNDLE="$KIT_REL/DragonKit_DragonKit.bundle"
+
+echo "==> Archiving DragonKit object files into static libs"
+libtool -static -o "$MODULE_DIR/libDragonKit.a" $(find -L "$KIT_REL/DragonKit.build" -name '*.o')
+libtool -static -o "$MODULE_DIR/libDragonKitUpdates.a" $(find -L "$KIT_REL/DragonKitUpdates.build" -name '*.o')
+
+echo "==> Compiling App against KeyKeyEngine + DragonKit"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
+# DragonKitUpdates imports Sparkle; the app already vendors Sparkle.framework (2.9.0) via
+# fetch-sparkle.sh, so both the app and DragonKitUpdates link that ONE framework — no second
+# Sparkle copy. -I picks up the DragonKit/DragonKitUpdates .swiftmodules; SwiftUI/AppKit come
+# from the SDK.
 swiftc \
   -o "$APP/Contents/MacOS/$EXECUTABLE_NAME" \
   -sdk "$SDK" -target "$TARGET" \
   -swift-version 5 \
   -I "$MODULE_DIR" -L "$MODULE_DIR" -lKeyKeyEngine \
+  -I "$KIT_MODULES" \
+  -lDragonKit -lDragonKitUpdates \
   -framework InputMethodKit -framework Cocoa \
   -F "$SPARKLE_CACHE" -framework Sparkle \
   -Xlinker -rpath -Xlinker @executable_path/../Frameworks \
-  "$APP_SRC"/main.swift "$APP_SRC"/InputController.swift "$APP_SRC"/SharedResources.swift "$APP_SRC"/InputEngine.swift "$APP_SRC"/InputMethodModule.swift "$APP_SRC"/CandidateWindow.swift "$APP_SRC"/Preferences.swift "$APP_SRC"/AboutWindow.swift "$APP_SRC"/SettingsWindow.swift "$APP_SRC"/Uninstaller.swift "$APP_SRC"/Updater.swift
+  "$APP_SRC"/main.swift "$APP_SRC"/InputController.swift "$APP_SRC"/SharedResources.swift "$APP_SRC"/InputEngine.swift "$APP_SRC"/InputMethodModule.swift "$APP_SRC"/CandidateWindow.swift "$APP_SRC"/Preferences.swift "$APP_SRC"/SettingsModel.swift "$APP_SRC"/GeneralPane.swift "$APP_SRC"/AboutConfig.swift "$APP_SRC"/WhatsNewConfig.swift "$APP_SRC"/AppMenuController.swift
 
 echo "==> Assembling Info.plist (resolving \${EXECUTABLE_NAME})"
 sed "s/\${EXECUTABLE_NAME}/$EXECUTABLE_NAME/g" "$APP_SRC/Info.plist" > "$APP/Contents/Info.plist"
@@ -128,6 +159,16 @@ echo "==> Copying localized strings (.lproj)"
 for lproj in "$APP_SRC"/*.lproj; do
   [ -d "$lproj" ] && cp -R "$lproj" "$APP/Contents/Resources/"
 done
+
+echo "==> Copying DragonKit resource bundle (DragonKit_DragonKit.bundle)"
+# DragonKit resolves its own localized strings from Contents/Resources/DragonKit_DragonKit.bundle
+# at runtime (see DragonKitResources). swift build produced it in the pinned checkout's bin dir.
+if [ ! -d "$KIT_BUNDLE" ]; then
+  echo "ERROR: DragonKit_DragonKit.bundle missing at $KIT_BUNDLE" >&2
+  exit 1
+fi
+rm -rf "$APP/Contents/Resources/DragonKit_DragonKit.bundle"
+cp -R "$KIT_BUNDLE" "$APP/Contents/Resources/DragonKit_DragonKit.bundle"
 
 if [[ "${KEYKEY_DEBUG_ID:-}" == "1" ]]; then
   echo "==> Applying debug identity ($DEBUG_BUNDLE_ID / \"$APP_BUNDLE_NAME\")"
