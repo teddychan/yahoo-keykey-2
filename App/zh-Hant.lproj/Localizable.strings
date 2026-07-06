@@ -20,10 +20,6 @@
 "keykey.general.cangjieV5" = "五代倉頡";
 "keykey.general.cangjieV3" = "三代倉頡（Yahoo KeyKey 相容）";
 "keykey.general.cangjieVersionHint" = "「三代倉頡」使用 Yahoo! KeyKey 原版的拆碼與候選字順序（同時套用到倉頡與速成），立即生效。";
-"keykey.general.english" = "英文輸入";
-"keykey.general.englishToggleShortcut" = "中／英 切換快速鍵";
-"keykey.general.englishToggleShortcutHint" = "點一下欄位後按下按鍵即可設定；預設為右 Shift（單按）。切換到英文模式後可直接輸入英數字，不需切換輸入法。";
-"keykey.general.reset" = "重設";
 "keykey.general.language" = "語言";
 
 /* About pane */

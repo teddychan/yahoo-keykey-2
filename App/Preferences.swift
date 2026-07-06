@@ -19,7 +19,6 @@ enum Preferences {
         static let cangjieVersion = "cangjieVersion"
         static let associationContinuationOnly = "associationContinuationOnly"
         static let codeHintEnabled = "codeHintEnabled"
-        static let englishToggleShortcut = "englishToggleShortcut"
     }
 
     static let minFontSize: CGFloat = 14
@@ -84,15 +83,5 @@ enum Preferences {
     static var codeHintEnabled: Bool {
         get { UserDefaults.standard.bool(forKey: Key.codeHintEnabled) }
         set { UserDefaults.standard.set(newValue, forKey: Key.codeHintEnabled) }
-    }
-
-    // The user-chosen shortcut that toggles 中/英 (quick-English) mode. Falls back to the
-    // classic KeyKey default (right-Shift tap) when unset or unparseable.
-    static var englishToggleShortcut: ShortcutSpec {
-        get {
-            UserDefaults.standard.string(forKey: Key.englishToggleShortcut)
-                .flatMap(ShortcutSpec.init(serialized:)) ?? .default
-        }
-        set { UserDefaults.standard.set(newValue.serialized, forKey: Key.englishToggleShortcut) }
     }
 }

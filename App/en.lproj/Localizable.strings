@@ -20,10 +20,6 @@
 "keykey.general.cangjieV5" = "5th-generation Cangjie";
 "keykey.general.cangjieV3" = "3rd-generation Cangjie (Yahoo KeyKey compatible)";
 "keykey.general.cangjieVersionHint" = "3rd-generation Cangjie uses the original Yahoo! KeyKey code table and candidate order (applied to both Cangjie and Simplex), effective immediately.";
-"keykey.general.english" = "English input";
-"keykey.general.englishToggleShortcut" = "中/英 toggle shortcut";
-"keykey.general.englishToggleShortcutHint" = "Click the field and press a key to set it; the default is right Shift (tap). In English mode you type letters and numbers directly, without switching input methods.";
-"keykey.general.reset" = "Reset";
 "keykey.general.language" = "Language";
 
 /* About pane */

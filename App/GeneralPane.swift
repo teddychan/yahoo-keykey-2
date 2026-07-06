@@ -52,17 +52,6 @@ private struct GeneralPaneView: View {
                 .dragonAnnotation(LocalizedStringKey(L("keykey.general.cangjieVersionHint")))
             }
 
-            DragonSection(LocalizedStringKey(L("keykey.general.english"))) {
-                HStack {
-                    Text(L("keykey.general.englishToggleShortcut"))
-                    Spacer()
-                    ShortcutRecorderView(spec: $model.englishToggleShortcut)
-                        .frame(width: 160, height: 24)
-                    Button(L("keykey.general.reset")) { model.resetEnglishToggleShortcut() }
-                }
-                .dragonAnnotation(LocalizedStringKey(L("keykey.general.englishToggleShortcutHint")))
-            }
-
             DragonSection(LocalizedStringKey(L("keykey.general.language"))) {
                 LanguagePicker()
             }

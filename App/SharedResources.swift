@@ -27,10 +27,6 @@ final class SharedResources {
     // One shared user-learning store across all controllers.
     let userFreq: UserFrequency
 
-    // 中/英 (quick-English) mode, shared across every controller instance (IMK makes one per
-    // client app) so the toggle is global. Deliberately NOT persisted — each launch starts 中.
-    var englishMode = false
-
     private init() {
         // Read data.txt to a String ONCE, then build both the LM and the associated
         // phrases from that same string (the previous code parsed data.txt twice).
