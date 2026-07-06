@@ -71,10 +71,12 @@ echo "==> Building DragonKit (SwiftPM, release) in pinned checkout"
 # (DragonKit_DragonKit.bundle), and resolves Sparkle. It emits per-module object files (not a
 # .a), so archive them into static libraries the app's swiftc link can consume. Uses the
 # package's own tools version (6.1) — a separate compilation from the app's -swift-version 5.
+# Clone the pinned tag on first use (e.g. a fresh CI checkout); vendor/ is gitignored, never
+# committed. Idempotent: an existing checkout (local dev) is reused as-is.
+DRAGONKIT_TAG="v1.2.1"
 if [ ! -d "$KIT_DIR" ]; then
-  echo "ERROR: DragonKit checkout missing at $KIT_DIR" >&2
-  echo "       Clone it: git clone --depth 1 --branch v1.2.1 https://github.com/teddychan/dragon-kit \"$KIT_DIR\"" >&2
-  exit 1
+  echo "==> Cloning DragonKit $DRAGONKIT_TAG into vendor/ (not committed)"
+  git clone --depth 1 --branch "$DRAGONKIT_TAG" https://github.com/teddychan/dragon-kit "$KIT_DIR"
 fi
 ( cd "$KIT_DIR" && swift build -c release )
 KIT_REL="$(cd "$KIT_DIR" && swift build -c release --show-bin-path)"
