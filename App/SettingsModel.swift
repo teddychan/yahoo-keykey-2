@@ -41,17 +41,27 @@ final class SettingsModel {
         set { Preferences.associationContinuationOnly = newValue }
     }
 
+    // 反查/拆碼提示: show each single character's 倉頡 code in the candidate window.
+    var codeHint: Bool {
+        get { Preferences.codeHintEnabled }
+        set { Preferences.codeHintEnabled = newValue }
+    }
+
     var candidateFontSize: Double {
         get { Double(Preferences.candidateFontSize) }
         set { Preferences.candidateFontSize = CGFloat(newValue) }
     }
 
-    // 倉頡版本 (Cangjie table). Setting it reloads the shared tables and notifies the live
-    // engines — mirrors the old SettingsWindow popup handler.
-    var cangjieVersion: CangjieVersion {
-        get { Preferences.cangjieVersion }
-        set {
-            Preferences.cangjieVersion = newValue
+    // 倉頡版本 (Cangjie table). This is a STORED, observation-tracked property (seeded from
+    // Preferences at init) — NOT a computed forwarder like the toggles above. A menu-style
+    // Picker bound to an @Observable *computed* property silently reverts its selection (the
+    // getter never registers an observation dependency, so SwiftUI drops the change); a stored
+    // property is tracked, so the Picker sticks. `didSet` writes through to Preferences (the
+    // engine reads that directly) and reloads the shared tables + live engines.
+    var cangjieVersion: CangjieVersion = Preferences.cangjieVersion {
+        didSet {
+            guard cangjieVersion != oldValue else { return }
+            Preferences.cangjieVersion = cangjieVersion
             SharedResources.shared.reloadCangjieTables()
         }
     }

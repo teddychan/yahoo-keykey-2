@@ -2,6 +2,20 @@
 
 A plain-language list of changes in each version, newest first.
 
+## 2.4.0
+
+- **New: 反查／拆碼提示 (Cangjie code hint).** Turn on **反查提示** — from the input menu or
+  **設定… ▸ 一般** — to show each character's 倉頡 code beside it in the candidate list, e.g.
+  倉 → 人口竹口. It's a handy way to learn or double-check how a character breaks down,
+  especially in **速成** (where you type only the first and last radical) and in **聯想**
+  suggestions. Off by default; turn it on when you want it.
+- **New: 臨時英數 (quick English).** Hold **Shift** and press a letter to type that English
+  letter directly, the classic Yahoo! KeyKey way — no need to switch input source. The case
+  follows **Caps Lock** (Shift is only the trigger, so it's lowercase with Caps Lock off,
+  uppercase with it on); anything you type without Shift stays Chinese.
+- **Fixed: the 倉頡版本 choice now saves.** Switching between **五代** and **三代** in **設定…**
+  could revert instead of sticking. Your selection is now kept correctly.
+
 ## 2.3.0
 
 - **New: Sync & Backup.** A new screen in **設定…** lets you back up your Yahoo! KeyKey 2 settings to a folder and restore them later — handy when setting up a new Mac.

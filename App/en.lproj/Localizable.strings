@@ -11,6 +11,8 @@
 "keykey.general.associatedPhrases" = "Associated phrases (聯想)";
 "keykey.general.associationContinuationOnly" = "Show only the continuation in associated phrases";
 "keykey.general.associationContinuationOnlyHint" = "Show 係／心／於 instead of 關係, like the original Yahoo! KeyKey. What you commit is unchanged.";
+"keykey.general.codeHint" = "Show Cangjie code hint";
+"keykey.general.codeHintHint" = "Show each character's Cangjie code beside the candidate (e.g. 倉 → 人口竹口) to help you learn and verify its decomposition.";
 "keykey.general.appearance" = "Appearance";
 "keykey.general.candidateFontSize" = "Candidate text size";
 "keykey.general.inputMethod" = "Input Method";
@@ -28,11 +30,11 @@
 "keykey.about.cangjieTable" = "Cangjie table";
 "keykey.about.hanConversion" = "Han conversion";
 
-/* What's New pane (2.3.0) */
-"keykey.whatsNew.summary" = "This release refreshes KeyKey's settings and app screens, adds Backup & Restore, and lets you switch the app's language on the fly. Your typing and input options are unchanged.";
-"keykey.whatsNew.backup" = "New: Sync & Backup. Back up your KeyKey settings to a folder and restore them later — handy when setting up a new Mac.";
-"keykey.whatsNew.language" = "New: switch the app's language live. Settings, About, and the other screens can now display in English, 繁體中文, 简体中文, 日本語, 한국어, Español, or Français — no restart needed.";
-"keykey.whatsNew.redesign" = "Refreshed the Settings, About, What's New, and Uninstall screens with a cleaner, more native macOS look. Your input options (輸出簡體字, 全形標點, 聯想字詞, candidate text size, Cangjie version) are unchanged and in the same place.";
+/* What's New pane (2.4.0) */
+"keykey.whatsNew.summary" = "This release adds a Cangjie code hint (反查／拆碼提示) and quick English (Shift + letter), and fixes the Cangjie-version setting not saving.";
+"keykey.whatsNew.codeHint" = "New: Cangjie code hint (反查／拆碼提示). Shows each character's Cangjie code beside the candidate (e.g. 倉 → 人口竹口) so you can learn or verify how it breaks down — handy in 速成 and 聯想. Off by default.";
+"keykey.whatsNew.quickEnglish" = "New: quick English (臨時英數). Hold Shift and press a letter to type that English letter directly, like the original Yahoo! KeyKey — no need to switch input source. Case follows Caps Lock; anything typed without Shift stays Chinese.";
+"keykey.whatsNew.cangjieVersionFix" = "Fixed: the 倉頡版本 (5th/3rd-generation) choice in Settings now saves correctly instead of reverting.";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "Disable Cangjie and Simplex from Input Sources";

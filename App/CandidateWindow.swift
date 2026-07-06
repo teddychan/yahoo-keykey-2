@@ -104,10 +104,15 @@ final class CandidateWindow {
     // `pageCandidates` is the already-sliced set for the current page (≤9), each rendered as a
     // numbered two-column row. `fontSize` is read live from Preferences by the caller so size
     // changes apply without restarting the IME.
-    func show(_ pageCandidates: [String], page: Int, pageCount: Int, fontSize: CGFloat, near caret: NSRect) {
+    // `hints`, when non-empty, is parallel to `pageCandidates`; a non-nil entry is drawn as a
+    // dimmed 倉頡-code hint (反查/拆碼提示) after that row's glyph. An empty array (the default)
+    // renders exactly as before.
+    func show(_ pageCandidates: [String], page: Int, pageCount: Int, fontSize: CGFloat,
+              hints: [String?] = [], near caret: NSRect) {
         let glyphFont = NSFont.systemFont(ofSize: fontSize)
         let numFont = NSFont.monospacedDigitSystemFont(ofSize: Style.numberSize(fontSize), weight: .regular)
         let chromeFont = NSFont.systemFont(ofSize: Style.chromeSize(fontSize), weight: .medium)
+        let hintFont = NSFont.systemFont(ofSize: Style.chromeSize(fontSize), weight: .regular)
         for f in [footerArrow, pageLabel] { f.font = chromeFont }
 
         let para = NSMutableParagraphStyle()
@@ -124,6 +129,12 @@ final class CandidateWindow {
             out.append(NSAttributedString(
                 string: cand,
                 attributes: [.font: glyphFont, .foregroundColor: NSColor.labelColor]))
+            // Optional dimmed 倉頡-code hint after the glyph (反查/拆碼提示).
+            if i < hints.count, let hint = hints[i], !hint.isEmpty {
+                out.append(NSAttributedString(
+                    string: "  \(hint)",
+                    attributes: [.font: hintFont, .foregroundColor: NSColor.tertiaryLabelColor]))
+            }
         }
         out.addAttribute(.paragraphStyle, value: para, range: NSRange(location: 0, length: out.length))
         candLabel.attributedStringValue = out
