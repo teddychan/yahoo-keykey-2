@@ -47,9 +47,17 @@ final class SettingsModel {
         set { Preferences.codeHintEnabled = newValue }
     }
 
-    var candidateFontSize: Double {
-        get { Double(Preferences.candidateFontSize) }
-        set { Preferences.candidateFontSize = CGFloat(newValue) }
+    // Candidate text size. Like `cangjieVersion` below, this is a STORED, observation-tracked
+    // property (seeded from Preferences at init) — NOT a computed forwarder. An @Observable
+    // *computed* property bound to a Slider never registers an observation dependency in its
+    // getter, so SwiftUI drops the change: the slider (and its "N pt" label) appear frozen while
+    // dragging. A stored property is tracked, so the value updates live. `didSet` writes through
+    // to Preferences, which the candidate window reads directly on the next composition.
+    var candidateFontSize: Double = Double(Preferences.candidateFontSize) {
+        didSet {
+            guard candidateFontSize != oldValue else { return }
+            Preferences.candidateFontSize = CGFloat(candidateFontSize)
+        }
     }
 
     // 倉頡版本 (Cangjie table). This is a STORED, observation-tracked property (seeded from
@@ -68,4 +76,14 @@ final class SettingsModel {
 
     var minFontSize: Double { Double(Preferences.minFontSize) }
     var maxFontSize: Double { Double(Preferences.maxFontSize) }
+
+    // Re-seed the observation-tracked mirror properties (currently just candidateFontSize) from
+    // the live Preferences. The computed forwarders above re-read Preferences on every access, so
+    // they always reflect changes made elsewhere; a stored property does not. Since the candidate
+    // size is ALSO settable outside Settings — the menu-bar 候選字大小 (小/中/大) items write
+    // Preferences directly — call this before showing the window so the slider matches the quick
+    // menu (the 2.0.2 behaviour). No-op when already in sync (the didSet guard skips the write).
+    func syncFromPreferences() {
+        candidateFontSize = Double(Preferences.candidateFontSize)
+    }
 }
