@@ -137,6 +137,13 @@ for f in cangjie-yahoo.txt simplex-yahoo.txt; do
   cp "$ROOT/Resources/$f" "$APP/Contents/Resources/$f"
 done
 
+echo "==> Copying bundled Pinyin map (pinyin-zhuyin.txt)"
+if [ ! -f "$ROOT/Resources/pinyin-zhuyin.txt" ]; then
+  echo "ERROR: Resources/pinyin-zhuyin.txt missing; run tools/build-pinyin-map.py first" >&2
+  exit 1
+fi
+cp "$ROOT/Resources/pinyin-zhuyin.txt" "$APP/Contents/Resources/pinyin-zhuyin.txt"
+
 echo "==> Copying bundled Han-conversion table (opencc-TSCharacters.txt)"
 if [ ! -f "$ROOT/Packages/KeyKeyEngine/Resources/opencc-TSCharacters.txt" ]; then
   echo "ERROR: Packages/KeyKeyEngine/Resources/opencc-TSCharacters.txt missing" >&2

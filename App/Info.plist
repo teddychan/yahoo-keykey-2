@@ -64,11 +64,31 @@
 				<key>tsInputModeScriptKey</key>
 				<string>smTradChinese</string>
 			</dict>
+			<key>com.dragonapp.inputmethod.yahoo-keykey.Pinyin</key>
+			<dict>
+				<key>TISIntendedLanguage</key>
+				<string>zh-Hant</string>
+				<key>tsInputModeAlternateMenuIconFileKey</key>
+				<string>YahooKeyKey.tiff</string>
+				<key>tsInputModeCharacterRepertoireKey</key>
+				<array>
+					<string>Hant</string>
+				</array>
+				<key>tsInputModeIsVisibleKey</key>
+				<true/>
+				<key>tsInputModeMenuIconFileKey</key>
+				<string>YahooKeyKey.tiff</string>
+				<key>tsInputModePaletteIconFileKey</key>
+				<string>YahooKeyKey.tiff</string>
+				<key>tsInputModeScriptKey</key>
+				<string>smTradChinese</string>
+			</dict>
 		</dict>
 		<key>tsVisibleInputModeOrderedArrayKey</key>
 		<array>
 			<string>com.dragonapp.inputmethod.yahoo-keykey.Cangjie</string>
 			<string>com.dragonapp.inputmethod.yahoo-keykey.Simplex</string>
+			<string>com.dragonapp.inputmethod.yahoo-keykey.Pinyin</string>
 		</array>
 	</dict>
 	<key>InputMethodConnectionName</key>
