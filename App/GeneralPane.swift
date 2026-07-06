@@ -25,6 +25,8 @@ private struct GeneralPaneView: View {
                 Toggle(L("keykey.general.associatedPhrases"), isOn: $model.associatedPhrases)
                 Toggle(L("keykey.general.associationContinuationOnly"), isOn: $model.associationContinuationOnly)
                     .dragonAnnotation(LocalizedStringKey(L("keykey.general.associationContinuationOnlyHint")))
+                Toggle(L("keykey.general.codeHint"), isOn: $model.codeHint)
+                    .dragonAnnotation(LocalizedStringKey(L("keykey.general.codeHintHint")))
             }
 
             DragonSection(LocalizedStringKey(L("keykey.general.appearance"))) {

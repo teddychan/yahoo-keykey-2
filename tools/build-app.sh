@@ -107,6 +107,11 @@ swiftc \
 
 echo "==> Assembling Info.plist (resolving \${EXECUTABLE_NAME})"
 sed "s/\${EXECUTABLE_NAME}/$EXECUTABLE_NAME/g" "$APP_SRC/Info.plist" > "$APP/Contents/Info.plist"
+# Stamp the build number from the git commit count (shared Dragon-App convention). The committed
+# CFBundleVersion is an inert placeholder; the real, monotonically-increasing number is set here so
+# About shows "<short> (<build>)" and each build differs. Falls back to 1 outside a git checkout.
+BUILD_NUM="$(git -C "$ROOT" rev-list --count HEAD 2>/dev/null || echo 1)"
+/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUM" "$APP/Contents/Info.plist"
 plutil -lint "$APP/Contents/Info.plist"
 
 echo "==> Copying bundled LM (data.txt)"

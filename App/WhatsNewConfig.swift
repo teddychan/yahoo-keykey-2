@@ -1,23 +1,23 @@
 import Foundation
 import DragonKit
 
-// "What's New" content for the current release (2.3.0), mirroring CHANGELOG.md's top entry:
-// refreshed settings/app screens (built on the shared DragonKit UI), a new Sync & Backup
-// screen, and live in-app language switching.
+// "What's New" content for the current release (2.4.0), mirroring CHANGELOG.md's top entry:
+// the 反查／拆碼提示 (Cangjie code hint) and 臨時英數 (quick English) features, plus the
+// 倉頡版本-save fix.
 enum WhatsNewConfig {
     @MainActor
     static var content: WhatsNewContent {
         WhatsNewContent(
-            version: "2.3.0",
+            version: "2.4.0",
             date: "2026-07-06",
             summary: L("keykey.whatsNew.summary"),
             sections: [
                 ChangeSection(kind: .added, entries: [
-                    L("keykey.whatsNew.backup"),
-                    L("keykey.whatsNew.language"),
+                    L("keykey.whatsNew.codeHint"),
+                    L("keykey.whatsNew.quickEnglish"),
                 ]),
-                ChangeSection(kind: .changed, entries: [
-                    L("keykey.whatsNew.redesign"),
+                ChangeSection(kind: .fixed, entries: [
+                    L("keykey.whatsNew.cangjieVersionFix"),
                 ]),
             ]
         )

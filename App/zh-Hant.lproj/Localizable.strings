@@ -11,6 +11,8 @@
 "keykey.general.associatedPhrases" = "聯想字詞";
 "keykey.general.associationContinuationOnly" = "聯想只顯示接續字";
 "keykey.general.associationContinuationOnlyHint" = "顯示「係／心／於」而非「關係」，如原版 Yahoo! KeyKey。所提交的字不變。";
+"keykey.general.codeHint" = "反查提示";
+"keykey.general.codeHintHint" = "在候選字旁顯示該字的倉頡拆碼（例：倉 → 人口竹口），方便學習與核對。";
 "keykey.general.appearance" = "外觀";
 "keykey.general.candidateFontSize" = "候選字大小";
 "keykey.general.inputMethod" = "輸入方式";
@@ -28,11 +30,11 @@
 "keykey.about.cangjieTable" = "倉頡碼表";
 "keykey.about.hanConversion" = "漢字轉換";
 
-/* What's New pane (2.3.0) */
-"keykey.whatsNew.summary" = "本版更新了設定與各項介面、新增「同步與備份」，並可即時切換 App 顯示語言。輸入行為與選項維持不變。";
-"keykey.whatsNew.backup" = "新增：同步與備份。可將 KeyKey 的設定備份到資料夾，日後再還原 — 換新 Mac 時特別方便。";
-"keykey.whatsNew.language" = "新增：即時切換 App 語言。設定、關於等畫面現可顯示為英文、繁體中文、简体中文、日本語、한국어、Español 或 Français — 無需重新啟動。";
-"keykey.whatsNew.redesign" = "重新設計了設定、關於、新功能與解除安裝畫面，介面更簡潔、更貼近 macOS 原生風格。輸入選項（輸出簡體字、全形標點、聯想字詞、候選字大小、倉頡版本）維持不變，位置照舊。";
+/* What's New pane (2.4.0) */
+"keykey.whatsNew.summary" = "本版新增「反查／拆碼提示」與「臨時英數（Shift＋字母）」，並修正倉頡版本設定無法儲存的問題。";
+"keykey.whatsNew.codeHint" = "新增：反查／拆碼提示。開啟後會在候選字旁顯示該字的倉頡拆碼（例：倉 → 人口竹口），方便學習與核對，速成與聯想時特別實用。預設關閉。";
+"keykey.whatsNew.quickEnglish" = "新增：臨時英數。按住 Shift 再按字母即可直接輸入英文字母，如原版 Yahoo! KeyKey，不需切換輸入來源。大小寫依 Caps Lock 而定；未按 Shift 時仍是中文。";
+"keykey.whatsNew.cangjieVersionFix" = "修正：倉頡版本（五代／三代）在設定中的選擇現在會正確儲存，不再還原。";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "從輸入來源中停用倉頡與速成";

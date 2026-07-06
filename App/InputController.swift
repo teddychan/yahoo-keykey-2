@@ -116,6 +116,11 @@ final class InputController: IMKInputController {
         associate.state = Preferences.associatedPhrasesEnabled ? .on : .off
         menu.addItem(associate)
 
+        let codeHint = NSMenuItem(title: "反查提示", action: #selector(toggleCodeHint), keyEquivalent: "")
+        codeHint.target = self
+        codeHint.state = Preferences.codeHintEnabled ? .on : .off
+        menu.addItem(codeHint)
+
         // 2. Candidate-window font size (候選字大小). The macOS input menu routes only
         // TOP-LEVEL item selections back to the controller — items nested in a submenu
         // are shown but never fire — so the sizes are flat items under a disabled
@@ -178,6 +183,10 @@ final class InputController: IMKInputController {
         Preferences.outputSimplifiedEnabled.toggle()
     }
 
+    @objc private func toggleCodeHint() {
+        Preferences.codeHintEnabled.toggle()
+    }
+
     // Named candidate-window font sizes (display title → point size → menu action),
     // all within the Preferences clamp (14–28); the default 18 is "中". Each size has
     // its own no-argument selector so it dispatches exactly like the toggles above —
@@ -232,6 +241,25 @@ final class InputController: IMKInputController {
 
     override func handle(_ event: NSEvent!, client sender: Any!) -> Bool {
         guard let event, event.type == .keyDown, let client = sender as? IMKTextInput else { return false }
+
+        // 臨時英數 (quick English), classic Yahoo! KeyKey style: Shift + a letter (and no other
+        // modifier) emits that English letter directly. Case follows CAPS LOCK, not Shift — Shift
+        // is only the trigger — so it's lowercase with Caps off, uppercase with Caps on. Any
+        // active composition/association is committed first; the next unshifted key resumes 中文.
+        // ⌘/⌃/⌥ combinations are left alone so app shortcuts (⌘⇧S, etc.) still work.
+        if event.modifierFlags.contains(.shift),
+           event.modifierFlags.intersection([.control, .option, .command]).isEmpty,
+           let raw = event.charactersIgnoringModifiers?.first, raw.isASCII, raw.isLetter {
+            if !engine.composingText.isEmpty {
+                _ = commitCurrent(to: client)
+            } else if !associations.isEmpty {
+                clearAssociations()
+            }
+            let caps = event.modifierFlags.contains(.capsLock)
+            let letter = caps ? String(raw).uppercased() : String(raw).lowercased()
+            client.insertText(letter, replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
+            return true
+        }
 
         // Association mode (聯想): after committing a single character we offer follow-on phrases.
         // The engine has no active composition here. Digits pick a phrase; arrows page; Esc
@@ -435,14 +463,28 @@ final class InputController: IMKInputController {
             // character (係／心／於) instead of the whole word (關係) — the classic Yahoo display.
             // Selection still indexes `associations` (unchanged) and inserts the dropFirst suffix.
             let continuationOnly = !associations.isEmpty && Preferences.associationContinuationOnly
+            let slice = Array(cands[start..<min(start + size, cands.count)])
+            // The string actually shown for each row (continuation-only drops the leading char).
+            let shown = slice.map { continuationOnly ? String($0.dropFirst()) : $0 }
             // Convert only the displayed strings (WYSIWYG); selection still indexes `cands`.
-            let page = cands[start..<min(start + size, cands.count)].map { item -> String in
-                applyHanConvert(continuationOnly ? String(item.dropFirst()) : item)
+            let page = shown.map { applyHanConvert($0) }
+            // 反查/拆碼提示: the 倉頡 code of each single-character row, from the traditional
+            // (pre-conversion) glyph so it matches the code you'd actually type. Whole-word 聯想
+            // rows get no hint. Empty array when the feature is off → unchanged rendering.
+            let hints: [String?]
+            if Preferences.codeHintEnabled {
+                let codeIndex = SharedResources.shared.cangjieCodeIndex
+                hints = shown.map { s -> String? in
+                    guard s.count == 1, let ch = s.first else { return nil }
+                    return codeIndex.codeGlyphs(for: ch)
+                }
+            } else {
+                hints = []
             }
             var rect = NSRect.zero
             client.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
             candidateWindow.show(page, page: candidatePage, pageCount: pageCount,
-                                 fontSize: Preferences.candidateFontSize, near: rect)
+                                 fontSize: Preferences.candidateFontSize, hints: hints, near: rect)
         }
     }
 }
