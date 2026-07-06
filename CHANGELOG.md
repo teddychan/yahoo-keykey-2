@@ -2,6 +2,14 @@
 
 A plain-language list of changes in each version, newest first.
 
+## 2.4.1
+
+- **Changed: clearer "already up to date" message.** When you check for updates and you're
+  already on the latest version, the confirmation dialog now reads more naturally.
+- **Changed: About now shows the build time.** The version line in **About** now reads like
+  `v2.4.1 (24) · 2026-Jul-06 13:34:56 UTC`, adding the exact UTC build time alongside the
+  version and build number.
+
 ## 2.4.0
 
 - **New: 反查／拆碼提示 (Cangjie code hint).** Turn on **反查提示** — from the input menu or

@@ -9,9 +9,7 @@ enum AboutConfig {
     static let appName = "Yahoo! KeyKey 2" + (isDebugBuild ? " Debug" : "")
 
     static var versionString: String {
-        let short = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "2.2.0"
-        let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "1"
-        return "\(short) (\(build))" + (isDebugBuild ? " Debug" : "")
+        return DragonAbout.versionString() + (isDebugBuild ? " Debug" : "")
     }
 
     @MainActor
