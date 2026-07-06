@@ -83,22 +83,26 @@ final class AppMenuController {
 
     func openSettings() {
         selection.paneID = "general"
+        model.syncFromPreferences()
         settingsController.show()
     }
 
     func openAbout() {
         selection.paneID = "about"
+        model.syncFromPreferences()
         settingsController.show()
     }
 
     func checkForUpdates() {
         selection.paneID = "updates"
+        model.syncFromPreferences()
         settingsController.show()
         updater.checkForUpdates()
     }
 
     func openUninstall() {
         selection.paneID = "uninstall"
+        model.syncFromPreferences()
         settingsController.show()
     }
 

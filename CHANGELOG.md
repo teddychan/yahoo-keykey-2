@@ -2,6 +2,13 @@
 
 A plain-language list of changes in each version, newest first.
 
+## 2.5.0
+
+- **Fixed: the candidate text size slider now updates as you drag.** In **設定… ▸ 一般**,
+  dragging the **候選字大小 (Candidate text size)** slider left the shown value (e.g. `19 pt`)
+  and the slider stuck in place, even though the size did change. The slider and its label now
+  track your dragging live.
+
 ## 2.4.1
 
 - **Changed: clearer "already up to date" message.** When you check for updates and you're
