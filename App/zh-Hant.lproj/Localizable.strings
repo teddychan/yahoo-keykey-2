@@ -28,10 +28,11 @@
 "keykey.about.cangjieTable" = "倉頡碼表";
 "keykey.about.hanConversion" = "漢字轉換";
 
-/* What's New pane (2.2.0) */
-"keykey.whatsNew.summary" = "本版新增三代倉頡的 z 碼標點，以及聯想只顯示接續字的選項。";
-"keykey.whatsNew.zcode" = "新增：三代倉頡的 z 碼標點。在「三代倉頡（Yahoo KeyKey 相容）」模式，現在可以用經典的 Yahoo z 碼輸入標點，例如 zxcd → 「、zxce → 」、zxab → ，、zxbe → （。這些原本就在 Yahoo 碼表中，現已重新提供。";
-"keykey.whatsNew.continuationOnly" = "新增：聯想只顯示接續字選項。「設定 ▸ 一般」新增一個選項，可讓聯想視窗只顯示所輸入字之後的接續字 — 例如輸入「關」後顯示 係／心／於，而非整個詞 關係／關心／關於，如經典的 Yahoo! KeyKey。預設關閉；所提交的字不變。";
+/* What's New pane (2.3.0) */
+"keykey.whatsNew.summary" = "本版更新了設定與各項介面、新增「同步與備份」，並可即時切換 App 顯示語言。輸入行為與選項維持不變。";
+"keykey.whatsNew.backup" = "新增：同步與備份。可將 KeyKey 的設定備份到資料夾，日後再還原 — 換新 Mac 時特別方便。";
+"keykey.whatsNew.language" = "新增：即時切換 App 語言。設定、關於等畫面現可顯示為英文、繁體中文、简体中文、日本語、한국어、Español 或 Français — 無需重新啟動。";
+"keykey.whatsNew.redesign" = "重新設計了設定、關於、新功能與解除安裝畫面，介面更簡潔、更貼近 macOS 原生風格。輸入選項（輸出簡體字、全形標點、聯想字詞、候選字大小、倉頡版本）維持不變，位置照舊。";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "從輸入來源中停用倉頡與速成";

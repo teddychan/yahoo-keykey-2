@@ -2,6 +2,12 @@
 
 A plain-language list of changes in each version, newest first.
 
+## 2.3.0
+
+- **New: Sync & Backup.** A new screen in **設定…** lets you back up your Yahoo! KeyKey 2 settings to a folder and restore them later — handy when setting up a new Mac.
+- **New: switch the app's language live.** Settings, About, and the other app screens can now display in English, 繁體中文, 简体中文, 日本語, 한국어, Español, or Français, switchable on the fly with no restart. (This changes the app's own interface, not what you type.)
+- **Changed: refreshed Settings, About, What's New, and Uninstall.** These screens were rebuilt with a cleaner, more native macOS look (now sharing the common Dragon App UI). Your input options — **輸出簡體字**, **全形標點**, **聯想字詞**, candidate text size, and 倉頡版本 — are unchanged and in the same place.
+
 ## 2.2.0
 
 - **New: z-code punctuation in 三代倉頡.** In the **三代倉頡（Yahoo KeyKey 相容）** mode you can now type punctuation with the classic Yahoo `z` codes — e.g. `zxcd` → 「, `zxce` → 」, `zxab` → ，, `zxbe` → （. These were part of the original Yahoo table and are available again.
