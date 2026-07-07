@@ -26,6 +26,11 @@ final class SharedResources {
     let hanConvertFilter: HanConvertFilter
     // One shared user-learning store across all controllers.
     let userFreq: UserFrequency
+    // Small pinyin→zhuyin syllable map (eager; ~422 rows, tiny). Backs the Pinyin segmenter.
+    let pinyinSyllableTable: PinyinSyllableTable
+    // The heavy Pinyin LM index (~55–80 MB), resident ONLY while at least one controller is in
+    // Pinyin mode (ref-counted). Built lazily from data.txt on the first acquire.
+    let pinyinIndexCache: RefCountedResource<TonelessLanguageModelIndex>
 
     private init() {
         // Read data.txt to a String ONCE, then build both the LM and the associated
@@ -79,6 +84,25 @@ final class SharedResources {
         // Load the persisted user-learning store once (fail-safe to empty if absent/corrupt).
         userFreq = UserFrequency()
 
+        // Pinyin syllable map: small, always loaded; fail-safe to empty if the resource is missing.
+        if let url = Bundle.main.url(forResource: "pinyin-zhuyin", withExtension: "txt"),
+           let loaded = try? PinyinSyllableTable(contentsOf: url) {
+            pinyinSyllableTable = loaded
+        } else {
+            NSLog("YahooKeyKey: pinyin-zhuyin.txt missing; Pinyin input unavailable")
+            pinyinSyllableTable = PinyinSyllableTable(text: "")
+        }
+        // Pinyin LM index: built lazily on first acquire (i.e. when a controller enters Pinyin),
+        // by re-reading data.txt. Released when no controller holds Pinyin (see InputController).
+        pinyinIndexCache = RefCountedResource {
+            if let url = Bundle.main.url(forResource: "data", withExtension: "txt"),
+               let text = try? String(contentsOf: url, encoding: .utf8) {
+                return TonelessLanguageModelIndex(text: text)
+            }
+            NSLog("YahooKeyKey: data.txt missing; Pinyin index empty")
+            return TonelessLanguageModelIndex(text: "")
+        }
+
         // All stored properties are now set: load the real tables for the selected version.
         loadCangjieTables(version: Preferences.cangjieVersion)
     }
@@ -108,6 +132,13 @@ final class SharedResources {
         }
         // Rebuild the reverse index from whichever table we just loaded.
         cangjieCodeIndex = CangjieCodeIndex(table: cangjieTable)
+    }
+
+    // The currently-resident Pinyin index (non-nil while a controller holds Pinyin), or an empty
+    // index when none is resident. The Pinyin module's makeEngine reads this; the controller
+    // manages acquire/release so the index is built only while Pinyin is actually in use.
+    var pinyinIndexOrEmpty: TonelessLanguageModelIndex {
+        pinyinIndexCache.current ?? TonelessLanguageModelIndex(text: "")
     }
 
     private static func loadCangjie(resource: String) -> CangjieTable {

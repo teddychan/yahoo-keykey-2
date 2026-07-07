@@ -2,6 +2,19 @@
 
 A plain-language list of changes in each version, newest first.
 
+## 2.6.0
+
+- **New input method: 拼音 (Pinyin).** Alongside **倉頡** and **速成**, Yahoo KeyKey 2 now
+  offers a **拼音** phrase input method. Add it the same way as the others — **System Settings ▸
+  Keyboard ▸ Input Sources ▸ + ▸ Chinese, Traditional ▸ Yahoo KeyKey 2** — then pick **拼音**
+  from the input menu. Type pinyin (no tone marks needed) and it composes whole phrases, not
+  just one character at a time:
+    - **Space / Return** commit the whole phrase.
+    - **1–9** pick a different candidate for the syllable at the cursor.
+    - **← / →** move between syllables to correct them individually.
+    - **Backspace** deletes; **Esc** clears the composition.
+  Use an apostrophe (`'`) to split syllables when they're ambiguous (e.g. `xi'an` → 西安).
+
 ## 2.5.0
 
 - **Fixed: the candidate text size slider now updates as you drag.** In **設定… ▸ 一般**,

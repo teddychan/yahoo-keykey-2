@@ -26,3 +26,15 @@ extension CangjieEngine: InputEngine {}
 
 // SimplexEngine mirrors the CangjieEngine surface exactly (direct digit-select then commit()).
 extension SimplexEngine: InputEngine {}
+
+// Richer surface for phrase-composition engines (Pinyin): an editable multi-node buffer
+// with a node cursor. The IMK controller detects this protocol to route cursor movement
+// and per-node candidate selection. Cangjie/Simplex do NOT conform (single-char engines).
+protocol PhraseComposingEngine: InputEngine {
+    func moveCursorLeft() -> Bool
+    func moveCursorRight() -> Bool
+}
+
+// PinyinEngine already exposes the full InputEngine surface plus cursor movement.
+extension PinyinEngine: InputEngine {}
+extension PinyinEngine: PhraseComposingEngine {}

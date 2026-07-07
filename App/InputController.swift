@@ -49,6 +49,13 @@ final class InputController: IMKInputController {
             InputMethodModule(modeSuffix: "Simplex", displayName: "速成") {
                 SimplexEngine(table: shared.simplexTable, characterRank: shared.cangjieRank, userRank: userRank)
             },
+            InputMethodModule(modeSuffix: "Pinyin", displayName: "拼音") {
+                // Cheap: reads the currently-acquired index (empty until a controller enters
+                // Pinyin, which acquires in setValue before this closure runs). Registration
+                // alone never builds the index.
+                PinyinEngine(syllableTable: shared.pinyinSyllableTable,
+                             index: shared.pinyinIndexOrEmpty, userRank: userRank)
+            },
         ]
         self.modules = modules
 
@@ -66,6 +73,10 @@ final class InputController: IMKInputController {
 
     deinit {
         NotificationCenter.default.removeObserver(self)
+        // A controller can be torn down while in Pinyin; release its hold on the shared index.
+        if currentModule.modeSuffix == "Pinyin" {
+            SharedResources.shared.pinyinIndexCache.release()
+        }
     }
 
     // Rebuild the active engine after a 倉頡版本 change. Mirrors the reset in
@@ -226,6 +237,10 @@ final class InputController: IMKInputController {
         // Look up the module whose suffix matches the IMK mode id; default to the first.
         let module = modules.first { modeID.hasSuffix(".\($0.modeSuffix)") } ?? modules[0]
         guard module.modeSuffix != currentModule.modeSuffix else { return }
+        // Pinyin LM lifecycle: release the shared index when leaving Pinyin.
+        if currentModule.modeSuffix == "Pinyin" {
+            SharedResources.shared.pinyinIndexCache.release()
+        }
         // Commit any in-progress composition so the rebuilt engine starts clean.
         if let client = sender as? IMKTextInput ?? client() {
             _ = commitCurrent(to: client)
@@ -236,6 +251,11 @@ final class InputController: IMKInputController {
         associations = []
         candidateWindow.hide()
         currentModule = module
+        // Acquire (and lazily build) the shared index when entering Pinyin, BEFORE makeEngine
+        // reads it. Ref-counted, so concurrent Pinyin controllers share one resident index.
+        if module.modeSuffix == "Pinyin" {
+            SharedResources.shared.pinyinIndexCache.acquire()
+        }
         engine = module.makeEngine()
     }
 
@@ -322,6 +342,43 @@ final class InputController: IMKInputController {
            let full = Punctuation.fullWidth(for: ch) {
             client.insertText(full, replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
             return true
+        }
+
+        // Pinyin (phrase composition) owns key handling while composing: the engine holds an
+        // editable multi-node buffer with a node cursor, so keys differ from Cangjie/Simplex.
+        // Arrows move the cursor between nodes; digits 1–9 pin a candidate for the cursor node
+        // (NO commit); Space/Return commit the whole buffer; Backspace deletes; Esc discards.
+        // Runs BEFORE the Cangjie/Simplex candidate block so those semantics don't apply.
+        if let phrase = engine as? PhraseComposingEngine, !engine.composingText.isEmpty {
+            switch event.keyCode {
+            case 123, 126: // Left / Up → previous node
+                _ = phrase.moveCursorLeft(); refresh(client); return true
+            case 124, 125: // Right / Down → next node
+                _ = phrase.moveCursorRight(); refresh(client); return true
+            case 49, 36: // Space / Return → commit the whole composition
+                return commitCurrent(to: client, offerAssociations: true)
+            case 51: // Backspace → delete last letter, re-walk
+                engine.backspace(); candidatePage = 0; refresh(client); return true
+            case 53: // Escape → commit-then-discard (matches Cangjie/Simplex Esc)
+                _ = engine.commit(); candidatePage = 0; refresh(client); return true
+            default: break
+            }
+            // Digit 1–9: pin the candidate for the cursor node (first page only in v1).
+            if let chars = event.characters, let d = Int(chars), (1...9).contains(d) {
+                if d - 1 < engine.candidates.count { engine.selectCandidate(d - 1) }
+                candidatePage = 0
+                refresh(client)
+                return true
+            }
+            // Letters / apostrophe extend the composition.
+            if let ch = event.characters?.first, engine.handleKey(ch) {
+                candidatePage = 0
+                refresh(client)
+                return true
+            }
+            // Anything else (e.g. punctuation) commits the buffer, then passes to the app.
+            _ = commitCurrent(to: client)
+            return false
         }
 
         // Cangjie/Simplex show candidates as soon as a code resolves, and their keys are a–z,
