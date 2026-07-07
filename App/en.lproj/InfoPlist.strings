@@ -2,3 +2,4 @@ CFBundleName = "Yahoo KeyKey 2";
 CFBundleDisplayName = "Yahoo KeyKey 2";
 "com.dragonapp.inputmethod.yahoo-keykey.Cangjie" = "倉頡";
 "com.dragonapp.inputmethod.yahoo-keykey.Simplex" = "速成";
+"com.dragonapp.inputmethod.yahoo-keykey.Pinyin" = "拼音";
