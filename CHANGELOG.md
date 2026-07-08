@@ -2,6 +2,13 @@
 
 A plain-language list of changes in each version, newest first.
 
+## 2.6.2
+
+- **Removed 候選字大小 from the input menu.** The coarse **小／中／大** shortcuts in the
+  input-method menu-bar item are gone — candidate text size is now set with the fine-grained
+  slider under **設定… ▸ 一般**, which lets you pick any size in the supported range instead of
+  just three fixed steps. Your current size is unchanged.
+
 ## 2.6.1
 
 - **拼音: number keys now pick a candidate directly.** While typing Pinyin, pressing **1–9**

@@ -100,9 +100,10 @@ final class InputController: IMKInputController {
     // IMK input-menu (the menu shown in the input-method menu-bar item), organized to the
     // shared Dragon-App app-menu standard (liquid-glass-macos SKILL §5A) for an IME:
     //   1. quick-toggles zone (輸出簡體字 / 全形標點 / 聯想字詞), checkmarks reflect live prefs;
-    //   2. 候選字大小 (candidate size) flat choices;
-    //   3. any settings specific to the active input method (none for Cangjie/Simplex today);
-    //   4. App menu grouping (§5A) — About Yahoo! KeyKey 2 · 檢查更新… · 設定… · — · 解除安裝….
+    //   2. any settings specific to the active input method (none for Cangjie/Simplex today);
+    //   3. App menu grouping (§5A) — About Yahoo! KeyKey 2 · 檢查更新… · 設定… · — · 解除安裝….
+    //      Candidate-window font size (候選字大小) is no longer offered here — the coarse
+    //      小/中/大 choices were superseded by the fine-grained slider in 設定….
     //      Per §5A the IME app menu omits Quit (an IME is system-managed; quitting only makes
     //      typing unresponsive until macOS relaunches it). All items are TOP-LEVEL: the macOS
     //      input menu only routes top-level selections back to the controller, so a "⋯ Yahoo!
@@ -132,23 +133,7 @@ final class InputController: IMKInputController {
         codeHint.state = Preferences.codeHintEnabled ? .on : .off
         menu.addItem(codeHint)
 
-        // 2. Candidate-window font size (候選字大小). The macOS input menu routes only
-        // TOP-LEVEL item selections back to the controller — items nested in a submenu
-        // are shown but never fire — so the sizes are flat items under a disabled
-        // header. The chosen size is read live by CandidateWindow on the next
-        // composition; the checkmark marks the active size.
-        let fontHeader = NSMenuItem(title: "候選字大小", action: nil, keyEquivalent: "")
-        fontHeader.isEnabled = false
-        menu.addItem(fontHeader)
-        let currentFontSize = Preferences.candidateFontSize
-        for (title, size, action) in Self.candidateFontSizeChoices {
-            let item = NSMenuItem(title: title, action: action, keyEquivalent: "")
-            item.target = self
-            item.state = (currentFontSize == size) ? .on : .off
-            menu.addItem(item)
-        }
-
-        // 3. Settings specific to the active input method (grouped with their method).
+        // 2. Settings specific to the active input method (grouped with their method).
         // Empty for Cangjie/Simplex today; future methods supply items via methodMenuItems.
         let methodItems = currentModule.methodMenuItems()
         if !methodItems.isEmpty {
@@ -156,7 +141,7 @@ final class InputController: IMKInputController {
             methodItems.forEach(menu.addItem)
         }
 
-        // 4. App menu grouping (§5A): About · Check for updates · Settings · — · Uninstall.
+        // 3. App menu grouping (§5A): About · Check for updates · Settings · — · Uninstall.
         // Quit omitted by design (system-managed IME). All top-level so IMK routes them.
         // Titles resolve via DragonKit's L() so they follow the picked language; IMK pulls
         // menu() fresh each time the input menu opens, so no cached menu to rebuild on change.
@@ -197,20 +182,6 @@ final class InputController: IMKInputController {
     @objc private func toggleCodeHint() {
         Preferences.codeHintEnabled.toggle()
     }
-
-    // Named candidate-window font sizes (display title → point size → menu action),
-    // all within the Preferences clamp (14–28); the default 18 is "中". Each size has
-    // its own no-argument selector so it dispatches exactly like the toggles above —
-    // the input menu's cross-process routing doesn't preserve a shared handler's tag.
-    private static let candidateFontSizeChoices: [(title: String, size: CGFloat, action: Selector)] = [
-        ("小", 14, #selector(setCandidateFontSizeSmall)),
-        ("中", 18, #selector(setCandidateFontSizeMedium)),
-        ("大", 24, #selector(setCandidateFontSizeLarge)),
-    ]
-
-    @objc private func setCandidateFontSizeSmall() { Preferences.candidateFontSize = 14 }
-    @objc private func setCandidateFontSizeMedium() { Preferences.candidateFontSize = 18 }
-    @objc private func setCandidateFontSizeLarge() { Preferences.candidateFontSize = 24 }
 
     // IMK invokes these input-menu selectors on the main thread, so entering the main actor
     // to reach the (main-actor) shared settings window controller is safe.
