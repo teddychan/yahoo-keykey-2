@@ -533,16 +533,20 @@ final class InputController: IMKInputController {
             let shown = slice.map { continuationOnly ? String($0.dropFirst()) : $0 }
             // Convert only the displayed strings (WYSIWYG); selection still indexes `cands`.
             let page = shown.map { applyHanConvert($0) }
-            // 反查/拆碼提示: show each candidate's code for the ACTIVE input method. In 拼音 every
-            // candidate for the cursor node shares that node's pinyin reading, so show the reading
-            // (e.g. "wo", "ni hao"); in 倉頡/速成 show the 倉頡 code of each single-character row,
-            // from the traditional (pre-conversion) glyph so it matches the code you'd actually
-            // type. Whole-word 聯想 rows get no hint. Empty array when the feature is off.
+            // 反查/拆碼提示: show each candidate's code for the ACTIVE input method. In 拼音 the
+            // candidates for the cursor node all share that node's typed reading, so show it
+            // (e.g. "wo", "ni hao"); once committed there is no cursor, so 聯想 rows fall back to
+            // each character's looked-up pinyin. In 倉頡/速成 show the 倉頡 code of each single-
+            // character row, from the traditional (pre-conversion) glyph so it matches the code
+            // you'd actually type. Empty array when the feature is off.
             let hints: [String?]
             if Preferences.codeHintEnabled {
                 if let phrase = engine as? PhraseComposingEngine {
-                    let reading = phrase.cursorReading
-                    hints = shown.map { _ in reading }
+                    if let reading = phrase.cursorReading {
+                        hints = shown.map { _ in reading }         // composing: shared node reading
+                    } else {
+                        hints = shown.map { pinyinReadingHint(for: $0) }  // 聯想: per-character pinyin
+                    }
                 } else {
                     let codeIndex = SharedResources.shared.cangjieCodeIndex
                     hints = shown.map { s -> String? in
@@ -558,5 +562,20 @@ final class InputController: IMKInputController {
             candidateWindow.show(page, page: candidatePage, pageCount: pageCount,
                                  fontSize: Preferences.candidateFontSize, hints: hints, near: rect)
         }
+    }
+
+    // The 拼音 hint for a committed candidate string (each character's looked-up pinyin,
+    // space-joined, e.g. 覺得 → "jue de"). Returns nil unless EVERY character resolves, so a
+    // partial reading is never shown. Used for 聯想 rows, which the user didn't type.
+    private func pinyinReadingHint(for text: String) -> String? {
+        let shared = SharedResources.shared
+        let index = shared.pinyinIndexOrEmpty
+        var readings: [String] = []
+        for ch in text {
+            guard let zhuyin = index.reading(forCharacter: ch),
+                  let pinyin = shared.pinyinSyllableTable.pinyin(forZhuyin: zhuyin) else { return nil }
+            readings.append(pinyin)
+        }
+        return readings.isEmpty ? nil : readings.joined(separator: " ")
     }
 }

@@ -22,6 +22,13 @@ final class PinyinSyllableTableTests: XCTestCase {
         let table = PinyinSyllableTable(text: "a\tㄚ\nzhuang\tㄓㄨㄤ")
         XCTAssertEqual(table.maxSyllableLength, 6) // "zhuang"
     }
+
+    func testReverseZhuyinToPinyin() {
+        let table = PinyinSyllableTable(text: "hao\tㄏㄠ\nni\tㄋㄧ\nwo\tㄨㄛ")
+        XCTAssertEqual(table.pinyin(forZhuyin: "ㄏㄠ"), "hao")
+        XCTAssertEqual(table.pinyin(forZhuyin: "ㄨㄛ"), "wo")
+        XCTAssertNil(table.pinyin(forZhuyin: "ㄗ"))
+    }
 }
 
 extension PinyinSyllableTableTests {

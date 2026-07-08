@@ -39,4 +39,24 @@ final class TonelessLanguageModelIndexTests: XCTestCase {
         let idx = TonelessLanguageModelIndex(text: sample)
         XCTAssertTrue(idx.unigrams(forKey: "ㄗㄗ").isEmpty)
     }
+
+    func testReadingForCharacterReturnsBestTonelessReading() {
+        let idx = TonelessLanguageModelIndex(text: sample)
+        XCTAssertEqual(idx.reading(forCharacter: "好"), "ㄏㄠ")
+        XCTAssertEqual(idx.reading(forCharacter: "你"), "ㄋㄧ")
+    }
+
+    func testReadingForCharacterPicksHighestScoredReading() {
+        // 行 appears with two readings; the higher score (-2.0, ㄒㄧㄥ) must win over -5.0.
+        let idx = TonelessLanguageModelIndex(text: """
+        ㄒㄧㄥˊ 行 -2.0
+        ㄏㄤˊ 行 -5.0
+        """)
+        XCTAssertEqual(idx.reading(forCharacter: "行"), "ㄒㄧㄥ")
+    }
+
+    func testReadingForCharacterNilWhenAbsent() {
+        let idx = TonelessLanguageModelIndex(text: sample)
+        XCTAssertNil(idx.reading(forCharacter: "電"))   // not in the sample
+    }
 }
