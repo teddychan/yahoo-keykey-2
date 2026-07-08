@@ -79,10 +79,9 @@ final class SettingsModel {
 
     // Re-seed the observation-tracked mirror properties (currently just candidateFontSize) from
     // the live Preferences. The computed forwarders above re-read Preferences on every access, so
-    // they always reflect changes made elsewhere; a stored property does not. Since the candidate
-    // size is ALSO settable outside Settings — the menu-bar 候選字大小 (小/中/大) items write
-    // Preferences directly — call this before showing the window so the slider matches the quick
-    // menu (the 2.0.2 behaviour). No-op when already in sync (the didSet guard skips the write).
+    // they always reflect changes made elsewhere; a stored property does not. Call this before
+    // showing the window so the slider matches whatever value Preferences currently holds (e.g. a
+    // value migrated from an older build). No-op when already in sync (the didSet guard skips the write).
     func syncFromPreferences() {
         candidateFontSize = Double(Preferences.candidateFontSize)
     }

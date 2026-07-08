@@ -30,11 +30,9 @@
 "keykey.about.cangjieTable" = "Cangjie table";
 "keykey.about.hanConversion" = "Han conversion";
 
-/* What's New pane (2.6.1) */
-"keykey.whatsNew.summary" = "Yahoo KeyKey 2 now includes a new 拼音 (Pinyin) input method — type whole phrases in pinyin. This update also lets you pick candidates with the number keys and shows a pinyin hint.";
-"keykey.whatsNew.pinyin" = "New input method: 拼音 (Pinyin). Alongside 倉頡 and 速成, type pinyin (no tone marks needed) to compose whole phrases. Space commits; 1–9 pick a candidate; ←/→ move between syllables; use an apostrophe to split ambiguous syllables (e.g. xi'an → 西安). Add it in System Settings ▸ Keyboard ▸ Input Sources.";
-"keykey.whatsNew.pinyinNumberSelect" = "拼音: the number keys 1–9 now select a candidate directly. A single syllable commits right away (like 倉頡／速成); in a phrase they pick that syllable and move to the next. Space still commits the whole phrase at once.";
-"keykey.whatsNew.pinyinHint" = "拼音: with the 反查／拆碼提示 hint turned on, candidates now show their pinyin reading (e.g. wo, ni hao) instead of the 倉頡 code.";
+/* What's New pane (2.6.2) */
+"keykey.whatsNew.summary" = "This update removes the 候選字大小 (small/medium/large) shortcuts from the input menu — candidate text size is now set with the finer-grained slider under 設定… ▸ 一般.";
+"keykey.whatsNew.candidateSizeMenu" = "Removed 候選字大小 (small/medium/large) from the input menu. Candidate text size is now set with the slider under 設定… ▸ 一般, which lets you pick any size in the supported range instead of just three fixed steps. Your current size is unchanged.";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "Disable Cangjie and Simplex from Input Sources";
