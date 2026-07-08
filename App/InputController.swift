@@ -346,8 +346,9 @@ final class InputController: IMKInputController {
 
         // Pinyin (phrase composition) owns key handling while composing: the engine holds an
         // editable multi-node buffer with a node cursor, so keys differ from Cangjie/Simplex.
-        // Arrows move the cursor between nodes; digits 1–9 pin a candidate for the cursor node
-        // (NO commit); Space/Return commit the whole buffer; Backspace deletes; Esc discards.
+        // Arrows move the cursor between nodes; digits 1–9 select the cursor node's candidate and
+        // advance to the next node (committing the whole buffer once past the last node);
+        // Space/Return commit the whole buffer; Backspace deletes; Esc discards.
         // Runs BEFORE the Cangjie/Simplex candidate block so those semantics don't apply.
         if let phrase = engine as? PhraseComposingEngine, !engine.composingText.isEmpty {
             switch event.keyCode {
@@ -363,12 +364,19 @@ final class InputController: IMKInputController {
                 _ = engine.commit(); candidatePage = 0; refresh(client); return true
             default: break
             }
-            // Digit 1–9: pin the candidate for the cursor node (first page only in v1).
+            // Digit 1–9: select the candidate for the cursor node, then advance to the next node —
+            // or commit the whole buffer if this was the last node. So a single syllable commits
+            // immediately (like 倉頡/速成), while multi-syllable phrases can be picked syllable by
+            // syllable; Space still commits everything at once. (First page only in v1.)
             if let chars = event.characters, let d = Int(chars), (1...9).contains(d) {
-                if d - 1 < engine.candidates.count { engine.selectCandidate(d - 1) }
-                candidatePage = 0
-                refresh(client)
-                return true
+                guard d - 1 < engine.candidates.count else { return true } // ignore out-of-range digit
+                engine.selectCandidate(d - 1)
+                if phrase.moveCursorRight() {
+                    candidatePage = 0
+                    refresh(client)
+                    return true
+                }
+                return commitCurrent(to: client, offerAssociations: true)
             }
             // Letters / apostrophe extend the composition.
             if let ch = event.characters?.first, engine.handleKey(ch) {
@@ -525,15 +533,26 @@ final class InputController: IMKInputController {
             let shown = slice.map { continuationOnly ? String($0.dropFirst()) : $0 }
             // Convert only the displayed strings (WYSIWYG); selection still indexes `cands`.
             let page = shown.map { applyHanConvert($0) }
-            // 反查/拆碼提示: the 倉頡 code of each single-character row, from the traditional
-            // (pre-conversion) glyph so it matches the code you'd actually type. Whole-word 聯想
-            // rows get no hint. Empty array when the feature is off → unchanged rendering.
+            // 反查/拆碼提示: show each candidate's code for the ACTIVE input method. In 拼音 the
+            // candidates for the cursor node all share that node's typed reading, so show it
+            // (e.g. "wo", "ni hao"); once committed there is no cursor, so 聯想 rows fall back to
+            // each character's looked-up pinyin. In 倉頡/速成 show the 倉頡 code of each single-
+            // character row, from the traditional (pre-conversion) glyph so it matches the code
+            // you'd actually type. Empty array when the feature is off.
             let hints: [String?]
             if Preferences.codeHintEnabled {
-                let codeIndex = SharedResources.shared.cangjieCodeIndex
-                hints = shown.map { s -> String? in
-                    guard s.count == 1, let ch = s.first else { return nil }
-                    return codeIndex.codeGlyphs(for: ch)
+                if let phrase = engine as? PhraseComposingEngine {
+                    if let reading = phrase.cursorReading {
+                        hints = shown.map { _ in reading }         // composing: shared node reading
+                    } else {
+                        hints = shown.map { pinyinReadingHint(for: $0) }  // 聯想: per-character pinyin
+                    }
+                } else {
+                    let codeIndex = SharedResources.shared.cangjieCodeIndex
+                    hints = shown.map { s -> String? in
+                        guard s.count == 1, let ch = s.first else { return nil }
+                        return codeIndex.codeGlyphs(for: ch)
+                    }
                 }
             } else {
                 hints = []
@@ -543,5 +562,20 @@ final class InputController: IMKInputController {
             candidateWindow.show(page, page: candidatePage, pageCount: pageCount,
                                  fontSize: Preferences.candidateFontSize, hints: hints, near: rect)
         }
+    }
+
+    // The 拼音 hint for a committed candidate string (each character's looked-up pinyin,
+    // space-joined, e.g. 覺得 → "jue de"). Returns nil unless EVERY character resolves, so a
+    // partial reading is never shown. Used for 聯想 rows, which the user didn't type.
+    private func pinyinReadingHint(for text: String) -> String? {
+        let shared = SharedResources.shared
+        let index = shared.pinyinIndexOrEmpty
+        var readings: [String] = []
+        for ch in text {
+            guard let zhuyin = index.reading(forCharacter: ch),
+                  let pinyin = shared.pinyinSyllableTable.pinyin(forZhuyin: zhuyin) else { return nil }
+            readings.append(pinyin)
+        }
+        return readings.isEmpty ? nil : readings.joined(separator: " ")
     }
 }

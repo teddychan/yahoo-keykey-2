@@ -33,6 +33,8 @@ extension SimplexEngine: InputEngine {}
 protocol PhraseComposingEngine: InputEngine {
     func moveCursorLeft() -> Bool
     func moveCursorRight() -> Bool
+    // Pinyin reading of the node under the cursor (e.g. "wo", "ni hao"), for the code hint.
+    var cursorReading: String? { get }
 }
 
 // PinyinEngine already exposes the full InputEngine surface plus cursor movement.

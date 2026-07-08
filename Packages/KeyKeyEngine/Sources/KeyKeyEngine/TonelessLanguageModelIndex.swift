@@ -10,6 +10,7 @@ import Foundation
 /// max score), and stores them sorted by score descending.
 public struct TonelessLanguageModelIndex {
     private var table: [String: [Unigram]] = [:]
+    private var charReading: [Character: String] = [:]  // char → its best single-syllable reading
     /// Longest key length in syllables (hyphen-separated), so the walker can bound spans.
     public private(set) var maxSpanLength: Int = 1
 
@@ -34,10 +35,22 @@ public struct TonelessLanguageModelIndex {
                 best[key, default: [:]][value] = score
             }
         }
+        // Reverse map: the highest-scored single-syllable reading for each single character,
+        // for char→reading lookups (e.g. the 拼音 hint on 聯想 rows the user didn't type).
+        var charBest: [Character: Double] = [:]
         for (key, values) in best {
             table[key] = values
                 .map { Unigram(value: $0.key, score: $0.value) }
                 .sorted { $0.score != $1.score ? $0.score > $1.score : $0.value < $1.value }
+            if !key.contains("-") {
+                for (value, score) in values where value.count == 1 {
+                    let ch = value.first!
+                    if score > (charBest[ch] ?? -.greatestFiniteMagnitude) {
+                        charBest[ch] = score
+                        charReading[ch] = key
+                    }
+                }
+            }
         }
         maxSpanLength = maxSpan
     }
@@ -48,4 +61,8 @@ public struct TonelessLanguageModelIndex {
 
     /// Unigrams for a toneless key, sorted by score descending (best first). Empty if none.
     public func unigrams(forKey key: String) -> [Unigram] { table[key] ?? [] }
+
+    /// The best (most common) single-syllable toneless reading for a character, or nil. Reverse
+    /// of the unigram table; used to show a 拼音 hint on characters the user didn't type.
+    public func reading(forCharacter ch: Character) -> String? { charReading[ch] }
 }

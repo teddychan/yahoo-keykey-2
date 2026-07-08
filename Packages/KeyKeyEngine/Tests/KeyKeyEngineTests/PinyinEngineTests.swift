@@ -71,6 +71,25 @@ final class PinyinEngineTests: XCTestCase {
         XCTAssertEqual(e.composingText, "你x")
     }
 
+    func testCursorReadingFollowsCursorAndSpansPhrase() {
+        let e = makeEngine()
+        XCTAssertNil(e.cursorReading)                       // nothing composing
+        for c in "wo" { _ = e.handleKey(c) }
+        for c in "ni" { _ = e.handleKey(c) }                // two nodes: 我 | 你
+        XCTAssertEqual(e.cursorReading, "wo")               // cursor on first node
+        XCTAssertTrue(e.moveCursorRight())
+        XCTAssertEqual(e.cursorReading, "ni")               // cursor on second node
+        _ = e.commit()
+        XCTAssertNil(e.cursorReading)                       // reset after commit
+    }
+
+    func testCursorReadingJoinsMultiSyllablePhraseNode() {
+        let e = makeEngine()
+        for c in "nihao" { _ = e.handleKey(c) }             // one node 你好 spanning ㄋㄧ-ㄏㄠ
+        XCTAssertEqual(e.composingText, "你好")
+        XCTAssertEqual(e.cursorReading, "ni hao")
+    }
+
     func testMaxComposingSyllablesCap() {
         let e = makeEngine()
         for _ in 0..<50 { _ = e.handleKey("n"); _ = e.handleKey("i") }

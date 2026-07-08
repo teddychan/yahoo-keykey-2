@@ -5,6 +5,7 @@ import Foundation
 /// generator, tools/build-pinyin-map.py). Line format: "<pinyin>\t<zhuyin>".
 public struct PinyinSyllableTable {
     private var map: [String: String] = [:]
+    private var reverse: [String: String] = [:]   // toneless zhuyin → pinyin (first spelling wins)
     /// Longest pinyin syllable, so the segmenter can bound its longest-match window.
     public private(set) var maxSyllableLength: Int = 0
 
@@ -18,6 +19,7 @@ public struct PinyinSyllableTable {
             let zhuyin = String(parts[1])
             guard !pinyin.isEmpty, !zhuyin.isEmpty else { continue }
             map[pinyin] = zhuyin
+            if reverse[zhuyin] == nil { reverse[zhuyin] = pinyin }
             maxSyllableLength = max(maxSyllableLength, pinyin.count)
         }
     }
@@ -28,5 +30,7 @@ public struct PinyinSyllableTable {
 
     public func isValidSyllable(_ s: String) -> Bool { map[s] != nil }
     public func zhuyin(forSyllable s: String) -> String? { map[s] }
+    /// The pinyin syllable for a toneless zhuyin reading (reverse of `zhuyin(forSyllable:)`), or nil.
+    public func pinyin(forZhuyin z: String) -> String? { reverse[z] }
     public var syllableCount: Int { map.count }
 }
