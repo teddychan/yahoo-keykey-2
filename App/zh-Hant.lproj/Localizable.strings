@@ -30,11 +30,11 @@
 "keykey.about.cangjieTable" = "倉頡碼表";
 "keykey.about.hanConversion" = "漢字轉換";
 
-/* What's New pane (2.4.0) */
-"keykey.whatsNew.summary" = "本版新增「反查／拆碼提示」與「臨時英數（Shift＋字母）」，並修正倉頡版本設定無法儲存的問題。";
-"keykey.whatsNew.codeHint" = "新增：反查／拆碼提示。開啟後會在候選字旁顯示該字的倉頡拆碼（例：倉 → 人口竹口），方便學習與核對，速成與聯想時特別實用。預設關閉。";
-"keykey.whatsNew.quickEnglish" = "新增：臨時英數。按住 Shift 再按字母即可直接輸入英文字母，如原版 Yahoo! KeyKey，不需切換輸入來源。大小寫依 Caps Lock 而定；未按 Shift 時仍是中文。";
-"keykey.whatsNew.cangjieVersionFix" = "修正：倉頡版本（五代／三代）在設定中的選擇現在會正確儲存，不再還原。";
+/* What's New pane (2.6.1) */
+"keykey.whatsNew.summary" = "Yahoo KeyKey 2 新增「拼音」輸入法——可用拼音輸入整個詞句。本次更新也可用數字鍵直接選字，並顯示拼音提示。";
+"keykey.whatsNew.pinyin" = "新增輸入法：拼音。除了倉頡與速成，現在可輸入拼音（免打聲調）來組成整個詞句。空白鍵送出；1–9 選字；←／→ 在音節間移動；用單引號分隔易混淆的音節（例：xi'an → 西安）。請於「系統設定 ▸ 鍵盤 ▸ 輸入來源」加入。";
+"keykey.whatsNew.pinyinNumberSelect" = "拼音：數字鍵 1–9 現在可直接選字。單一音節會立即送出（如倉頡／速成）；在詞句中則選取該音節並移到下一個。空白鍵仍可一次送出整個詞句。";
+"keykey.whatsNew.pinyinHint" = "拼音：開啟「反查／拆碼提示」後，候選字現在會顯示其拼音（例：wo、ni hao），而非倉頡碼。";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "從輸入來源中停用倉頡與速成";

@@ -1,23 +1,23 @@
 import Foundation
 import DragonKit
 
-// "What's New" content for the current release (2.4.0), mirroring CHANGELOG.md's top entry:
-// the 反查／拆碼提示 (Cangjie code hint) and 臨時英數 (quick English) features, plus the
-// 倉頡版本-save fix.
+// "What's New" content for the current release (2.6.1). Leads with the new 拼音 (Pinyin)
+// input method — added in 2.6.0 but never surfaced in this pane — plus the two 2.6.1 fixes
+// (direct number-key selection, pinyin code hint). Keep in sync with CHANGELOG.md on release.
 enum WhatsNewConfig {
     @MainActor
     static var content: WhatsNewContent {
         WhatsNewContent(
-            version: "2.4.0",
-            date: "2026-07-06",
+            version: "2.6.1",
+            date: "2026-07-08",
             summary: L("keykey.whatsNew.summary"),
             sections: [
                 ChangeSection(kind: .added, entries: [
-                    L("keykey.whatsNew.codeHint"),
-                    L("keykey.whatsNew.quickEnglish"),
+                    L("keykey.whatsNew.pinyin"),
                 ]),
                 ChangeSection(kind: .fixed, entries: [
-                    L("keykey.whatsNew.cangjieVersionFix"),
+                    L("keykey.whatsNew.pinyinNumberSelect"),
+                    L("keykey.whatsNew.pinyinHint"),
                 ]),
             ]
         )

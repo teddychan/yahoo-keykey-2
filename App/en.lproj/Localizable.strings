@@ -30,11 +30,11 @@
 "keykey.about.cangjieTable" = "Cangjie table";
 "keykey.about.hanConversion" = "Han conversion";
 
-/* What's New pane (2.4.0) */
-"keykey.whatsNew.summary" = "This release adds a Cangjie code hint (反查／拆碼提示) and quick English (Shift + letter), and fixes the Cangjie-version setting not saving.";
-"keykey.whatsNew.codeHint" = "New: Cangjie code hint (反查／拆碼提示). Shows each character's Cangjie code beside the candidate (e.g. 倉 → 人口竹口) so you can learn or verify how it breaks down — handy in 速成 and 聯想. Off by default.";
-"keykey.whatsNew.quickEnglish" = "New: quick English (臨時英數). Hold Shift and press a letter to type that English letter directly, like the original Yahoo! KeyKey — no need to switch input source. Case follows Caps Lock; anything typed without Shift stays Chinese.";
-"keykey.whatsNew.cangjieVersionFix" = "Fixed: the 倉頡版本 (5th/3rd-generation) choice in Settings now saves correctly instead of reverting.";
+/* What's New pane (2.6.1) */
+"keykey.whatsNew.summary" = "Yahoo KeyKey 2 now includes a new 拼音 (Pinyin) input method — type whole phrases in pinyin. This update also lets you pick candidates with the number keys and shows a pinyin hint.";
+"keykey.whatsNew.pinyin" = "New input method: 拼音 (Pinyin). Alongside 倉頡 and 速成, type pinyin (no tone marks needed) to compose whole phrases. Space commits; 1–9 pick a candidate; ←/→ move between syllables; use an apostrophe to split ambiguous syllables (e.g. xi'an → 西安). Add it in System Settings ▸ Keyboard ▸ Input Sources.";
+"keykey.whatsNew.pinyinNumberSelect" = "拼音: the number keys 1–9 now select a candidate directly. A single syllable commits right away (like 倉頡／速成); in a phrase they pick that syllable and move to the next. Space still commits the whole phrase at once.";
+"keykey.whatsNew.pinyinHint" = "拼音: with the 反查／拆碼提示 hint turned on, candidates now show their pinyin reading (e.g. wo, ni hao) instead of the 倉頡 code.";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "Disable Cangjie and Simplex from Input Sources";
