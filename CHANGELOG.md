@@ -9,7 +9,10 @@ A plain-language list of changes in each version, newest first.
   and for a multi-syllable phrase it picks that syllable and moves to the next one. **Space** still
   commits the whole phrase at once, so both ways work.
 - **拼音: the 反查／拆碼提示 hint now shows pinyin.** With the code hint turned on, candidates in
-  拼音 mode now show their **pinyin reading** (e.g. `wo`, `ni hao`) instead of the 倉頡 code.
+  拼音 mode now show their **pinyin reading** (e.g. `wo`, `ni hao`) instead of the 倉頡 code —
+  for both the syllables you're typing and the 聯想 suggestions that follow a commit.
+- **Fixed: the in-app What's New now shows the current version.** The **設定… ▸ What's New** pane
+  was stuck on an older release's notes; it now reflects the version you're running.
 
 ## 2.6.0
 
