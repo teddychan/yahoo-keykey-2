@@ -2,6 +2,15 @@
 
 A plain-language list of changes in each version, newest first.
 
+## 2.6.1
+
+- **拼音: number keys now pick a candidate directly.** While typing Pinyin, pressing **1–9**
+  now selects that candidate — for a single syllable it commits right away (just like 倉頡／速成),
+  and for a multi-syllable phrase it picks that syllable and moves to the next one. **Space** still
+  commits the whole phrase at once, so both ways work.
+- **拼音: the 反查／拆碼提示 hint now shows pinyin.** With the code hint turned on, candidates in
+  拼音 mode now show their **pinyin reading** (e.g. `wo`, `ni hao`) instead of the 倉頡 code.
+
 ## 2.6.0
 
 - **New input method: 拼音 (Pinyin).** Alongside **倉頡** and **速成**, Yahoo KeyKey 2 now

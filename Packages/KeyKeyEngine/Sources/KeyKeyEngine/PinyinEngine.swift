@@ -18,6 +18,7 @@ public final class PinyinEngine {
     private var nodes: [WalkNode] = []
     private var tail: String = ""
     private var cursor: Int = 0             // index into `nodes`
+    private var syllables: [String] = []    // raw pinyin syllables, aligned 1:1 with node readings
 
     public init(syllableTable: PinyinSyllableTable,
                 index: TonelessLanguageModelIndex,
@@ -54,6 +55,15 @@ public final class PinyinEngine {
     public var candidates: [String] {
         guard cursor >= 0, cursor < nodes.count else { return [] }
         return nodes[cursor].candidates
+    }
+
+    /// The pinyin reading of the node under the cursor, space-joined for multi-syllable
+    /// phrases (e.g. "ni hao"); nil when there is no node. Drives the 拼音 code hint.
+    public var cursorReading: String? {
+        guard cursor >= 0, cursor < nodes.count else { return nil }
+        let range = nodes[cursor].readingRange
+        guard range.upperBound <= syllables.count else { return nil }
+        return syllables[range].joined(separator: " ")
     }
 
     public func selectCandidate(_ index: Int) {
@@ -95,6 +105,7 @@ public final class PinyinEngine {
     private func rewalk() {
         let seg = segmenter.segment(raw)
         tail = seg.tail
+        syllables = seg.syllables
         let readings = seg.syllables.compactMap { syllableTable.zhuyin(forSyllable: $0) }
         nodes = walker.walk(readings: readings, rawSyllables: seg.syllables, userBonus: userRank)
         if cursor >= nodes.count { cursor = max(0, nodes.count - 1) }
