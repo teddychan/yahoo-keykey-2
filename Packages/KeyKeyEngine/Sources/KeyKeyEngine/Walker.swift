@@ -40,9 +40,17 @@ public struct Walker {
         guard n > 0 else { return [] }
         precondition(rawSyllables.count == n, "readings and rawSyllables must align")
 
+        // How the winning span at a boundary is rebuilt into a node, deferred until backtracking
+        // so the (userBonus) candidate sort runs only for the ~n chosen spans, not every span the
+        // DP evaluates.
+        enum SpanChoice {
+            case fallback(range: Range<Int>, raw: String)
+            case phrase(range: Range<Int>, unigrams: [Unigram])
+        }
+
         // DP over prefix boundaries: best[j] = best total score covering readings[0..<j].
         var best = [Double](repeating: -.greatestFiniteMagnitude, count: n + 1)
-        var back = [WalkNode?](repeating: nil, count: n + 1)
+        var back = [SpanChoice?](repeating: nil, count: n + 1)
         var prev = [Int](repeating: 0, count: n + 1)
         best[0] = 0
 
@@ -54,35 +62,42 @@ public struct Walker {
                 let key = readings[i..<j].joined(separator: "-")
                 let unis = index.unigrams(forKey: key)
                 let spanScore: Double
-                let node: WalkNode
+                let choice: SpanChoice
                 if unis.isEmpty {
                     guard L == 1 else { continue } // no phrase for a multi-reading span
                     spanScore = Self.rawFallbackScore
-                    node = WalkNode(readingRange: i..<j, candidates: [rawSyllables[i]])
+                    choice = .fallback(range: i..<j, raw: rawSyllables[i])
                 } else {
+                    // `unis` is already sorted by score descending, so `.first` is the span's best
+                    // (pre-userBonus) score used for path selection.
                     spanScore = unis.first?.score ?? Self.rawFallbackScore
-                    // Display order: LM score + user-learning bonus on the leading character.
-                    let ordered = unis.sorted { a, b in
-                        let sa = a.score + (a.value.first.map(userBonus) ?? 0)
-                        let sb = b.score + (b.value.first.map(userBonus) ?? 0)
-                        return sa != sb ? sa > sb : a.value < b.value
-                    }.map(\.value)
-                    node = WalkNode(readingRange: i..<j, candidates: ordered)
+                    choice = .phrase(range: i..<j, unigrams: unis)
                 }
                 let total = best[i] + spanScore
                 if total > best[j] {
                     best[j] = total
-                    back[j] = node
+                    back[j] = choice
                     prev[j] = i
                 }
             }
         }
 
-        // Backtrack from n to 0.
+        // Backtrack from n to 0, building each chosen node now. Display order for a phrase span is
+        // LM score + user-learning bonus on the leading character.
         var nodes: [WalkNode] = []
         var j = n
-        while j > 0, let node = back[j] {
-            nodes.append(node)
+        while j > 0, let choice = back[j] {
+            switch choice {
+            case .fallback(let range, let raw):
+                nodes.append(WalkNode(readingRange: range, candidates: [raw]))
+            case .phrase(let range, let unigrams):
+                let ordered = unigrams.sorted { a, b in
+                    let sa = a.score + (a.value.first.map(userBonus) ?? 0)
+                    let sb = b.score + (b.value.first.map(userBonus) ?? 0)
+                    return sa != sb ? sa > sb : a.value < b.value
+                }.map(\.value)
+                nodes.append(WalkNode(readingRange: range, candidates: ordered))
+            }
             j = prev[j]
         }
         return nodes.reversed()

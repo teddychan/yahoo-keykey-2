@@ -51,4 +51,23 @@ final class LanguageModelTests: XCTestCase {
         """)
         XCTAssertEqual(lm.characterScores()["我"] ?? 0, -3.00000000, accuracy: 1e-6)
     }
+
+    func testStreamingCharacterScoresMatchesFullBuild() {
+        // The streaming launch path must produce exactly the same ranking as building the full
+        // LM and calling characterScores(); it just skips the transient full table.
+        let cases = [
+            Self.fixture,
+            """
+            ㄨㄛ 我 -5.00000000
+            ㄜ 我 -3.00000000
+            ㄋㄧ-ㄏㄠ 你好 -6.00000000
+            """,
+            "# only a header, no entries",
+            "",
+        ]
+        for text in cases {
+            XCTAssertEqual(LanguageModel.characterScores(fromText: text),
+                           LanguageModel(text: text).characterScores())
+        }
+    }
 }

@@ -30,9 +30,10 @@
 "keykey.about.cangjieTable" = "倉頡碼表";
 "keykey.about.hanConversion" = "漢字轉換";
 
-/* What's New pane (2.6.2) */
-"keykey.whatsNew.summary" = "本次更新移除了輸入選單中的「候選字大小」（小／中／大）捷徑，改用「設定… ▸ 一般」裡更精細的字級滑桿來調整。";
-"keykey.whatsNew.candidateSizeMenu" = "已從輸入選單移除「候選字大小」（小／中／大）。候選字字級現在改由「設定… ▸ 一般」的滑桿調整，可在支援範圍內選擇任意大小，不再只有三段固定值。您目前的字級維持不變。";
+/* What's New pane (2.6.3) */
+"keykey.whatsNew.summary" = "本次更新讓 Yahoo KeyKey 2 更輕更快：啟動更迅速、佔用記憶體更少，輸入拼音時每次按鍵的運算也更精簡。";
+"keykey.whatsNew.perfMemory" = "啟動更快、記憶體用量更低。啟動時不再為了排序常用字而在記憶體中建立整份詞庫的複本，改為只讀取所需資料，因此 Yahoo KeyKey 2 啟動更迅速、佔用記憶體更少。您輸入的內容完全不受影響。";
+"keykey.whatsNew.perfPinyin" = "拼音輸入更有效率。組字時，引擎不再於每次按鍵重複進行排序運算，長詞句時尤其明顯。您看到的候選字與其排序，皆與先前完全相同。";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "從輸入來源中停用倉頡與速成";

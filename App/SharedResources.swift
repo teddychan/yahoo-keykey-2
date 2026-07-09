@@ -42,16 +42,15 @@ final class SharedResources {
             dataText = nil
         }
 
-        // Build the LM from data.txt ONLY to derive the character ranking, then let it go:
-        // nothing at runtime needs the full model, so it is not retained (frees ~55–80 MB).
-        let lm: LanguageModel
+        // Derive the character ranking straight from data.txt WITHOUT building the full LM:
+        // nothing at runtime needs the whole model, and streaming avoids the transient ~55–80 MB
+        // table (lower launch peak memory + faster startup).
         if let text = dataText {
-            lm = LanguageModel(text: text)
+            characterRank = LanguageModel.characterScores(fromText: text)
         } else {
-            NSLog("YahooKeyKey: data.txt missing; running with empty LM")
-            lm = LanguageModel(text: "# format org.openvanilla.mcbopomofo.sorted")
+            NSLog("YahooKeyKey: data.txt missing; running with empty character ranking")
+            characterRank = [:]
         }
-        characterRank = lm.characterScores()
 
         // Build associated phrases from the SAME data.txt string; fail safe to empty if missing.
         if let text = dataText {
