@@ -17,7 +17,7 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>2.6.2</string>
+	<string>2.6.3</string>
 	<key>CFBundleVersion</key>
 	<string>23</string>
 	<key>ComponentInputModeDict</key>
@@ -45,7 +45,7 @@
 				<key>tsInputModeScriptKey</key>
 				<string>smTradChinese</string>
 			</dict>
-			<key>com.dragonapp.inputmethod.yahoo-keykey.Simplex</key>
+			<key>com.dragonapp.inputmethod.yahoo-keykey.Pinyin</key>
 			<dict>
 				<key>TISIntendedLanguage</key>
 				<string>zh-Hant</string>
@@ -64,7 +64,7 @@
 				<key>tsInputModeScriptKey</key>
 				<string>smTradChinese</string>
 			</dict>
-			<key>com.dragonapp.inputmethod.yahoo-keykey.Pinyin</key>
+			<key>com.dragonapp.inputmethod.yahoo-keykey.Simplex</key>
 			<dict>
 				<key>TISIntendedLanguage</key>
 				<string>zh-Hant</string>

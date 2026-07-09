@@ -30,9 +30,10 @@
 "keykey.about.cangjieTable" = "Cangjie table";
 "keykey.about.hanConversion" = "Han conversion";
 
-/* What's New pane (2.6.2) */
-"keykey.whatsNew.summary" = "This update removes the 候選字大小 (small/medium/large) shortcuts from the input menu — candidate text size is now set with the finer-grained slider under 設定… ▸ 一般.";
-"keykey.whatsNew.candidateSizeMenu" = "Removed 候選字大小 (small/medium/large) from the input menu. Candidate text size is now set with the slider under 設定… ▸ 一般, which lets you pick any size in the supported range instead of just three fixed steps. Your current size is unchanged.";
+/* What's New pane (2.6.3) */
+"keykey.whatsNew.summary" = "This update makes Yahoo KeyKey 2 lighter and faster: it starts up quicker, uses less memory, and does less work on each keystroke while you type 拼音.";
+"keykey.whatsNew.perfMemory" = "Faster startup and lower memory use. At launch the app no longer builds a large in-memory copy of its dictionary just to rank characters — it now reads only what it needs, so Yahoo KeyKey 2 starts up quicker and takes up less memory. Nothing you type changes.";
+"keykey.whatsNew.perfPinyin" = "拼音 typing is more efficient. While composing pinyin, the engine now avoids repeated sorting work on every keystroke — most noticeable with long phrases. The candidates you see, and their order, are exactly the same as before.";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "Disable Cangjie and Simplex from Input Sources";

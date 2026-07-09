@@ -2,6 +2,16 @@
 
 A plain-language list of changes in each version, newest first.
 
+## 2.6.3
+
+- **Faster startup and lower memory use.** At launch, Yahoo KeyKey 2 no longer builds a large
+  in-memory copy of its whole dictionary just to work out which characters are most common — it
+  now reads only what it needs. The app starts up quicker and uses less memory, and nothing you
+  type changes.
+- **拼音 typing is a little more efficient.** While you're composing pinyin, the engine skips
+  repeated sorting work it used to do on every keystroke. You'll notice it most with long
+  phrases. The candidates you see, and their order, are exactly the same as before.
+
 ## 2.6.2
 
 - **Removed 候選字大小 from the input menu.** The coarse **小／中／大** shortcuts in the
