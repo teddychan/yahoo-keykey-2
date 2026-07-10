@@ -14,6 +14,8 @@ public struct SimplexTable {
     /// Cangjie-code order so the grouped candidate lists are deterministic
     /// (forEachEntry's own order is unspecified).
     public init(cangjie: CangjieTable) {
+        table.reserveCapacity(700)
+        seen.reserveCapacity(700)
         var entries: [(String, [String])] = []
         cangjie.forEachEntry { code, chars in entries.append((code, chars)) }
         for (code, chars) in entries.sorted(by: { $0.0 < $1.0 }) {
@@ -28,6 +30,8 @@ public struct SimplexTable {
     /// Used for the Yahoo! KeyKey 速成 table (simplex-ext.cin), whose rows are already quick
     /// codes and whose line order is the intended candidate order.
     public init(quickCodeText: String) {
+        table.reserveCapacity(700)
+        seen.reserveCapacity(700)
         for rawLine in quickCodeText.split(separator: "\n", omittingEmptySubsequences: true) {
             let line = rawLine.trimmingCharacters(in: .whitespaces)
             if line.isEmpty || line.hasPrefix("#") { continue }
@@ -45,6 +49,8 @@ public struct SimplexTable {
 
     /// Builds the index directly from "<cangjieCode>\t<char>" lines (test fixtures).
     public init(text: String) {
+        table.reserveCapacity(700)
+        seen.reserveCapacity(700)
         for rawLine in text.split(separator: "\n", omittingEmptySubsequences: true) {
             let line = rawLine.trimmingCharacters(in: .whitespaces)
             if line.isEmpty || line.hasPrefix("#") { continue }

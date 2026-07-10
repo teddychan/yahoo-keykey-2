@@ -1,15 +1,15 @@
 import Foundation
 import DragonKit
 
-// "What's New" content for the current release (2.6.3). Performance-only: lower launch memory /
-// faster startup, and less per-keystroke work while typing 拼音. Keep in sync with CHANGELOG.md
-// on release.
+// "What's New" content for the current release (2.6.4). Performance + robustness: single-pass
+// dictionary load, lazily-built 速成 table / 反查 index, and a 拼音 composer that stays responsive
+// on unusual input. Keep in sync with CHANGELOG.md on release.
 enum WhatsNewConfig {
     @MainActor
     static var content: WhatsNewContent {
         WhatsNewContent(
-            version: "2.6.3",
-            date: "2026-07-09",
+            version: "2.6.4",
+            date: "2026-07-10",
             summary: L("keykey.whatsNew.summary"),
             sections: [
                 ChangeSection(kind: .changed, entries: [

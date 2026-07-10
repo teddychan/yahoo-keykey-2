@@ -19,6 +19,7 @@ public struct CangjieTable {
     private let regexCache = RegexCache()
 
     public init(text: String) {
+        table.reserveCapacity(70_000)
         for rawLine in text.split(separator: "\n", omittingEmptySubsequences: true) {
             let line = rawLine.trimmingCharacters(in: .whitespaces)
             if line.isEmpty || line.hasPrefix("#") { continue }

@@ -13,16 +13,12 @@ final class SharedResources {
     // wildcard matches surface common characters first. Computed once.
     let characterRank: [Character: Double]
     let associatedPhrases: AssociatedPhrases
-    // Cangjie/Simplex tables and the effective sort rank depend on the selected Cangjie
-    // version; rebuilt in place by reloadCangjieTables() when the user changes it.
+    // Cangjie table and the effective sort rank depend on the selected Cangjie version;
+    // rebuilt in place by reloadCangjieTables() when the user changes it.
     private(set) var cangjieTable: CangjieTable
-    private(set) var simplexTable: SimplexTable
     // Single-char rank the engines sort by: the LM `characterRank` for 五代, or empty for
     // 三代 so the Yahoo table's native line order is preserved. User-learning applies on top.
     private(set) var cangjieRank: [Character: Double]
-    // Reverse index (char → 倉頡 code) for the 反查/拆碼提示 hint; rebuilt with the tables so it
-    // always matches the selected 倉頡版本.
-    private(set) var cangjieCodeIndex: CangjieCodeIndex
     let hanConvertFilter: HanConvertFilter
     // One shared user-learning store across all controllers.
     let userFreq: UserFrequency
@@ -32,9 +28,24 @@ final class SharedResources {
     // Pinyin mode (ref-counted). Built lazily from data.txt on the first acquire.
     let pinyinIndexCache: RefCountedResource<TonelessLanguageModelIndex>
 
+    // Simplex (速成) table: only needed once a controller actually selects 速成, so it's built
+    // lazily on first access rather than eagerly at launch (building it arrays + sorts all
+    // Cangjie entries). Guarded by a lock, mirroring RefCountedResource, since SharedResources
+    // is prewarmed off-main and read from the input controller. Invalidated (not rebuilt) by
+    // loadCangjieTables() on a 倉頡版本 change; the next access rebuilds for the new version.
+    private let simplexLock = NSLock()
+    private var cachedSimplexTable: SimplexTable?
+
+    // Reverse index (char → 倉頡 code) for the 反查/拆碼提示 hint. Only read when
+    // Preferences.codeHintEnabled is true (off by default), so it's built lazily on first
+    // access rather than unconditionally at launch. Same locking approach as simplexTable.
+    private let codeIndexLock = NSLock()
+    private var cachedCodeIndex: CangjieCodeIndex?
+
     private init() {
-        // Read data.txt to a String ONCE, then build both the LM and the associated
-        // phrases from that same string (the previous code parsed data.txt twice).
+        // Read data.txt to a String ONCE, split it into lines ONCE, then build both the LM
+        // ranking and the associated phrases from that SAME line array (the previous code
+        // split and tokenized data.txt twice — once per consumer).
         let dataText: String?
         if let url = Bundle.main.url(forResource: "data", withExtension: "txt") {
             dataText = try? String(contentsOf: url, encoding: .utf8)
@@ -42,31 +53,25 @@ final class SharedResources {
             dataText = nil
         }
 
-        // Derive the character ranking straight from data.txt WITHOUT building the full LM:
-        // nothing at runtime needs the whole model, and streaming avoids the transient ~55–80 MB
-        // table (lower launch peak memory + faster startup).
         if let text = dataText {
-            characterRank = LanguageModel.characterScores(fromText: text)
+            let lines = text.split(separator: "\n", omittingEmptySubsequences: true)
+            // Derive the character ranking straight from the lines WITHOUT building the full
+            // LM: nothing at runtime needs the whole model, and streaming avoids the transient
+            // ~55–80 MB table (lower launch peak memory + faster startup).
+            characterRank = LanguageModel.characterScores(fromLines: lines)
+            associatedPhrases = AssociatedPhrases(lines: lines)
         } else {
             NSLog("YahooKeyKey: data.txt missing; running with empty character ranking")
             characterRank = [:]
-        }
-
-        // Build associated phrases from the SAME data.txt string; fail safe to empty if missing.
-        if let text = dataText {
-            associatedPhrases = AssociatedPhrases(text: text)
-        } else {
             NSLog("YahooKeyKey: data.txt missing; running with empty associated phrases")
             associatedPhrases = AssociatedPhrases(text: "")
         }
 
-        // Placeholder empties satisfy Swift's two-phase init; the real tables for the
-        // selected version are loaded by loadCangjieTables() at the end of init (once every
+        // Placeholder empties satisfy Swift's two-phase init; the real table for the
+        // selected version is loaded by loadCangjieTables() at the end of init (once every
         // stored property is set, so an instance method may be called).
         cangjieTable = CangjieTable(text: "")
-        simplexTable = SimplexTable(cangjie: cangjieTable)
         cangjieRank = characterRank
-        cangjieCodeIndex = CangjieCodeIndex(table: cangjieTable)
 
         // Load the bundled TC→SC table for the "輸出簡體字" toggle; fail safe to an empty
         // (pass-through) table if missing, so the toggle simply leaves text unchanged.
@@ -102,35 +107,72 @@ final class SharedResources {
             return TonelessLanguageModelIndex(text: "")
         }
 
-        // All stored properties are now set: load the real tables for the selected version.
+        // All stored properties are now set: load the real Cangjie table for the selected
+        // version. simplexTable/cangjieCodeIndex are lazy and build on first access.
         loadCangjieTables(version: Preferences.cangjieVersion)
     }
 
-    // Load the Cangjie table, derive/load the Simplex table, and set the effective sort
-    // rank for the given version. 五代 uses the bundled ibus table + LM ranking; 三代 uses
-    // the Yahoo! KeyKey tables (cj-ext / simplex-ext) with their native line order (empty
-    // rank → the engines' stable sort preserves it).
+    // Load the Cangjie table and set the effective sort rank for the given version. 五代 uses
+    // the bundled ibus table + LM ranking; 三代 uses the Yahoo! KeyKey table (cj-ext) with its
+    // native line order (empty rank → the engines' stable sort preserves it).
     private func loadCangjieTables(version: CangjieVersion) {
         switch version {
         case .v5:
             cangjieTable = Self.loadCangjie(resource: "cangjie")
-            simplexTable = SimplexTable(cangjie: cangjieTable)
             cangjieRank = characterRank
         case .v3:
             cangjieTable = Self.loadCangjie(resource: "cangjie-yahoo")
-            // Yahoo 速成 has its own native order; load it directly. Fail-safe: derive from
-            // the Cangjie table if simplex-yahoo.txt is missing.
-            if let url = Bundle.main.url(forResource: "simplex-yahoo", withExtension: "txt"),
-               let loaded = try? SimplexTable(quickCodeContentsOf: url) {
-                simplexTable = loaded
-            } else {
-                NSLog("YahooKeyKey: simplex-yahoo.txt missing; deriving Simplex from Cangjie")
-                simplexTable = SimplexTable(cangjie: cangjieTable)
-            }
             cangjieRank = [:]   // native table order
         }
-        // Rebuild the reverse index from whichever table we just loaded.
-        cangjieCodeIndex = CangjieCodeIndex(table: cangjieTable)
+        // Drop any cached simplexTable/cangjieCodeIndex: both are derived from cangjieTable
+        // (or the version), so they must rebuild against the table just loaded. Rebuilding is
+        // deferred to the next access rather than done eagerly here.
+        simplexLock.lock()
+        cachedSimplexTable = nil
+        simplexLock.unlock()
+        codeIndexLock.lock()
+        cachedCodeIndex = nil
+        codeIndexLock.unlock()
+    }
+
+    // Builds the Simplex table for `version`. 五代 derives it from the Cangjie table; 三代 loads
+    // the Yahoo 速成 table's own native order directly, falling back to deriving from Cangjie if
+    // simplex-yahoo.txt is missing.
+    private static func buildSimplexTable(version: CangjieVersion, cangjieTable: CangjieTable) -> SimplexTable {
+        switch version {
+        case .v5:
+            return SimplexTable(cangjie: cangjieTable)
+        case .v3:
+            if let url = Bundle.main.url(forResource: "simplex-yahoo", withExtension: "txt"),
+               let loaded = try? SimplexTable(quickCodeContentsOf: url) {
+                return loaded
+            }
+            NSLog("YahooKeyKey: simplex-yahoo.txt missing; deriving Simplex from Cangjie")
+            return SimplexTable(cangjie: cangjieTable)
+        }
+    }
+
+    // The Simplex (速成) table for the currently-selected 倉頡版本, built lazily on first access
+    // and cached until the version changes (see loadCangjieTables). Thread-safe via simplexLock.
+    var simplexTable: SimplexTable {
+        simplexLock.lock()
+        defer { simplexLock.unlock() }
+        if let cached = cachedSimplexTable { return cached }
+        let built = Self.buildSimplexTable(version: Preferences.cangjieVersion, cangjieTable: cangjieTable)
+        cachedSimplexTable = built
+        return built
+    }
+
+    // The reverse (char → 倉頡 code) index for the 反查/拆碼提示 hint, built lazily on first
+    // access (it's only read when Preferences.codeHintEnabled is true) and cached until the
+    // 倉頡版本 changes (see loadCangjieTables). Thread-safe via codeIndexLock.
+    var cangjieCodeIndex: CangjieCodeIndex {
+        codeIndexLock.lock()
+        defer { codeIndexLock.unlock() }
+        if let cached = cachedCodeIndex { return cached }
+        let built = CangjieCodeIndex(table: cangjieTable)
+        cachedCodeIndex = built
+        return built
     }
 
     // The currently-resident Pinyin index (non-nil while a controller holds Pinyin), or an empty
@@ -149,7 +191,7 @@ final class SharedResources {
         return CangjieTable(text: "")
     }
 
-    // Rebuild the tables/rank for the currently-selected version and notify controllers to
+    // Rebuild the table/rank for the currently-selected version and notify controllers to
     // rebuild their live engines. Called when the user changes 倉頡版本 in Settings.
     func reloadCangjieTables() {
         loadCangjieTables(version: Preferences.cangjieVersion)
