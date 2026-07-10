@@ -147,6 +147,22 @@ final class UserFrequencyTests: XCTestCase {
         XCTAssertEqual(perms, 0o700)
     }
 
+    func testDefaultFileURLPointsAtAppSupport() {
+        let url = UserFrequency.defaultFileURL()
+        XCTAssertEqual(url.lastPathComponent, "user-frequency.json")
+        XCTAssertEqual(url.deletingLastPathComponent().lastPathComponent, "YahooKeyKey2")
+    }
+
+    func testFlushToUnwritableLocationDoesNotCrash() {
+        // A path under a regular file (not a directory) can't have its parent dir created, so
+        // save() hits its catch branch. The failure must be swallowed — no crash, no throw.
+        let unwritable = URL(fileURLWithPath: "/dev/null/nope/user-frequency.json")
+        let uf = UserFrequency(fileURL: unwritable)   // load also fails safe -> empty
+        uf.record("好")
+        uf.flush()                                    // save fails internally; logged, not fatal
+        XCTAssertGreaterThan(uf.bonus(for: "好"), 0)   // in-memory count still intact
+    }
+
     func testSingleCountIsCapped() {
         // bonus saturates: recording past the cap doesn't keep growing the count.
         let uf = UserFrequency(fileURL: fileURL)

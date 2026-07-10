@@ -33,6 +33,18 @@ final class CangjieCodeIndexTests: XCTestCase {
         XCTAssertEqual(Self.index.codeGlyphs(for: "倉"), "人口竹口")
     }
 
+    func testMultiCharacterCandidatesAreSkipped() {
+        // A code mapping to a multi-character string (a phrase) is not a single-glyph entry,
+        // so it must be ignored — only single characters get a 反查 code.
+        let t = CangjieTable(text: """
+        a\t日
+        abc\t你好
+        """)
+        let idx = CangjieCodeIndex(table: t)
+        XCTAssertEqual(idx.codeGlyphs(for: "日"), "日")   // single char indexed
+        XCTAssertNil(idx.codeGlyphs(for: "你"))           // phrase entry skipped entirely
+    }
+
     func testTieBreakIsLexicographicForEqualLength() {
         // Two equal-length codes for the same char: the lexicographically smaller wins.
         let t = CangjieTable(text: """

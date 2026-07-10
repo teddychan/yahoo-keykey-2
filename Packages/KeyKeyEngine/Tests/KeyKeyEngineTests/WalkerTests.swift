@@ -66,6 +66,25 @@ final class WalkerTests: XCTestCase {
 }
 
 extension WalkerTests {
+    // MARK: WalkNode.chosenText
+
+    func testChosenTextReturnsSelectedCandidate() {
+        let node = WalkNode(readingRange: 0..<1, candidates: ["你", "泥"], chosenIndex: 1)
+        XCTAssertEqual(node.chosenText, "泥")
+    }
+
+    func testChosenTextFallsBackToFirstWhenIndexOutOfRange() {
+        let high = WalkNode(readingRange: 0..<1, candidates: ["你", "泥"], chosenIndex: 5)
+        XCTAssertEqual(high.chosenText, "你")     // out of upper bound -> first
+        let negative = WalkNode(readingRange: 0..<1, candidates: ["你", "泥"], chosenIndex: -1)
+        XCTAssertEqual(negative.chosenText, "你")  // negative -> first
+    }
+
+    func testChosenTextIsEmptyWhenNoCandidates() {
+        let node = WalkNode(readingRange: 0..<1, candidates: [], chosenIndex: 0)
+        XCTAssertEqual(node.chosenText, "")
+    }
+
     func testLongInputCompletesQuickly() {
         let walker = Walker(index: index())
         let readings = Array(repeating: "ㄋㄧ", count: 24)
