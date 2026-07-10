@@ -30,10 +30,10 @@
 "keykey.about.cangjieTable" = "倉頡碼表";
 "keykey.about.hanConversion" = "漢字轉換";
 
-/* What's New pane (2.6.3) */
-"keykey.whatsNew.summary" = "本次更新讓 Yahoo KeyKey 2 更輕更快：啟動更迅速、佔用記憶體更少，輸入拼音時每次按鍵的運算也更精簡。";
-"keykey.whatsNew.perfMemory" = "啟動更快、記憶體用量更低。啟動時不再為了排序常用字而在記憶體中建立整份詞庫的複本，改為只讀取所需資料，因此 Yahoo KeyKey 2 啟動更迅速、佔用記憶體更少。您輸入的內容完全不受影響。";
-"keykey.whatsNew.perfPinyin" = "拼音輸入更有效率。組字時，引擎不再於每次按鍵重複進行排序運算，長詞句時尤其明顯。您看到的候選字與其排序，皆與先前完全相同。";
+/* What's New pane (2.6.4) */
+"keykey.whatsNew.summary" = "本次更新進一步縮減啟動時間與記憶體用量，並讓拼音在遇到異常輸入時仍保持流暢。";
+"keykey.whatsNew.perfMemory" = "啟動更快、更輕巧。啟動時，應用程式改以單次讀取詞庫（原本需讀取兩次），並僅在您實際使用時才建立速成碼表與反查／拆碼提示的反查索引。若您只使用倉頡或拼音，啟動時的運算與記憶體用量都更少。您輸入的內容完全不受影響。";
+"keykey.whatsNew.perfPinyin" = "拼音在異常輸入時依然流暢。連續輸入一長串無法組成有效音節的字母時，組字引擎不再於每次按鍵進行越來越多的運算。";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "從輸入來源中停用倉頡與速成";

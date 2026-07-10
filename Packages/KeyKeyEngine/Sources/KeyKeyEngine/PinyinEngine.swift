@@ -7,6 +7,12 @@ import Foundation
 public final class PinyinEngine {
     /// Upper bound on syllables in one composition (keeps the per-keystroke walk cheap).
     public static let maxComposingSyllables = 24
+    /// Upper bound on the raw input length (letters + apostrophes), independent of the
+    /// syllable cap above: a run of invalid letters/apostrophes never grows `syllables`,
+    /// so without this `raw` (and the O(n) re-segment on every keystroke) would grow
+    /// unbounded. 6 is a generous per-syllable character allowance (longest real
+    /// syllable, e.g. "zhuang", is 6 letters).
+    public static let maxRawLength = maxComposingSyllables * 6
 
     private let syllableTable: PinyinSyllableTable
     private let index: TonelessLanguageModelIndex
@@ -35,6 +41,11 @@ public final class PinyinEngine {
     @discardableResult
     public func handleKey(_ key: Character) -> Bool {
         guard (key.isLetter && key.isASCII) || key == "'" else { return false }
+        // Cap: refuse further input once the raw string itself is long enough that it
+        // could not possibly still be under the syllable limit (cheap check, done before
+        // the O(n) segment below, so a run of invalid input can't keep re-segmenting an
+        // ever-growing string).
+        guard raw.count < Self.maxRawLength else { return true }
         // Cap: refuse further input once at the syllable limit (swallow the key).
         let seg = segmenter.segment(raw + String(key))
         if seg.syllables.count > Self.maxComposingSyllables { return true }
@@ -99,6 +110,7 @@ public final class PinyinEngine {
 
     // MARK: Testing hooks
     public var syllableCountForTesting: Int { nodes.reduce(0) { $0 + $1.readingRange.count } }
+    public var rawLengthForTesting: Int { raw.count }
 
     // MARK: Private
 

@@ -2,6 +2,17 @@
 
 A plain-language list of changes in each version, newest first.
 
+## 2.6.4
+
+- **Starts up even faster and lighter.** At launch, Yahoo KeyKey 2 now reads its dictionary file
+  in a single pass instead of two, and it builds the **速成 (Simplex)** code table and the
+  **反查／拆碼提示** reverse-lookup index only when you actually use them. If you type only 倉頡 or
+  拼音, that's less work and less memory every time the app starts. Nothing you type changes.
+- **拼音 stays responsive on unusual input.** Typing a long run of letters that can't form valid
+  syllables no longer makes the pinyin composer do more and more work on every keystroke.
+- **Under the hood.** Added test coverage for the 拼音 and 速成 engines to match 倉頡 (user-learning
+  reranking, edge-case input handling, and real-dictionary checks), guarding against regressions.
+
 ## 2.6.3
 
 - **Faster startup and lower memory use.** At launch, Yahoo KeyKey 2 no longer builds a large

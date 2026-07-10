@@ -30,10 +30,10 @@
 "keykey.about.cangjieTable" = "Cangjie table";
 "keykey.about.hanConversion" = "Han conversion";
 
-/* What's New pane (2.6.3) */
-"keykey.whatsNew.summary" = "This update makes Yahoo KeyKey 2 lighter and faster: it starts up quicker, uses less memory, and does less work on each keystroke while you type 拼音.";
-"keykey.whatsNew.perfMemory" = "Faster startup and lower memory use. At launch the app no longer builds a large in-memory copy of its dictionary just to rank characters — it now reads only what it needs, so Yahoo KeyKey 2 starts up quicker and takes up less memory. Nothing you type changes.";
-"keykey.whatsNew.perfPinyin" = "拼音 typing is more efficient. While composing pinyin, the engine now avoids repeated sorting work on every keystroke — most noticeable with long phrases. The candidates you see, and their order, are exactly the same as before.";
+/* What's New pane (2.6.4) */
+"keykey.whatsNew.summary" = "This update trims startup and memory a little further, and keeps 拼音 responsive even on unusual input.";
+"keykey.whatsNew.perfMemory" = "Starts up even faster and lighter. At launch the app now reads its dictionary in a single pass instead of two, and it builds the 速成 (Simplex) table and the 反查／拆碼提示 reverse-lookup index only when you actually use them. If you type only 倉頡 or 拼音, that's less work and less memory at startup. What you type is unchanged.";
+"keykey.whatsNew.perfPinyin" = "拼音 stays responsive on unusual input. Typing a long run of letters that don't form valid syllables no longer makes the composer do more and more work on each keystroke.";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "Disable Cangjie and Simplex from Input Sources";

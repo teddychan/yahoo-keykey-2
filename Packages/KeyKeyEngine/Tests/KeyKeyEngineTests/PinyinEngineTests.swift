@@ -2,7 +2,7 @@ import XCTest
 @testable import KeyKeyEngine
 
 final class PinyinEngineTests: XCTestCase {
-    private func makeEngine() -> PinyinEngine {
+    private func makeEngine(userRank: @escaping (Character) -> Double = { _ in 0 }) -> PinyinEngine {
         let table = PinyinSyllableTable(text: """
         ni\tㄋㄧ
         hao\tㄏㄠ
@@ -15,7 +15,7 @@ final class PinyinEngineTests: XCTestCase {
         ㄋㄧ-ㄏㄠ 你好 -5.0
         ㄨㄛ 我 -3.0
         """)
-        return PinyinEngine(syllableTable: table, index: index, userRank: { _ in 0 })
+        return PinyinEngine(syllableTable: table, index: index, userRank: userRank)
     }
 
     func testTypingComposesBestPath() {
@@ -94,5 +94,68 @@ final class PinyinEngineTests: XCTestCase {
         let e = makeEngine()
         for _ in 0..<50 { _ = e.handleKey("n"); _ = e.handleKey("i") }
         XCTAssertLessThanOrEqual(e.syllableCountForTesting, PinyinEngine.maxComposingSyllables)
+    }
+
+    func testRawLengthCappedOnInvalidInput() {
+        // 'x' never extends a syllable, so pre-fix this would grow `raw` (and the
+        // per-keystroke re-segment) unbounded; the guard should cap it.
+        let e = makeEngine()
+        for _ in 0..<500 { _ = e.handleKey("x") }
+        XCTAssertLessThanOrEqual(e.rawLengthForTesting, PinyinEngine.maxRawLength)
+    }
+
+    func testUserRankPromotesLearnedChar() {
+        // No userRank boost leaves 你 (-3.0) ahead of 泥 (-6.0, see testCandidatesAtCursor);
+        // boosting 泥 flips the order.
+        let e = makeEngine(userRank: { $0 == "泥" ? 10 : 0 })
+        _ = e.handleKey("n"); _ = e.handleKey("i")
+        XCTAssertEqual(e.candidates, ["泥", "你"])
+    }
+
+    func testZeroUserRankLeavesOrderUnchanged() {
+        let e = makeEngine(userRank: { _ in 0 })
+        _ = e.handleKey("n"); _ = e.handleKey("i")
+        XCTAssertEqual(e.candidates, ["你", "泥"])
+    }
+
+    func testNonLetterIgnored() {
+        let e = makeEngine()
+        XCTAssertFalse(e.handleKey("1"))
+        XCTAssertFalse(e.handleKey(" "))
+        // Audit note: unlike CangjieEngine/SimplexEngine (whose radical maps are
+        // lowercase-only), PinyinEngine's guard is `key.isLetter && key.isASCII`, which
+        // does not check case, so uppercase "A" IS accepted (returns true) -- it just
+        // never matches a syllable and surfaces in the tail.
+        XCTAssertTrue(e.handleKey("A"))
+        XCTAssertEqual(e.composingText, "A")
+    }
+
+    func testApostropheKeyAccepted() {
+        XCTAssertTrue(makeEngine().handleKey("'"))
+    }
+
+    func testSelectOutOfRangeIgnored() {
+        let e = makeEngine()
+        _ = e.handleKey("n"); _ = e.handleKey("i")
+        e.selectCandidate(9)
+        XCTAssertEqual(e.composingText, "你")
+    }
+
+    func testSelectWithNoNodeIsSafe() {
+        let e = makeEngine()
+        e.selectCandidate(0)                 // no composing nodes yet -- guarded no-op
+        XCTAssertEqual(e.composingText, "")
+    }
+
+    func testBackspaceOnEmptyIsSafe() {
+        let e = makeEngine()
+        e.backspace()
+        XCTAssertEqual(e.composingText, "")
+    }
+
+    func testCommitEmptyReturnsEmpty() {
+        let e = makeEngine()
+        XCTAssertEqual(e.commit(), "")
+        XCTAssertEqual(e.composingText, "")
     }
 }

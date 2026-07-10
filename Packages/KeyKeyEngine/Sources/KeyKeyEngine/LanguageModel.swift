@@ -28,13 +28,14 @@ public struct LanguageModel {
     public func unigrams(forKey key: String) -> [Unigram] { table[key] ?? [] }
     public func hasKey(_ key: String) -> Bool { table[key] != nil }
 
-    /// Single-character max scores derived directly from the LM text, WITHOUT building the
-    /// full `[String: [Unigram]]` table. Streams each line once and keeps only single-character
-    /// values. Equivalent to `LanguageModel(text:).characterScores()`, but avoids the transient
-    /// ~55–80 MB table when only the character ranking is needed (the app's launch path).
-    public static func characterScores(fromText text: String) -> [Character: Double] {
+    /// Single-character max scores derived directly from already-split LM lines, WITHOUT
+    /// building the full `[String: [Unigram]]` table. Keeps only single-character values.
+    /// Callers that already have the file split into lines (e.g. to also build
+    /// `AssociatedPhrases` from the same lines) should use this to avoid re-splitting.
+    public static func characterScores(fromLines lines: [Substring]) -> [Character: Double] {
         var scores: [Character: Double] = [:]
-        for rawLine in text.split(separator: "\n", omittingEmptySubsequences: true) {
+        scores.reserveCapacity(16_000)
+        for rawLine in lines {
             let line = rawLine.trimmingCharacters(in: .whitespaces)
             if line.isEmpty || line.hasPrefix("#") { continue }
             let parts = line.split(separator: " ")
@@ -45,6 +46,14 @@ public struct LanguageModel {
             else { scores[ch] = score }
         }
         return scores
+    }
+
+    /// Single-character max scores derived directly from the LM text, WITHOUT building the
+    /// full `[String: [Unigram]]` table. Streams each line once and keeps only single-character
+    /// values. Equivalent to `LanguageModel(text:).characterScores()`, but avoids the transient
+    /// ~55–80 MB table when only the character ranking is needed (the app's launch path).
+    public static func characterScores(fromText text: String) -> [Character: Double] {
+        characterScores(fromLines: text.split(separator: "\n", omittingEmptySubsequences: true))
     }
 
     /// Maps each single-character value to the MAX score seen for it across all

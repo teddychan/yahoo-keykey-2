@@ -74,4 +74,50 @@ final class PinyinSegmenterTests: XCTestCase {
         // Both fang+an and fan+gan fully parse; longest-first from the left keeps fang+an.
         XCTAssertEqual(seg("fangan").syllables, ["fang", "an"])
     }
+
+    func testLeadingApostrophe() {
+        let r = seg("'nihao")
+        XCTAssertEqual(r.syllables, ["ni", "hao"])
+        XCTAssertEqual(r.tail, "")
+    }
+
+    func testTrailingApostrophe() {
+        let r = seg("nihao'")
+        XCTAssertEqual(r.syllables, ["ni", "hao"])
+        XCTAssertEqual(r.tail, "")
+    }
+
+    func testDoubledApostrophe() {
+        // Consecutive apostrophes behave like a single boundary (skipApostrophes
+        // advances past all of them), so "xi''an" segments exactly like "xi'an".
+        let r = seg("xi''an")
+        XCTAssertEqual(r.syllables, ["xi", "an"])
+        XCTAssertEqual(r.tail, "")
+    }
+
+    func testOnlyApostrophes() {
+        let r = seg("'''")
+        XCTAssertEqual(r.syllables, [])
+        XCTAssertEqual(r.tail, "")
+    }
+
+    func testApostropheOverridesGreedy() {
+        // Contrast with testAmbiguousStillPrefersLongestFirstWhenBothFullyParse: an
+        // explicit apostrophe forces the fan|gan boundary, blocking the "fang" reading
+        // that greedy left-to-right matching would otherwise pick for "fangan".
+        XCTAssertEqual(seg("fan'gan").syllables, ["fan", "gan"])
+    }
+
+    func testFullyInvalidInput() {
+        let r = seg("xyz")
+        XCTAssertEqual(r.syllables, [])
+        XCTAssertEqual(r.tail, "xyz")
+    }
+
+    func testVeryLongValidInputNoCrash() {
+        let long = String(repeating: "nihao", count: 16)   // 32 syllables
+        let r = seg(long)
+        XCTAssertEqual(r.syllables.count, 32)
+        XCTAssertEqual(r.tail, "")
+    }
 }

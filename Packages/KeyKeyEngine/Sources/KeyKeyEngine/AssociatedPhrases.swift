@@ -7,9 +7,13 @@ public struct AssociatedPhrases {
 
     private var table: [Character: [String]] = [:]
 
-    public init(text: String) {
+    /// Builds from already-split LM lines. Callers that already have the file split into
+    /// lines (e.g. to also build `LanguageModel.characterScores` from the same lines) should
+    /// use this to avoid re-splitting the same multi-MB text.
+    public init(lines: [Substring]) {
         var scored: [Character: [(phrase: String, score: Double)]] = [:]
-        for rawLine in text.split(separator: "\n", omittingEmptySubsequences: true) {
+        scored.reserveCapacity(6_000)
+        for rawLine in lines {
             let line = rawLine.trimmingCharacters(in: .whitespaces)
             if line.isEmpty || line.hasPrefix("#") { continue }
             let parts = line.split(separator: " ")
@@ -18,6 +22,7 @@ public struct AssociatedPhrases {
             guard phrase.count >= 2, let first = phrase.first else { continue }
             scored[first, default: []].append((phrase, score))
         }
+        table.reserveCapacity(scored.count)
         for (first, entries) in scored {
             var seen = Set<String>()
             var phrases: [String] = []
@@ -29,6 +34,10 @@ public struct AssociatedPhrases {
             }
             table[first] = phrases
         }
+    }
+
+    public init(text: String) {
+        self.init(lines: text.split(separator: "\n", omittingEmptySubsequences: true))
     }
 
     public init(contentsOf url: URL) throws {
