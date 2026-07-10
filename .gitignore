@@ -1,5 +1,6 @@
 .DS_Store
 Packages/KeyKeyEngine/.build/
+Packages/KeyKeyApp/.build/
 
 Resources/data.txt
 .lm-build/

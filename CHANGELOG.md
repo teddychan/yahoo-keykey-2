@@ -2,6 +2,17 @@
 
 A plain-language list of changes in each version, newest first.
 
+## Unreleased
+
+- **More automated tests, no behavior change.** Added 32 test cases (bringing the total to 209),
+  raising region test coverage of the input engine to **92%** and adding a new **91%**-covered
+  test suite for the app's settings and screen-content logic. New coverage includes: candidate
+  font-size clamping and preference persistence (`Preferences`), the 速成 (Simplex) quick-code
+  table loader, user-frequency file handling and save-failure safety, the 反查／拆碼提示
+  reverse-lookup index, best-path walker edge cases, the input-method engine protocol contract,
+  and the About / What's New content. Nothing you type changes — this only guards against future
+  regressions.
+
 ## 2.6.4
 
 - **Starts up even faster and lighter.** At launch, Yahoo KeyKey 2 now reads its dictionary file
