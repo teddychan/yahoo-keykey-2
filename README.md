@@ -10,6 +10,7 @@ loved. It brings the familiar Cangjie (倉頡) and Simplex (速成) typing exper
 modern macOS — native, fast, and free.
 
 [![Download](https://img.shields.io/badge/download-latest-brightgreen?style=flat-square)](https://github.com/teddychan/yahoo-keykey-2/releases/latest)
+[![Tests](https://img.shields.io/github/actions/workflow/status/teddychan/yahoo-keykey-2/tests.yml?branch=main&style=flat-square&label=tests)](https://github.com/teddychan/yahoo-keykey-2/actions/workflows/tests.yml)
 ![Platform](https://img.shields.io/badge/platform-macOS%2026%2B-blue?style=flat-square)
 ![Architecture](https://img.shields.io/badge/arch-Apple%20Silicon-blue?style=flat-square)
 [![License](https://img.shields.io/github/license/teddychan/yahoo-keykey-2?style=flat-square)](LICENSE)
