@@ -1,0 +1,38 @@
+name: Tests
+
+# Runs the unit-test suites on every PR to main (and pushes to main). Build/release stays in
+# release.yml — this job never signs, notarizes, or releases anything.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    # macOS 26 image: same runner the release build targets (macOS 26 SDK, Swift 6.2).
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Swift version
+        run: swift --version
+
+      # KeyKeyEngine has no external dependencies — it tests standalone.
+      - name: Engine tests (KeyKeyEngine)
+        run: swift test --package-path Packages/KeyKeyEngine
+
+      # The App-logic package depends on the pinned DragonKit checkout (vendor/ is gitignored,
+      # cloned on demand). Read the SAME tag build-app.sh pins so CI never drifts from release.
+      - name: Vendor DragonKit
+        run: |
+          TAG=$(grep -oE 'DRAGONKIT_TAG="[^"]+"' tools/build-app.sh | head -1 | cut -d'"' -f2)
+          echo "Cloning DragonKit $TAG"
+          git clone --depth 1 --branch "$TAG" https://github.com/teddychan/dragon-kit vendor/dragon-kit
+
+      - name: App-logic tests (KeyKeyApp)
+        run: swift test --package-path Packages/KeyKeyApp

@@ -10,8 +10,8 @@ A plain-language list of changes in each version, newest first.
   font-size clamping and preference persistence (`Preferences`), the 速成 (Simplex) quick-code
   table loader, user-frequency file handling and save-failure safety, the 反查／拆碼提示
   reverse-lookup index, best-path walker edge cases, the input-method engine protocol contract,
-  and the About / What's New content. Nothing you type changes — this only guards against future
-  regressions.
+  and the About / What's New content. Both test suites now run automatically in CI on every
+  pull request. Nothing you type changes — this only guards against future regressions.
 
 ## 2.6.4
 
