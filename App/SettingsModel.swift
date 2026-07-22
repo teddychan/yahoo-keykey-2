@@ -74,6 +74,16 @@ final class SettingsModel {
         }
     }
 
+    // 聯想選字鍵 (issue #52). Stored + observation-tracked like `cangjieVersion` above so the
+    // menu-style Picker selection sticks (a computed forwarder would silently revert). `didSet`
+    // writes through to Preferences, which InputController reads live on the next composition.
+    var associationTrigger: AssociationTrigger = Preferences.associationSelectionTrigger {
+        didSet {
+            guard associationTrigger != oldValue else { return }
+            Preferences.associationSelectionTrigger = associationTrigger
+        }
+    }
+
     var minFontSize: Double { Double(Preferences.minFontSize) }
     var maxFontSize: Double { Double(Preferences.maxFontSize) }
 
