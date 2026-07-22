@@ -234,6 +234,19 @@ git commit -m "feat: add associated-phrase selection-key picker to settings (#52
 - Consumes: `Preferences.associationSelectionTrigger`, `AssociationTrigger` (Task 1).
 - Produces: no new symbols; changes runtime behavior of the association digit branch.
 
+- [ ] **Step 0: Add the number-row key-code map**
+
+In `App/InputController.swift`, add this static constant immediately after `private static let pageSize = 9` (line 26):
+
+```swift
+    // Number-row key codes → digit (1–9). Layout-stable and Shift-independent, unlike
+    // `characters`/`charactersIgnoringModifiers`, which return the shifted symbol (7 → &).
+    // Used to detect Shift+digit for associated-phrase selection (issue #52).
+    private static let numberRowDigits: [UInt16: Int] = [
+        18: 1, 19: 2, 20: 3, 21: 4, 23: 5, 22: 6, 26: 7, 28: 8, 25: 9,
+    ]
+```
+
 - [ ] **Step 1: Replace the digit-selection block**
 
 In `App/InputController.swift`, inside `if !associations.isEmpty { … }`, replace this existing block:
@@ -264,9 +277,10 @@ with:
             // Which digit (if any) selects an associated phrase depends on the configured
             // trigger (issue #52). In .number mode a plain 1–9 picks (Shift+digit yields a
             // symbol that Int() rejects, so it falls through and dismisses, as before). In
-            // .shift mode only Shift+1–9 with no ⌃⌥⌘ picks — read from the base key, since
-            // Shift+digit's `characters` is a symbol — and a bare digit is NOT a pick, so it
-            // falls through, dismisses, and the idle engine lets the app type the number.
+            // .shift mode only Shift+1–9 with no ⌃⌥⌘ picks — matched by physical key code,
+            // since `characters`/`charactersIgnoringModifiers` both apply Shift (7 → &) — and
+            // a bare digit is NOT a pick, so it falls through, dismisses, and the idle engine
+            // lets the app type the number.
             let selectionDigit: Int? = {
                 switch Preferences.associationSelectionTrigger {
                 case .number:
@@ -274,7 +288,7 @@ with:
                 case .shift:
                     if event.modifierFlags.contains(.shift),
                        event.modifierFlags.intersection([.control, .option, .command]).isEmpty,
-                       let base = event.charactersIgnoringModifiers, let d = Int(base), (1...9).contains(d) { return d }
+                       let d = InputController.numberRowDigits[event.keyCode] { return d }
                 }
                 return nil
             }()

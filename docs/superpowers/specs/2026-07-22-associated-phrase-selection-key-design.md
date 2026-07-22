@@ -77,11 +77,13 @@ of which digit (if any) selects a phrase:
 - `.number` mode: **unchanged** — a plain digit read from `event.characters`
   picks; `Shift`+digit yields a symbol (not an `Int`), so it falls through to
   the existing "any other key: dismiss" path exactly as today.
-- `.shift` mode: only `Shift`+digit (with no `⌃`/`⌥`/`⌘`), reading the base
-  digit via `charactersIgnoringModifiers`, picks. A plain digit is **not** a
-  pick, so control falls through to `clearAssociations()` and then normal
-  handling; the idle engine rejects the digit and `handle()` returns `false`,
-  so the app types the literal number.
+- `.shift` mode: only `Shift`+digit (with no `⌃`/`⌥`/`⌘`), matched by physical
+  key code, picks. (`charactersIgnoringModifiers` still applies Shift, so
+  `Shift`+`7` reads as `"&"`, not `"7"` — the digit must come from the key code,
+  matching the Space/arrow key-code handling already in this block.) A plain
+  digit is **not** a pick, so control falls through to `clearAssociations()` and
+  then normal handling; the idle engine rejects the digit and `handle()` returns
+  `false`, so the app types the literal number.
 
 The phrase-insertion body is unchanged and shared by both modes: index into the
 current page, insert only the continuation after the just-committed character
