@@ -4,6 +4,11 @@ A plain-language list of changes in each version, newest first.
 
 ## Unreleased
 
+- **Page Up / Page Down now flip 聯想 (associated-phrase) pages.** When Yahoo KeyKey 2 offers
+  follow-on phrases after you commit a character, you can now page through them with **Page Up**
+  (previous page) and **Page Down** (next page), the way many traditional Chinese IMEs do — in
+  addition to the existing arrow keys and Space.
+
 - **More automated tests, no behavior change.** Added 32 test cases (bringing the total to 209),
   raising region test coverage of the input engine to **92%** and adding a new **91%**-covered
   test suite for the app's settings and screen-content logic. New coverage includes: candidate
