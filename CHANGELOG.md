@@ -4,6 +4,10 @@ A plain-language list of changes in each version, newest first.
 
 ## Unreleased
 
+- **Page Up / Page Down now flip candidate pages.** In both the 倉頡／速成 candidate window and
+  the 聯想 (associated-phrase) window, you can now page through choices with **Page Up**
+  (previous page) and **Page Down** (next page), the way many traditional Chinese IMEs do — in
+  addition to the existing arrow keys and Space.
 - **Corrected the install instructions.** Releases ship a `.zip` (not a `.pkg`), so the
   README and the `Install.txt` inside the download now tell you to unzip and move
   `YahooKeyKey2.app` into `~/Library/Input Methods/` yourself — or just use Homebrew.

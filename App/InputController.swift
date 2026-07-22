@@ -273,10 +273,10 @@ final class InputController: IMKInputController {
             switch event.keyCode {
             case 53: // Escape dismisses associations
                 clearAssociations(); return true
-            case 125, 124: // Down / Right arrow → next page
+            case 125, 124, 121: // Down / Right arrow / Page Down → next page
                 if candidatePage < lastPage { candidatePage += 1; refresh(client) }
                 return true
-            case 126, 123: // Up / Left arrow → previous page
+            case 126, 123, 116: // Up / Left arrow / Page Up → previous page
                 if candidatePage > 0 { candidatePage -= 1; refresh(client) }
                 return true
             default: break
@@ -397,10 +397,10 @@ final class InputController: IMKInputController {
             let count = engine.candidates.count
             let lastPage = (count - 1) / InputController.pageSize
             switch event.keyCode {
-            case 125, 124: // Down / Right arrow → next page
+            case 125, 124, 121: // Down / Right arrow / Page Down → next page
                 if candidatePage < lastPage { candidatePage += 1; refresh(client) }
                 return true
-            case 126, 123: // Up / Left arrow → previous page
+            case 126, 123, 116: // Up / Left arrow / Page Up → previous page
                 if candidatePage > 0 { candidatePage -= 1; refresh(client) }
                 return true
             default: break
