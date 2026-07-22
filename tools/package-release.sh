@@ -103,7 +103,7 @@ fi
 # Stage a clean directory holding the app and a plain-text install guide, then
 # zip its CONTENTS at the archive root. The same zip is BOTH the user download
 # and the Sparkle update payload — Sparkle locates YahooKeyKey2.app inside it,
-# the extra Install.txt is ignored. (No DMG: the release ships .pkg + .zip only.)
+# the extra Install.txt is ignored. (No DMG/.pkg: the release ships the .zip only.)
 echo "==> Staging zip contents (app + Install.txt)"
 STAGE="$BUILD/zip-stage"
 rm -rf "$STAGE"
@@ -113,12 +113,11 @@ cp -R "$APP" "$STAGE/$APP_NAME"
 cat > "$STAGE/Install.txt" <<EOF
 Yahoo KeyKey 2 — Install
 
-The easiest way is the .pkg installer (double-click and click through; no admin
-password). To install from this zip manually instead:
+Install from this zip by copying the app into your Input Methods folder:
 
 1. Copy "YahooKeyKey2.app" into your Input Methods folder:
        ~/Library/Input Methods/
-   (Create the folder if it does not exist.)
+   (Create the folder if it does not exist. No admin password needed.)
 
 2. Log out and log back in. macOS only scans input methods at login.
 

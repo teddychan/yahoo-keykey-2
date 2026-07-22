@@ -25,6 +25,11 @@ private struct GeneralPaneView: View {
                 Toggle(L("keykey.general.associatedPhrases"), isOn: $model.associatedPhrases)
                 Toggle(L("keykey.general.associationContinuationOnly"), isOn: $model.associationContinuationOnly)
                     .dragonAnnotation(LocalizedStringKey(L("keykey.general.associationContinuationOnlyHint")))
+                Picker(L("keykey.general.associationTrigger"), selection: $model.associationTrigger) {
+                    Text(L("keykey.general.associationTriggerNumber")).tag(AssociationTrigger.number)
+                    Text(L("keykey.general.associationTriggerShift")).tag(AssociationTrigger.shift)
+                }
+                .dragonAnnotation(LocalizedStringKey(L("keykey.general.associationTriggerHint")))
                 Toggle(L("keykey.general.codeHint"), isOn: $model.codeHint)
                     .dragonAnnotation(LocalizedStringKey(L("keykey.general.codeHintHint")))
             }

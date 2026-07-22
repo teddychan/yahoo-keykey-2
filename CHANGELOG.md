@@ -8,7 +8,10 @@ A plain-language list of changes in each version, newest first.
   the 聯想 (associated-phrase) window, you can now page through choices with **Page Up**
   (previous page) and **Page Down** (next page), the way many traditional Chinese IMEs do — in
   addition to the existing arrow keys and Space.
-
+- **Corrected the install instructions.** Releases ship a `.zip` (not a `.pkg`), so the
+  README and the `Install.txt` inside the download now tell you to unzip and move
+  `YahooKeyKey2.app` into `~/Library/Input Methods/` yourself — or just use Homebrew.
+  No app behavior changes; documentation only.
 - **More automated tests, no behavior change.** Added 32 test cases (bringing the total to 209),
   raising region test coverage of the input engine to **92%** and adding a new **91%**-covered
   test suite for the app's settings and screen-content logic. New coverage includes: candidate

@@ -56,22 +56,24 @@ never open-sourced — so associations use Yahoo KeyKey 2's own ordering in both
 
 ## Install
 
-### Installer (`.pkg`)
-
-1. Download `YahooKeyKey2.pkg` from the [latest release](https://github.com/teddychan/yahoo-keykey-2/releases/latest)
-   and double-click it. It installs to `~/Library/Input Methods` without admin rights.
-2. Log out and back in when prompted.
-3. Add the input source: **System Settings ▸ Keyboard ▸ Input Sources ▸ + ▸ Traditional Chinese**
-   → add **倉頡** and/or **速成**.
-4. Press **Ctrl-Space** to switch to Yahoo KeyKey 2 and start typing.
-
-### Homebrew
+### Homebrew (recommended)
 
 ```sh
 brew install --cask teddychan/tap/yahoo-keykey-2
 ```
 
-Then log out and back in to load the input method.
+Then log out and back in to load the input method, and continue from step 4 below.
+
+### Manual (`.zip`)
+
+1. Download `YahooKeyKey2-<version>.zip` from the [latest release](https://github.com/teddychan/yahoo-keykey-2/releases/latest)
+   and unzip it.
+2. Move `YahooKeyKey2.app` into `~/Library/Input Methods/` (create the folder if it
+   does not exist). No admin rights needed.
+3. Log out and back in — macOS only scans input methods at login.
+4. Add the input source: **System Settings ▸ Keyboard ▸ Input Sources ▸ + ▸ Traditional Chinese**
+   → add **倉頡** and/or **速成**.
+5. Press **Ctrl-Space** to switch to Yahoo KeyKey 2 and start typing.
 
 ## Credits
 
