@@ -4,8 +4,8 @@ A plain-language list of changes in each version, newest first.
 
 ## Unreleased
 
-- **Page Up / Page Down now flip 聯想 (associated-phrase) pages.** When Yahoo KeyKey 2 offers
-  follow-on phrases after you commit a character, you can now page through them with **Page Up**
+- **Page Up / Page Down now flip candidate pages.** In both the 倉頡／速成 candidate window and
+  the 聯想 (associated-phrase) window, you can now page through choices with **Page Up**
   (previous page) and **Page Down** (next page), the way many traditional Chinese IMEs do — in
   addition to the existing arrow keys and Space.
 
