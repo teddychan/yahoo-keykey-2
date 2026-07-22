@@ -11,6 +11,10 @@
 "keykey.general.associatedPhrases" = "聯想字詞";
 "keykey.general.associationContinuationOnly" = "聯想只顯示接續字";
 "keykey.general.associationContinuationOnlyHint" = "顯示「係／心／於」而非「關係」，如原版 Yahoo! KeyKey。所提交的字不變。";
+"keykey.general.associationTrigger" = "聯想選字鍵";
+"keykey.general.associationTriggerNumber" = "數字鍵";
+"keykey.general.associationTriggerShift" = "Shift + 數字";
+"keykey.general.associationTriggerHint" = "選「Shift + 數字」時，直接按數字鍵會輸入該數字，而不會選取聯想詞，方便在字後接著打數字（例如「這周有7天」）。";
 "keykey.general.codeHint" = "反查提示";
 "keykey.general.codeHintHint" = "在候選字旁顯示該字的倉頡拆碼（例：倉 → 人口竹口），方便學習與核對。";
 "keykey.general.appearance" = "外觀";

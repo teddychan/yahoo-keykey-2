@@ -11,6 +11,10 @@
 "keykey.general.associatedPhrases" = "Associated phrases (聯想)";
 "keykey.general.associationContinuationOnly" = "Show only the continuation in associated phrases";
 "keykey.general.associationContinuationOnlyHint" = "Show 係／心／於 instead of 關係, like the original Yahoo! KeyKey. What you commit is unchanged.";
+"keykey.general.associationTrigger" = "Associated-phrase selection key";
+"keykey.general.associationTriggerNumber" = "Number key";
+"keykey.general.associationTriggerShift" = "Shift + Number";
+"keykey.general.associationTriggerHint" = "With “Shift + Number”, a plain number key types the digit instead of picking an associated phrase — handy for typing numbers right after a character (e.g. 這周有7天).";
 "keykey.general.codeHint" = "Show Cangjie code hint";
 "keykey.general.codeHintHint" = "Show each character's Cangjie code beside the candidate (e.g. 倉 → 人口竹口) to help you learn and verify its decomposition.";
 "keykey.general.appearance" = "Appearance";

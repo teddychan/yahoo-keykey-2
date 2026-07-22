@@ -24,6 +24,12 @@ final class InputController: IMKInputController {
     // association mode. Paged with `candidatePage`, shown in the same numbered candidate window.
     private var associations: [String] = []
     private static let pageSize = 9
+    // Number-row key codes → digit (1–9). Layout-stable and Shift-independent, unlike
+    // `characters`/`charactersIgnoringModifiers`, which return the shifted symbol (7 → &).
+    // Used to detect Shift+digit for associated-phrase selection (issue #52).
+    private static let numberRowDigits: [UInt16: Int] = [
+        18: 1, 19: 2, 20: 3, 21: 4, 23: 5, 22: 6, 26: 7, 28: 8, 25: 9,
+    ]
 
     override init!(server: IMKServer!, delegate: Any!, client inputClient: Any!) {
         // All heavy resources are loaded ONCE in SharedResources and shared across every
@@ -283,7 +289,25 @@ final class InputController: IMKInputController {
                 refresh(client)
                 return true
             }
-            if let chars = event.characters, let d = Int(chars), (1...9).contains(d) {
+            // Which digit (if any) selects an associated phrase depends on the configured
+            // trigger (issue #52). In .number mode a plain 1–9 picks (Shift+digit yields a
+            // symbol that Int() rejects, so it falls through and dismisses, as before). In
+            // .shift mode only Shift+1–9 with no ⌃⌥⌘ picks — matched by physical key code,
+            // since `characters`/`charactersIgnoringModifiers` both apply Shift (7 → &) — and
+            // a bare digit is NOT a pick, so it falls through, dismisses, and the idle engine
+            // lets the app type the number.
+            let selectionDigit: Int? = {
+                switch Preferences.associationSelectionTrigger {
+                case .number:
+                    if let chars = event.characters, let d = Int(chars), (1...9).contains(d) { return d }
+                case .shift:
+                    if event.modifierFlags.contains(.shift),
+                       event.modifierFlags.intersection([.control, .option, .command]).isEmpty,
+                       let d = InputController.numberRowDigits[event.keyCode] { return d }
+                }
+                return nil
+            }()
+            if let d = selectionDigit {
                 let index = candidatePage * InputController.pageSize + (d - 1)
                 if index < count {
                     // Associations are full phrases that START with the just-committed

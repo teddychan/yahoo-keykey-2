@@ -10,7 +10,7 @@ final class PreferencesTests: XCTestCase {
     override func tearDown() {
         for key in ["candidateFontSize", "associatedPhrasesEnabled", "fullWidthPunctuationEnabled",
                     "outputSimplifiedEnabled", "cangjieVersion", "associationContinuationOnly",
-                    "codeHintEnabled"] {
+                    "codeHintEnabled", "associationSelectionTrigger"] {
             defaults.removeObject(forKey: key)
         }
         super.tearDown()
@@ -94,12 +94,42 @@ final class PreferencesTests: XCTestCase {
         XCTAssertEqual(Preferences.cangjieVersion, .v5)
     }
 
+    // MARK: associationSelectionTrigger
+
+    func testAssociationTriggerRoundTrip() {
+        Preferences.associationSelectionTrigger = .shift
+        XCTAssertEqual(Preferences.associationSelectionTrigger, .shift)
+        Preferences.associationSelectionTrigger = .number
+        XCTAssertEqual(Preferences.associationSelectionTrigger, .number)
+    }
+
+    func testAssociationTriggerUnknownRawFallsBackToNumber() {
+        defaults.set("zzz", forKey: "associationSelectionTrigger")   // not a valid case
+        XCTAssertEqual(Preferences.associationSelectionTrigger, .number)
+    }
+
+    func testAssociationTriggerAbsentFallsBackToNumber() {
+        defaults.removeObject(forKey: "associationSelectionTrigger")
+        XCTAssertEqual(Preferences.associationSelectionTrigger, .number)
+    }
+
+    func testAssociationTriggerRawValues() {
+        XCTAssertEqual(AssociationTrigger.number.rawValue, "number")
+        XCTAssertEqual(AssociationTrigger.shift.rawValue, "shift")
+    }
+
+    func testAssociationTriggerInitFromRawValue() {
+        XCTAssertEqual(AssociationTrigger(rawValue: "number"), .number)
+        XCTAssertEqual(AssociationTrigger(rawValue: "shift"), .shift)
+        XCTAssertNil(AssociationTrigger(rawValue: "x"))
+    }
+
     // MARK: registerDefaults
 
     func testRegisterDefaultsSuppliesSensibleFirstLaunchValues() {
         for key in ["candidateFontSize", "associatedPhrasesEnabled", "fullWidthPunctuationEnabled",
                     "outputSimplifiedEnabled", "cangjieVersion", "associationContinuationOnly",
-                    "codeHintEnabled"] {
+                    "codeHintEnabled", "associationSelectionTrigger"] {
             defaults.removeObject(forKey: key)
         }
         Preferences.registerDefaults()
@@ -109,6 +139,7 @@ final class PreferencesTests: XCTestCase {
         XCTAssertFalse(Preferences.associationContinuationOnly)
         XCTAssertFalse(Preferences.codeHintEnabled)
         XCTAssertEqual(Preferences.cangjieVersion, .v5)
+        XCTAssertEqual(Preferences.associationSelectionTrigger, .number)
         XCTAssertEqual(Preferences.candidateFontSize, 18)    // defaultFontSize
     }
 
