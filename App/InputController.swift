@@ -233,6 +233,12 @@ final class InputController: IMKInputController {
     override func handle(_ event: NSEvent!, client sender: Any!) -> Bool {
         guard let event, event.type == .keyDown, let client = sender as? IMKTextInput else { return false }
 
+        // ⌘/⌃ combinations (⌘C copy, ⌘X cut, ⌘V paste, ⌃A …) are app/system shortcuts, never IME
+        // input, so hand them straight back to the app. Without this the engine would treat ⌘C's
+        // base letter "c" as the radical 金 and swallow the copy (issue #56); it also stops ⌘/⌃
+        // with Space/Return/arrows from being eaten by the paging/commit branches below.
+        if KeyEventPolicy.isSystemShortcut(event.modifierFlags) { return false }
+
         // 臨時英數 (quick English), classic Yahoo! KeyKey style: Shift + a letter (and no other
         // modifier) emits that English letter directly. Case follows CAPS LOCK, not Shift — Shift
         // is only the trigger — so it's lowercase with Caps off, uppercase with Caps on. Any
