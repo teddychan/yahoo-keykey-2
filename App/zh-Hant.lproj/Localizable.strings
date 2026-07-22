@@ -34,10 +34,11 @@
 "keykey.about.cangjieTable" = "倉頡碼表";
 "keykey.about.hanConversion" = "漢字轉換";
 
-/* What's New pane (2.6.4) */
-"keykey.whatsNew.summary" = "本次更新進一步縮減啟動時間與記憶體用量，並讓拼音在遇到異常輸入時仍保持流暢。";
-"keykey.whatsNew.perfMemory" = "啟動更快、更輕巧。啟動時，應用程式改以單次讀取詞庫（原本需讀取兩次），並僅在您實際使用時才建立速成碼表與反查／拆碼提示的反查索引。若您只使用倉頡或拼音，啟動時的運算與記憶體用量都更少。您輸入的內容完全不受影響。";
-"keykey.whatsNew.perfPinyin" = "拼音在異常輸入時依然流暢。連續輸入一長串無法組成有效音節的字母時，組字引擎不再於每次按鍵進行越來越多的運算。";
+/* What's New pane (2.7.0) */
+"keykey.whatsNew.summary" = "本次更新新增 Page Up／Page Down 翻頁、可選擇以 Shift＋數字挑選聯想字詞，並修正被輸入法攔截的 ⌘／⌃ 快捷鍵。";
+"keykey.whatsNew.paging" = "Page Up／Page Down 可翻頁。在倉頡／速成候選字視窗與聯想字詞視窗中，除了方向鍵與空白鍵外，現在也可用 Page Up 與 Page Down 前後翻頁。";
+"keykey.whatsNew.assocKey" = "可自行選擇挑選聯想字詞的按鍵。設定… ▸ 一般 新增一個選項：維持預設（以 1–9 直接挑選聯想字詞），或改為 Shift＋1–9；改用後，單獨按 1–9 會直接輸入該數字，方便在字元後緊接著輸入數字（例如「這周有7天。」）。預設維持不變，現有使用者不受影響。";
+"keykey.whatsNew.shortcutPassthrough" = "⌘ 與 ⌃ 快捷鍵恢復正常傳遞。選用 Yahoo KeyKey 2 時，⌘C／⌘X／⌘V 等組合鍵原本會被輸入法攔截（⌘C 可能被當成倉頡字根「金」）而無法複製、剪下或貼上，現在會正確傳給應用程式。";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "從輸入來源中停用倉頡與速成";

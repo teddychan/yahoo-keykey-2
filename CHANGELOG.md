@@ -2,12 +2,20 @@
 
 A plain-language list of changes in each version, newest first.
 
-## Unreleased
+## 2.7.0
 
 - **Page Up / Page Down now flip candidate pages.** In both the 倉頡／速成 candidate window and
   the 聯想 (associated-phrase) window, you can now page through choices with **Page Up**
   (previous page) and **Page Down** (next page), the way many traditional Chinese IMEs do — in
   addition to the existing arrow keys and Space.
+- **Choose how to pick associated phrases.** A new **設定… ▸ 一般** option lets you keep the
+  default (**1–9** picks an associated phrase) or switch to **Shift + 1–9** — with that on, a
+  plain **1–9** types the digit and dismisses the suggestions, so numbers flow naturally right
+  after a character (e.g. `這周有7天。`). Default is unchanged, so existing users see no difference.
+- **Fixed: ⌘ and ⌃ shortcuts now pass through to the app.** With Yahoo KeyKey 2 selected,
+  combinations like **⌘C / ⌘X / ⌘V** were intercepted by the input method (⌘C could turn into the
+  倉頡 radical 金) instead of copying, cutting, or pasting. ⌘/⌃ key combinations now reach the app
+  as expected.
 - **Corrected the install instructions.** Releases ship a `.zip` (not a `.pkg`), so the
   README and the `Install.txt` inside the download now tell you to unzip and move
   `YahooKeyKey2.app` into `~/Library/Input Methods/` yourself — or just use Homebrew.
