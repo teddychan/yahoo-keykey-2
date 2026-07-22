@@ -8,6 +8,14 @@ enum CangjieVersion: String {
     case v3 = "3"          // 三代倉頡 — Yahoo! KeyKey cj-ext table + native order
 }
 
+// Which key selects an associated phrase (聯想) in the numbered candidate window.
+// `.number` keeps the classic direct 1–9 pick; `.shift` requires Shift+1–9 so a bare
+// 1–9 types the digit instead — smoother when mixing numbers with Chinese (issue #52).
+enum AssociationTrigger: String {
+    case number = "number"   // default — plain 1–9 picks
+    case shift  = "shift"    // Shift+1–9 picks; plain 1–9 types the digit
+}
+
 // Typed accessors for the user-facing settings, persisted in the IME process's
 // standard UserDefaults. Read live (no caching) so changes apply without restarting.
 enum Preferences {
@@ -19,6 +27,7 @@ enum Preferences {
         static let cangjieVersion = "cangjieVersion"
         static let associationContinuationOnly = "associationContinuationOnly"
         static let codeHintEnabled = "codeHintEnabled"
+        static let associationSelectionTrigger = "associationSelectionTrigger"
     }
 
     static let minFontSize: CGFloat = 14
@@ -35,6 +44,7 @@ enum Preferences {
             Key.cangjieVersion: CangjieVersion.v5.rawValue,
             Key.associationContinuationOnly: false,
             Key.codeHintEnabled: false,
+            Key.associationSelectionTrigger: AssociationTrigger.number.rawValue,
         ])
     }
 
@@ -83,5 +93,11 @@ enum Preferences {
     static var codeHintEnabled: Bool {
         get { UserDefaults.standard.bool(forKey: Key.codeHintEnabled) }
         set { UserDefaults.standard.set(newValue, forKey: Key.codeHintEnabled) }
+    }
+
+    // Which key selects an associated phrase; unknown/absent falls back to plain number keys.
+    static var associationSelectionTrigger: AssociationTrigger {
+        get { AssociationTrigger(rawValue: UserDefaults.standard.string(forKey: Key.associationSelectionTrigger) ?? "") ?? .number }
+        set { UserDefaults.standard.set(newValue.rawValue, forKey: Key.associationSelectionTrigger) }
     }
 }
