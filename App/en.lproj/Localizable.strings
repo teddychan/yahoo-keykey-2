@@ -34,10 +34,11 @@
 "keykey.about.cangjieTable" = "Cangjie table";
 "keykey.about.hanConversion" = "Han conversion";
 
-/* What's New pane (2.6.4) */
-"keykey.whatsNew.summary" = "This update trims startup and memory a little further, and keeps 拼音 responsive even on unusual input.";
-"keykey.whatsNew.perfMemory" = "Starts up even faster and lighter. At launch the app now reads its dictionary in a single pass instead of two, and it builds the 速成 (Simplex) table and the 反查／拆碼提示 reverse-lookup index only when you actually use them. If you type only 倉頡 or 拼音, that's less work and less memory at startup. What you type is unchanged.";
-"keykey.whatsNew.perfPinyin" = "拼音 stays responsive on unusual input. Typing a long run of letters that don't form valid syllables no longer makes the composer do more and more work on each keystroke.";
+/* What's New pane (2.7.0) */
+"keykey.whatsNew.summary" = "This update adds Page Up / Page Down paging and an option to pick associated phrases with Shift + number, and fixes ⌘/⌃ shortcuts that were being intercepted.";
+"keykey.whatsNew.paging" = "Page Up / Page Down flip candidate pages. In both the 倉頡／速成 candidate window and the 聯想 (associated-phrase) window, Page Up and Page Down now move between pages, alongside the arrow keys and Space.";
+"keykey.whatsNew.assocKey" = "Choose how to pick associated phrases. A new option in 設定… ▸ 一般 lets you keep the default (1–9 picks an associated phrase) or switch to Shift + 1–9 — with that on, a plain 1–9 types the digit instead, so numbers flow naturally right after a character (e.g. 這周有7天。). Existing users see no change by default.";
+"keykey.whatsNew.shortcutPassthrough" = "⌘ and ⌃ shortcuts pass through to the app again. With Yahoo KeyKey 2 selected, combinations like ⌘C / ⌘X / ⌘V were captured by the input method (⌘C could turn into the 倉頡 radical 金) instead of copying, cutting, or pasting. They now reach the app as expected.";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "Disable Cangjie and Simplex from Input Sources";
