@@ -1,5 +1,19 @@
 # Third-Party Notices
 
+The MIT license in `LICENSE` covers the original Yahoo KeyKey 2 source code (the
+Swift engine and the macOS app). Bundled third-party **data** keeps its own
+license — all of them permit redistribution, including commercial use:
+
+| Component | License |
+|---|---|
+| McBopomofo language model | MIT |
+| libtabe / TaBE phrase data | BSD-style |
+| OpenCC conversion data | Apache-2.0 |
+| Cangjie-5 table | "Freely redistributable without restriction" (upstream table header; see `Resources/CANGJIE-DATA-LICENSE.txt`) |
+
+Yahoo KeyKey 2 is an independent reimplementation and is not affiliated with, or
+endorsed by, Yahoo. See `CREDITS.md`.
+
 ## McBopomofo (language model + algorithm reference)
 MIT License. Copyright (c) 2011-2026 Mengjuei Hsieh, Lukhnos Liu, et al.
 https://github.com/openvanilla/McBopomofo
