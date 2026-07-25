@@ -90,7 +90,7 @@ env vars:
 `tools/package-installer.sh` additionally produces:
 
 - `build/YahooKeyKey2-<version>.pkg` — a GUI installer for local use
-  ([details below](#gui-installer-pkg--legacy-not-shipped)).
+  ([details below](#gui-installer-pkg-legacy-not-shipped)).
 
 Only the `.zip` belongs on a release; the `.pkg` is **not** published. Neither
 script produces a `.dmg`.
@@ -193,7 +193,7 @@ If running locally instead of CI:
 
 ---
 
-## GUI installer (`.pkg`) — legacy, not shipped
+## GUI installer (`.pkg`): legacy, not shipped
 
 > **Not part of the release.** CI publishes the `.zip` only, and the Homebrew cask
 > installs from that `.zip`. This script is retained as a local option; nothing in
