@@ -9,49 +9,114 @@
 loved. It brings the familiar Cangjie (倉頡) and Simplex (速成) typing experience back to
 modern macOS — native, fast, and free.
 
-[![Latest release](https://img.shields.io/github/v/release/teddychan/yahoo-keykey-2?style=flat-square&label=download&color=brightgreen)](https://github.com/teddychan/yahoo-keykey-2/releases/latest)
-[![Homebrew](https://img.shields.io/badge/homebrew-teddychan%2Ftap-orange?style=flat-square)](#homebrew-recommended)
-[![Tests](https://img.shields.io/github/actions/workflow/status/teddychan/yahoo-keykey-2/tests.yml?branch=main&style=flat-square&label=tests)](https://github.com/teddychan/yahoo-keykey-2/actions/workflows/tests.yml)
-![Platform](https://img.shields.io/badge/platform-macOS%2026%2B-blue?style=flat-square)
-![Architecture](https://img.shields.io/badge/arch-Apple%20Silicon-blue?style=flat-square)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
+[![Download](https://img.shields.io/badge/download-latest-brightgreen?style=flat-square)](https://github.com/teddychan/yahoo-keykey-2/releases/latest)
+![Platform](https://img.shields.io/badge/platform-macOS-blue?style=flat-square)
+![Requirements](https://img.shields.io/badge/requirements-macOS%2026%2B-fa4e49?style=flat-square)
 [![Website](https://img.shields.io/badge/Website-dragonapp.com-015FBA?style=flat-square)](https://www.dragonapp.com/yahoo-keykey-2/)
+[![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 
-> **Note:** Yahoo KeyKey 2 is not affiliated with, or endorsed by, Yahoo. It is an
-> independent project that exists to honor the original work and keep a KeyKey-style
-> experience alive on modern macOS.
+## Contents
 
-## What's new in 2.8.0
+- [Requirements](#requirements)
+- [Install](#install)
+- [Features](#features)
+- [Cangjie generation (倉頡版本)](#cangjie-generation-倉頡版本)
+- [Troubleshooting](#troubleshooting)
+- [Building from source](#building-from-source)
+- [Contributing](#contributing)
+- [Credits](#credits)
+- [License](#license)
 
-- **Press Space to confirm the code (new option).** In **速成**, and in **倉頡** with the `*`
-  wildcard, candidates show up before your code is finished — so **Space** paged forward instead
-  of confirming what you typed. Turn on **設定… ▸ 一般 ▸ 輸入方式 ▸ 以空白鍵確認字根** and the first
-  Space confirms the code and stays on page 1; press Space again to page, or **1–9** to pick.
-  Off by default, and plain 倉頡 is unaffected.
-- **Fixed: 三代倉頡 offered characters under the wrong code.** Typing `人一弓口` (何's code) also
-  offered 含, which really decomposes as `人戈弓口`. The bundled 三代 table carried ~800 duplicate
-  codes from an upstream merge; those are gone, Yahoo's original candidate order is untouched,
-  and **五代倉頡 was never affected**.
+## Requirements
 
-Recently before that: **Page Up / Page Down paging** in both candidate windows, a configurable
-**聯想 selection key** (`1–9` or `Shift + 1–9`), and **⌘/⌃ shortcuts passing through** to the app
-so ⌘C / ⌘X / ⌘V work normally. Full history in [CHANGELOG.md](CHANGELOG.md).
+- **macOS 26 Tahoe** or later
+- A Mac with **Apple Silicon (arm64)** — there is no Intel slice
+- Signed with a Developer ID and notarized by Apple, so it opens cleanly
+
+## Install
+
+Both channels install the same signed, notarized app into `~/Library/Input Methods/`.
+
+### Homebrew
+
+```sh
+brew install --cask teddychan/tap/yahoo-keykey-2
+```
+
+Then **log out and back in** — macOS only registers input methods at login. The cask lives in
+[teddychan/homebrew-tap](https://github.com/teddychan/homebrew-tap) and is bumped automatically
+on every release.
+
+### Manual
+
+1. Download `YahooKeyKey2-X.Y.Z.zip` from the
+   [latest release](https://github.com/teddychan/yahoo-keykey-2/releases/latest) and unzip it.
+   Releases ship a `.zip` — never a `.pkg` or `.dmg` — so no admin rights are needed.
+2. Move `YahooKeyKey2.app` into `~/Library/Input Methods/` (create the folder if it does not
+   exist).
+3. **Log out and back in** — macOS only registers input methods at login.
+4. Add the input source under **System Settings ▸ Keyboard ▸ Input Sources ▸ + ▸
+   Traditional Chinese** → **倉頡** and/or **速成**.
+5. Press **⌃Space** to switch to Yahoo KeyKey 2 and start typing.
+
+### Update
+
+- **In-app (both channels):** open the input menu from the input-source icon in the menu bar and
+  choose **檢查更新…**. Updates arrive over Sparkle from a signed appcast at
+  `https://www.dragonapp.com/yahoo-keykey-2/appcast.xml`.
+- **Homebrew:** `brew upgrade --cask yahoo-keykey-2`
+- **Manual:** download the newest `.zip` and replace the app in `~/Library/Input Methods/`.
+
+Log out and back in after any update so macOS reloads the input method.
+
+### Uninstall
+
+1. Deactivate the input method: **System Settings ▸ Keyboard ▸ Input Sources**, select
+   Yahoo KeyKey 2, and remove it.
+2. Remove the app — **Homebrew:** `brew uninstall --cask teddychan/tap/yahoo-keykey-2`;
+   **manual:** choose **解除安裝…** from the input menu, or delete
+   `~/Library/Input Methods/YahooKeyKey2.app`.
+3. Remove the leftover preferences and caches (what `brew uninstall --zap` deletes):
+
+   ```sh
+   rm -f  ~/Library/Preferences/com.dragonapp.inputmethod.yahoo-keykey.plist
+   rm -rf ~/Library/Caches/com.dragonapp.inputmethod.yahoo-keykey
+   rm -rf ~/Library/HTTPStorages/com.dragonapp.inputmethod.yahoo-keykey
+   ```
+
+4. Log out and back in.
 
 ## Features
 
 - **倉頡 + 速成 input** — both classic modes, with wildcard `*` matching when you don't
   remember every radical.
+- **拼音 (Pinyin) phrase input** — a third mode that composes whole phrases from toneless
+  pinyin; `'` splits ambiguous syllables, so `xi'an` gives 西安.
 - **Frequency-ranked &amp; adaptive** — candidates are ordered by how common they are, and
   the characters you pick rank higher over time.
 - **Associated phrases (聯想字詞)** — after you commit a character, Yahoo KeyKey 2 suggests
-  the words that usually follow, pickable with `1–9` or `Shift + 1–9`.
+  the words that usually follow, pickable with `1–9` or `Shift + 1–9`, and optionally showing
+  only the continuation (聯想只顯示接續字).
 - **繁 → 簡 &amp; full-width punctuation** — toggle Traditional-to-Simplified output (輸出簡體字)
   and full-width punctuation (全形標點) right from the input menu.
 - **Native candidate window** — a vertical candidate list that follows the text caret and
-  never gets clipped off-screen, with arrow-key, Space, and Page Up / Page Down paging.
-- **反查／拆碼提示** — see the code a character decomposes to, right beside the candidate.
+  never gets clipped off-screen, paged with the arrow keys, Space, or Page Up / Page Down, at
+  whatever size you set with the 候選字大小 slider.
+- **反查／拆碼提示** — see the code a character decomposes to right beside the candidate: its
+  倉頡 code, or its pinyin reading in 拼音.
+- **以空白鍵確認字根 (optional)** — make the first Space confirm the code instead of paging, for
+  速成 and for 倉頡 with the `*` wildcard. Off by default.
+- **臨時英數 (quick English)** — hold **Shift** and press a letter to type that English letter
+  without switching input source; the case follows Caps Lock.
+- **Sync &amp; Backup** — back up your settings to a folder from **設定…** and restore them
+  later, handy when setting up a new Mac.
 - **Lightweight &amp; open source** — full source on GitHub, MIT licensed, Developer ID-signed
   and notarized, with in-app updates.
+
+> [!NOTE]
+> Yahoo KeyKey 2 is not affiliated with, or endorsed by, Yahoo. It is an independent project
+> that exists to honor the original work and keep a KeyKey-style experience alive on modern
+> macOS.
 
 ## Cangjie generation (倉頡版本)
 
@@ -67,69 +132,39 @@ The default is **五代**, so existing users are unaffected until they opt in. N
 Yahoo! KeyKey's *associated-phrase (關聯字表) ranking* cannot be reproduced — that data was
 never open-sourced — so associations use Yahoo KeyKey 2's own ordering in both modes.
 
-## Requirements
+## Troubleshooting
 
-- A Mac with **Apple Silicon (arm64)**
-- **macOS 26 Tahoe** or later
-- Signed with a Developer ID and notarized by Apple, so it opens cleanly
+**Yahoo KeyKey 2 doesn't appear in Input Sources.** macOS scans
+`~/Library/Input Methods/` only at login, so log out and back in after installing or updating.
+Then add it under **System Settings ▸ Keyboard ▸ Input Sources ▸ + ▸ Traditional Chinese**;
+until it is added there, **⌃Space** has nothing to switch to.
 
-## Install
+**A character takes a code I don't recognise.** 三代 and 五代 give different codes for the same
+character — 面 is `一田卜中` in 三代 but `一田尸中` in 五代, and 鬼 is `竹戈` versus `竹山戈`.
+Check which table is selected in **設定… ▸ 輸入方式** (see
+[Cangjie generation](#cangjie-generation-倉頡版本)), and turn on **反查提示** to see the code
+beside each candidate.
 
-Pick either channel below — both install the same signed, notarized app into
-`~/Library/Input Methods/`. Then follow **[Finish setup](#finish-setup)**.
+**Space pages forward instead of confirming my code.** In 速成, and in 倉頡 with the `*`
+wildcard, candidates appear before the code is finished, so Space paged instead of confirming.
+Turn on **設定… ▸ 一般 ▸ 輸入方式 ▸ 以空白鍵確認字根**: the first Space then confirms the code
+and stays on page 1, a second Space pages, and `1–9` picks.
 
-### Homebrew (recommended)
+**Typing a digit picks an associated phrase instead.** Switch the 聯想 selection key to
+**Shift + 1–9** in **設定… ▸ 一般**; a plain `1–9` then types the digit and dismisses the
+suggestions, so numbers flow naturally right after a character.
 
-```sh
-brew install --cask teddychan/tap/yahoo-keykey-2
-```
+**⌘C / ⌘X / ⌘V don't copy, cut, or paste.** Fixed in **2.7.0** — ⌘ and ⌃ combinations now pass
+through to the app instead of being read as radicals. Update if you are on an older version.
 
-The cask lives in [teddychan/homebrew-tap](https://github.com/teddychan/homebrew-tap) and is
-bumped automatically on every release. To add the tap explicitly first:
+**三代 offers a character under the wrong code.** Fixed in **2.8.0** — the bundled 三代 table
+carried duplicate codes from an upstream merge, so `人一弓口` (何) also offered 含, which really
+decomposes as `人戈弓口`. 五代 was never affected.
 
-```sh
-brew tap teddychan/tap
-```
+## Building from source
 
-### Manual download (`.zip`)
-
-1. Download `YahooKeyKey2-<version>.zip` from the
-   [latest release](https://github.com/teddychan/yahoo-keykey-2/releases/latest) and unzip it.
-2. Move `YahooKeyKey2.app` into `~/Library/Input Methods/` (create the folder if it does not
-   exist). No admin rights needed — releases ship a `.zip`, never a `.pkg` or `.dmg`.
-
-### Finish setup
-
-1. **Log out and back in** — macOS only scans input methods at login.
-2. Add the input source: **System Settings ▸ Keyboard ▸ Input Sources ▸ + ▸ Traditional Chinese**
-   → add **倉頡** and/or **速成**.
-3. Press **Ctrl-Space** to switch to Yahoo KeyKey 2 and start typing.
-
-## Update
-
-- **In-app (both channels):** open the input menu from the input-source icon in the menu bar and
-  choose **檢查更新…**. Updates are delivered over Sparkle from a signed appcast at
-  `https://www.dragonapp.com/yahoo-keykey-2/appcast.xml`.
-- **Homebrew:**
-
-  ```sh
-  brew upgrade --cask yahoo-keykey-2
-  ```
-
-- **Manual:** download the newest `.zip` and replace the app in `~/Library/Input Methods/`.
-
-After any update, log out and back in so macOS reloads the input method.
-
-## Uninstall
-
-- **Homebrew:** `brew uninstall --cask yahoo-keykey-2` (add `--zap` to remove preferences and
-  caches too).
-- **Manual:** choose **解除安裝…** from the input menu, or delete
-  `~/Library/Input Methods/YahooKeyKey2.app` and log out and back in.
-
-## Build from source
-
-Requires the Xcode 26 toolchain (`swiftc`, Swift 6.2) on Apple Silicon.
+There is no Xcode project — the app is assembled by shell scripts around `swiftc`, and the
+test suites are SwiftPM packages. Requires the Xcode 26 toolchain (Swift 6.2) on Apple Silicon.
 
 ```sh
 git clone https://github.com/teddychan/yahoo-keykey-2.git
@@ -138,13 +173,10 @@ cd yahoo-keykey-2
 ./tools/build-app.sh   # assemble + ad-hoc sign build/YahooKeyKey2.app
 ```
 
-Run the test suites:
+Run the test suites — the same two CI runs on every pull request:
 
 ```sh
 swift test --package-path Packages/KeyKeyEngine
-```
-
-```sh
 swift test --package-path Packages/KeyKeyApp
 ```
 
@@ -153,6 +185,14 @@ For hands-on testing, `./tools/run-debug.sh` builds and installs a separate
 installed release copy. Signed release builds are produced by
 [`.github/workflows/release.yml`](.github/workflows/release.yml) on a `v*` tag — see
 [docs/RELEASE.md](docs/RELEASE.md).
+
+## Contributing
+
+Bug reports and pull requests are welcome on the
+[issue tracker](https://github.com/teddychan/yahoo-keykey-2/issues). Before opening a pull
+request, run both test suites (see [Building from source](#building-from-source)) and add a
+plain-language entry to [CHANGELOG.md](CHANGELOG.md) describing the user-visible change.
+Release mechanics are documented in [docs/RELEASE.md](docs/RELEASE.md).
 
 ## Credits
 
