@@ -45,6 +45,27 @@ Format:  Extracted from the source .cin %chardef sections; only rows whose code 
              | awk '/%chardef begin/{f=1;next}/%chardef end/{f=0}f{n=split($0,a,/[ \t]+/); \
                     if(a[1] ~ /^[a-z]+$/ && a[2]!="") print a[1]"\t"a[2]}'
 
+Deduplication of cangjie-yahoo.txt (issue #62)
+-----------------------------------------------
+Upstream cj-ext.cin is a MERGE of a curated base table (its leading, code-sorted
+run — exactly one code per character) and a CNS11643/HKSCS "large character set"
+dump appended after it, and the merge never deduplicated. 800 characters the base
+table already encodes were handed a second, non-standard code by the dump: 含
+(人戈弓口 = oinr) also answered to omnr (人一弓口), which is 何's code. Typing a
+valid code therefore offered characters that do not decompose that way. Where the
+two disagree the base code is the correct one — it agrees with the 五代 table for
+669 of the 794 conflicts, the dump code for only 40.
+
+cangjie-yahoo.txt therefore drops, from the appended section only, every line that
+re-encodes a character the curated base table already has (characters compared
+under Unicode canonical equivalence, as Swift's Character does), plus the two
+U+F900–FAFF compatibility twins that made a code list the same character twice.
+1,115 of 82,808 lines removed; no character became unreachable — each keeps its
+curated base code. The full, reproducible transformation is in
+docs/superpowers/specs/2026-07-25-cangjie-yahoo-duplicate-codes.md, and
+Packages/KeyKeyEngine/Tests/KeyKeyEngineTests/YahooCangjieTableTests.swift locks
+the result.
+
 Source repository
 -----------------
 bency/YahooKeyKey  (the open-sourced Yahoo! KeyKey, New BSD)
