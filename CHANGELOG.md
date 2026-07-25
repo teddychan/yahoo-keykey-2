@@ -2,6 +2,21 @@
 
 A plain-language list of changes in each version, newest first.
 
+## 2.8.0
+
+- **Press Space to confirm the code (new option).** In **速成**, and in **倉頡** with the `*`
+  wildcard, candidates appear before the code is finished — so **Space** flipped to the next
+  page instead of confirming what you typed, breaking the 倉頡 habit of "type the radicals,
+  press Space". A new **設定… ▸ 一般 ▸ 輸入方式** option, **以空白鍵確認字根**, makes the first
+  Space confirm the code and stay on page 1; press Space again to page, or **1–9** to pick.
+  Off by default, and plain 倉頡 is unaffected.
+- **Fixed: 三代倉頡 offered characters under the wrong code.** Typing `人一弓口` (何's code)
+  also offered 含, which decomposes as `人戈弓口` — as the 反查 hint beside it already said.
+  The bundled 三代 table came from an upstream merge that never removed duplicates, handing
+  800 characters a second, non-standard code. Those extra codes are gone; every character
+  keeps its real one, Yahoo's original candidate order is untouched, and **五代倉頡 was never
+  affected**.
+
 ## 2.7.0
 
 - **Page Up / Page Down now flip candidate pages.** In both the 倉頡／速成 candidate window and
