@@ -24,6 +24,8 @@
 "keykey.general.cangjieV5" = "5th-generation Cangjie";
 "keykey.general.cangjieV3" = "3rd-generation Cangjie (Yahoo KeyKey compatible)";
 "keykey.general.cangjieVersionHint" = "3rd-generation Cangjie uses the original Yahoo! KeyKey code table and candidate order (applied to both Cangjie and Simplex), effective immediately.";
+"keykey.general.strokeConfirmation" = "Press Space to confirm the code";
+"keykey.general.strokeConfirmationHint" = "In 速成, and in 倉頡 with the * wildcard, candidates appear before the code is finished, so Space flips to the next page instead of confirming what you typed. With this on, the first Space only confirms the code and keeps page 1 — press Space again to page, or 1–9 to pick. Plain 倉頡 is unaffected.";
 "keykey.general.language" = "Language";
 
 /* About pane */

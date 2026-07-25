@@ -20,6 +20,11 @@ final class InputController: IMKInputController {
     private let candidateWindow = CandidateWindow()
     // Current candidate page (9 per page) for the active composition; reused for association paging.
     private var candidatePage = 0
+    // Stroke confirmation for the active composition (issue #61). Only consulted when
+    // Preferences.strokeConfirmationEnabled and the composition is auto-completed (速成, or 倉頡
+    // with a `*` wildcard): until the user has pressed Space once, Space confirms the strokes
+    // rather than paging. Reset alongside candidatePage whenever the composition itself changes.
+    private var strokeConfirmed = false
     // Associated phrases (聯想) offered after committing a single character; empty when not in
     // association mode. Paged with `candidatePage`, shown in the same numbered candidate window.
     private var associations: [String] = []
@@ -93,7 +98,7 @@ final class InputController: IMKInputController {
         } else {
             _ = engine.commit()
         }
-        candidatePage = 0
+        resetCompositionState()
         associations = []
         candidateWindow.hide()
         engine = currentModule.makeEngine()
@@ -224,7 +229,7 @@ final class InputController: IMKInputController {
         } else {
             _ = engine.commit()
         }
-        candidatePage = 0
+        resetCompositionState()
         associations = []
         candidateWindow.hide()
         currentModule = module
@@ -330,7 +335,7 @@ final class InputController: IMKInputController {
         // composition before full-width punctuation would turn it into ＊. Simplex rejects
         // `*`, so handleKey returns false and it falls through to punctuation below.
         if event.characters?.first == "*", engine.composingText.isEmpty, engine.handleKey("*") {
-            candidatePage = 0
+            resetCompositionState()
             refresh(client)
             return true
         }
@@ -405,6 +410,19 @@ final class InputController: IMKInputController {
                 return true
             default: break
             }
+            // 以空白鍵確認字根 (issue #61): 速成 and 倉頡-with-`*` show candidates before the
+            // code is finished, so the Space a 倉頡 typist presses out of muscle memory pages the
+            // window (or commits) instead of confirming the strokes. When the option is on,
+            // swallow the FIRST Space of such a composition as that confirmation — the page and
+            // the marked text stay exactly as they are, and the next Space / 1–9 / arrow behaves
+            // as it always has.
+            if event.keyCode == 49,
+               KeyEventPolicy.spaceConfirmsStroke(enabled: Preferences.strokeConfirmationEnabled,
+                                                  autoCompletedCode: isAutoCompletedComposition,
+                                                  alreadyConfirmed: strokeConfirmed) {
+                strokeConfirmed = true
+                return true
+            }
             // SPACE pages to the next candidate page (wrapping last → first). On a
             // single page there is nothing to page, so fall through to the
             // commit-first-candidate-on-space behaviour below.
@@ -447,18 +465,19 @@ final class InputController: IMKInputController {
             return commitCurrent(to: client, offerAssociations: true)
         case 51: // Delete/Backspace
             guard !engine.composingText.isEmpty else { return false }
-            engine.backspace(); candidatePage = 0; refresh(client); return true
+            engine.backspace(); resetCompositionState(); refresh(client); return true
         case 53: // Escape cancels composition (commit-then-discard)
             guard !engine.composingText.isEmpty else { return false }
-            _ = engine.commit(); candidatePage = 0; refresh(client); return true
+            _ = engine.commit(); resetCompositionState(); refresh(client); return true
         default: break
         }
 
         guard let ch = event.characters?.first else { return false }
         let consumed = engine.handleKey(ch)
         if consumed {
-            // A new radical/key changes the candidate set; restart paging from page 0.
-            candidatePage = 0
+            // A new radical/key changes the candidate set; restart paging from page 0 and
+            // require the stroke confirmation again (issue #61).
+            resetCompositionState()
             refresh(client)
         }
         return consumed
@@ -471,7 +490,7 @@ final class InputController: IMKInputController {
 
     @discardableResult
     private func commitCurrent(to client: IMKTextInput, offerAssociations: Bool = false) -> Bool {
-        candidatePage = 0
+        resetCompositionState()
         let text = engine.commit()
         if !text.isEmpty {
             client.insertText(applyHanConvert(text), replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
@@ -500,6 +519,23 @@ final class InputController: IMKInputController {
     // Used for both committed text and candidate/association display so they stay WYSIWYG.
     private func applyHanConvert(_ text: String) -> String {
         Preferences.outputSimplifiedEnabled ? hanConvertFilter.convert(text) : text
+    }
+
+    // Per-composition transient state: candidate paging and the issue-#61 stroke confirmation.
+    // Called wherever the composition itself changes (new radical, backspace, cancel, commit,
+    // engine swap) — NOT while merely paging, which must keep the confirmation.
+    private func resetCompositionState() {
+        candidatePage = 0
+        strokeConfirmed = false
+    }
+
+    // Whether the active composition resolves to candidates before its code is complete: 速成
+    // (a first+last-radical shorthand) or a 倉頡 code carrying the `*` wildcard. `*` has no
+    // radical glyph, so composingText shows it literally and it is visible here. These are
+    // exactly the compositions where Space is not a stroke confirmation today (issue #61);
+    // plain 倉頡 types a determinate code, and 拼音 has its own key handling.
+    private var isAutoCompletedComposition: Bool {
+        engine is SimplexEngine || engine.composingText.contains("*")
     }
 
     // Leave association mode: drop the suggestions, reset paging, hide the candidate window.

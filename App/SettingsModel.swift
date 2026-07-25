@@ -47,6 +47,14 @@ final class SettingsModel {
         set { Preferences.codeHintEnabled = newValue }
     }
 
+    // 以空白鍵確認字根 (issue #61): in 速成 / 倉頡-with-`*`, require one Space press to confirm the
+    // typed strokes before Space resumes paging or committing. A plain toggle, so a computed
+    // forwarder is fine here — only Picker/Slider need the stored-property treatment below.
+    var strokeConfirmation: Bool {
+        get { Preferences.strokeConfirmationEnabled }
+        set { Preferences.strokeConfirmationEnabled = newValue }
+    }
+
     // Candidate text size. Like `cangjieVersion` below, this is a STORED, observation-tracked
     // property (seeded from Preferences at init) — NOT a computed forwarder. An @Observable
     // *computed* property bound to a Slider never registers an observation dependency in its

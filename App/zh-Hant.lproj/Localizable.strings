@@ -24,6 +24,8 @@
 "keykey.general.cangjieV5" = "五代倉頡";
 "keykey.general.cangjieV3" = "三代倉頡（Yahoo KeyKey 相容）";
 "keykey.general.cangjieVersionHint" = "「三代倉頡」使用 Yahoo! KeyKey 原版的拆碼與候選字順序（同時套用到倉頡與速成），立即生效。";
+"keykey.general.strokeConfirmation" = "以空白鍵確認字根";
+"keykey.general.strokeConfirmationHint" = "在速成、以及使用萬用字元（*）的倉頡中，字根還沒打完就會出現候選字，此時空白鍵會直接翻到下一頁，而不是確認你打的字根。開啟後，第一次按空白鍵只會確認字根並停留在第 1 頁；再按一次空白鍵才翻頁，或直接按 1–9 選字。一般倉頡不受影響。";
 "keykey.general.language" = "語言";
 
 /* About pane */
