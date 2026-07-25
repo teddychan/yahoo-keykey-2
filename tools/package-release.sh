@@ -1,8 +1,11 @@
 #!/bin/bash
 # Package "Yahoo KeyKey 2" for non-App-Store distribution.
 #
-# Produces a downloadable DMG (and a .zip alternative) containing YahooKeyKey2.app,
-# which users copy into ~/Library/Input Methods/ and enable in System Settings.
+# Produces a downloadable .zip containing YahooKeyKey2.app + Install.txt, which
+# users copy into ~/Library/Input Methods/ and enable in System Settings. No DMG.
+#
+# This is the LOCAL packaging path. The tagged release is published by
+# .github/workflows/release.yml (see docs/RELEASE.md), not by this script.
 #
 # Code signing and notarization are OPTIONAL and driven entirely by environment
 # variables so this script never embeds Teddy's identity and can run on CI or any
@@ -18,7 +21,8 @@
 #                      was Developer-ID-signed, the app is notarized and stapled.
 #
 # Requires: tools/build-app.sh deps, plus codesign, xcrun (notarytool/stapler),
-# hdiutil, ditto, plutil. Produces ./build/YahooKeyKey2-<version>.dmg and .zip.
+# ditto, plutil. Produces ./build/YahooKeyKey2-<version>.zip, plus build/appcast.xml
+# when DEVELOPER_ID_APP is set.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
