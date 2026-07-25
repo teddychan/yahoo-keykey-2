@@ -1,23 +1,22 @@
 import Foundation
 import DragonKit
 
-// "What's New" content for the current release (2.7.0). Page Up / Page Down candidate paging,
-// a configurable associated-phrase selection key (1–9 vs Shift+1–9), and a fix so ⌘/⌃ shortcuts
-// pass through to the app. Keep in sync with CHANGELOG.md on release.
+// "What's New" content for the current release (2.8.0). An option that makes Space confirm the
+// typed code in 速成 / 倉頡-with-`*`, and a fix for the 三代 table offering characters under codes
+// they do not decompose to. Keep in sync with CHANGELOG.md on release.
 enum WhatsNewConfig {
     @MainActor
     static var content: WhatsNewContent {
         WhatsNewContent(
-            version: "2.7.0",
-            date: "2026-07-23",
+            version: "2.8.0",
+            date: "2026-07-25",
             summary: L("keykey.whatsNew.summary"),
             sections: [
                 ChangeSection(kind: .added, entries: [
-                    L("keykey.whatsNew.paging"),
-                    L("keykey.whatsNew.assocKey"),
+                    L("keykey.whatsNew.strokeConfirm"),
                 ]),
                 ChangeSection(kind: .fixed, entries: [
-                    L("keykey.whatsNew.shortcutPassthrough"),
+                    L("keykey.whatsNew.cangjieCodes"),
                 ]),
             ]
         )

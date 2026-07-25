@@ -41,8 +41,8 @@ final class ConfigContentTests: XCTestCase {
     @MainActor
     func testWhatsNewVersionMatchesCurrentRelease() {
         let content = WhatsNewConfig.content
-        XCTAssertEqual(content.version, "2.7.0")
-        XCTAssertEqual(content.date, "2026-07-23")
+        XCTAssertEqual(content.version, "2.8.0")
+        XCTAssertEqual(content.date, "2026-07-25")
     }
 
     @MainActor
@@ -50,7 +50,7 @@ final class ConfigContentTests: XCTestCase {
         let content = WhatsNewConfig.content
         XCTAssertEqual(content.sections.count, 2)
         XCTAssertEqual(content.sections[0].kind, .added)
-        XCTAssertEqual(content.sections[0].entries.count, 2)
+        XCTAssertEqual(content.sections[0].entries.count, 1)
         XCTAssertEqual(content.sections[1].kind, .fixed)
         XCTAssertEqual(content.sections[1].entries.count, 1)
     }
