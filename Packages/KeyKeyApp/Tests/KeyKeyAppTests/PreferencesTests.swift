@@ -10,7 +10,7 @@ final class PreferencesTests: XCTestCase {
     override func tearDown() {
         for key in ["candidateFontSize", "associatedPhrasesEnabled", "fullWidthPunctuationEnabled",
                     "outputSimplifiedEnabled", "cangjieVersion", "associationContinuationOnly",
-                    "codeHintEnabled", "associationSelectionTrigger"] {
+                    "codeHintEnabled", "associationSelectionTrigger", "strokeConfirmationEnabled"] {
             defaults.removeObject(forKey: key)
         }
         super.tearDown()
@@ -73,6 +73,18 @@ final class PreferencesTests: XCTestCase {
         XCTAssertTrue(Preferences.codeHintEnabled)
         Preferences.codeHintEnabled = false
         XCTAssertFalse(Preferences.codeHintEnabled)
+
+        Preferences.strokeConfirmationEnabled = true
+        XCTAssertTrue(Preferences.strokeConfirmationEnabled)
+        Preferences.strokeConfirmationEnabled = false
+        XCTAssertFalse(Preferences.strokeConfirmationEnabled)
+    }
+
+    // Issue #61: absent (never set) must read false, so an existing install keeps today's
+    // Space behaviour until the user opts in.
+    func testStrokeConfirmationDefaultsOffWhenAbsent() {
+        defaults.removeObject(forKey: "strokeConfirmationEnabled")
+        XCTAssertFalse(Preferences.strokeConfirmationEnabled)
     }
 
     // MARK: cangjieVersion
@@ -129,7 +141,7 @@ final class PreferencesTests: XCTestCase {
     func testRegisterDefaultsSuppliesSensibleFirstLaunchValues() {
         for key in ["candidateFontSize", "associatedPhrasesEnabled", "fullWidthPunctuationEnabled",
                     "outputSimplifiedEnabled", "cangjieVersion", "associationContinuationOnly",
-                    "codeHintEnabled", "associationSelectionTrigger"] {
+                    "codeHintEnabled", "associationSelectionTrigger", "strokeConfirmationEnabled"] {
             defaults.removeObject(forKey: key)
         }
         Preferences.registerDefaults()
@@ -138,6 +150,7 @@ final class PreferencesTests: XCTestCase {
         XCTAssertFalse(Preferences.outputSimplifiedEnabled)
         XCTAssertFalse(Preferences.associationContinuationOnly)
         XCTAssertFalse(Preferences.codeHintEnabled)
+        XCTAssertFalse(Preferences.strokeConfirmationEnabled)
         XCTAssertEqual(Preferences.cangjieVersion, .v5)
         XCTAssertEqual(Preferences.associationSelectionTrigger, .number)
         XCTAssertEqual(Preferences.candidateFontSize, 18)    // defaultFontSize

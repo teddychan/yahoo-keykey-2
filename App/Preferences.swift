@@ -28,6 +28,7 @@ enum Preferences {
         static let associationContinuationOnly = "associationContinuationOnly"
         static let codeHintEnabled = "codeHintEnabled"
         static let associationSelectionTrigger = "associationSelectionTrigger"
+        static let strokeConfirmationEnabled = "strokeConfirmationEnabled"
     }
 
     static let minFontSize: CGFloat = 14
@@ -45,6 +46,7 @@ enum Preferences {
             Key.associationContinuationOnly: false,
             Key.codeHintEnabled: false,
             Key.associationSelectionTrigger: AssociationTrigger.number.rawValue,
+            Key.strokeConfirmationEnabled: false,
         ])
     }
 
@@ -99,5 +101,13 @@ enum Preferences {
     static var associationSelectionTrigger: AssociationTrigger {
         get { AssociationTrigger(rawValue: UserDefaults.standard.string(forKey: Key.associationSelectionTrigger) ?? "") ?? .number }
         set { UserDefaults.standard.set(newValue.rawValue, forKey: Key.associationSelectionTrigger) }
+    }
+
+    // When true, an auto-completed composition — 速成, or 倉頡 with a `*` wildcard — needs one
+    // Space press to CONFIRM the typed strokes before Space resumes its usual paging/commit
+    // role (issue #61). Off by default, so existing users see no change.
+    static var strokeConfirmationEnabled: Bool {
+        get { UserDefaults.standard.bool(forKey: Key.strokeConfirmationEnabled) }
+        set { UserDefaults.standard.set(newValue, forKey: Key.strokeConfirmationEnabled) }
     }
 }

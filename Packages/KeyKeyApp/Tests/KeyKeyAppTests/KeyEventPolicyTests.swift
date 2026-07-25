@@ -18,6 +18,34 @@ final class KeyEventPolicyTests: XCTestCase {
         XCTAssertTrue(KeyEventPolicy.isSystemShortcut([.control, .command]))
     }
 
+    // MARK: spaceConfirmsStroke (issue #61)
+
+    func testFirstSpaceConfirmsAnAutoCompletedCodeWhenEnabled() {
+        // 速成 / 倉頡-with-`*`, option on, not yet confirmed: Space is the stroke confirmation.
+        XCTAssertTrue(KeyEventPolicy.spaceConfirmsStroke(enabled: true, autoCompletedCode: true,
+                                                        alreadyConfirmed: false))
+    }
+
+    func testSecondSpaceDoesNotConfirmAgain() {
+        // Once confirmed, Space goes back to paging / committing for the rest of the composition.
+        XCTAssertFalse(KeyEventPolicy.spaceConfirmsStroke(enabled: true, autoCompletedCode: true,
+                                                         alreadyConfirmed: true))
+    }
+
+    func testPlainCangjieNeverNeedsConfirmation() {
+        // A determinate 倉頡 code already treats Space as "confirm + commit"; nothing to change.
+        XCTAssertFalse(KeyEventPolicy.spaceConfirmsStroke(enabled: true, autoCompletedCode: false,
+                                                         alreadyConfirmed: false))
+    }
+
+    func testDisabledOptionLeavesSpaceUntouched() {
+        // Default (off): existing users keep today's paging behaviour in every case.
+        XCTAssertFalse(KeyEventPolicy.spaceConfirmsStroke(enabled: false, autoCompletedCode: true,
+                                                         alreadyConfirmed: false))
+        XCTAssertFalse(KeyEventPolicy.spaceConfirmsStroke(enabled: false, autoCompletedCode: false,
+                                                         alreadyConfirmed: false))
+    }
+
     func testImeRelevantModifiersAreNotSystemShortcuts() {
         // ⇧+letter (臨時英數) and plain/⌥ typing stay with the IME.
         XCTAssertFalse(KeyEventPolicy.isSystemShortcut([]))

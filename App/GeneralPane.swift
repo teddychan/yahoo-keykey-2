@@ -2,9 +2,9 @@ import SwiftUI
 import DragonKit
 
 // KeyKey's General settings pane: the real input toggles (輸出簡體字 / 全形標點 / 聯想字詞 and the
-// 聯想只顯示接續字 option), the candidate font size, the 倉頡版本 picker, and the shared language
-// picker. Everything binds to `SettingsModel`, which forwards to the live `Preferences` the
-// engine reads — so changes apply on the next composition, no restart.
+// 聯想只顯示接續字 option), the candidate font size, the 倉頡版本 picker and 以空白鍵確認字根
+// toggle, and the shared language picker. Everything binds to `SettingsModel`, which forwards
+// to the live `Preferences` the engine reads — so changes apply on the next composition, no restart.
 struct GeneralPane: SettingsPane {
     let id = "general"
     let title = "keykey.pane.general"
@@ -55,6 +55,8 @@ private struct GeneralPaneView: View {
                     Text(L("keykey.general.cangjieV3")).tag(CangjieVersion.v3)
                 }
                 .dragonAnnotation(LocalizedStringKey(L("keykey.general.cangjieVersionHint")))
+                Toggle(L("keykey.general.strokeConfirmation"), isOn: $model.strokeConfirmation)
+                    .dragonAnnotation(LocalizedStringKey(L("keykey.general.strokeConfirmationHint")))
             }
 
             DragonSection(LocalizedStringKey(L("keykey.general.language"))) {
