@@ -4,12 +4,20 @@ This describes how to produce a downloadable build of **Yahoo KeyKey 2** (an
 InputMethodKit input method) for distribution **outside the Mac App Store**.
 App Store distribution is **not** used for this version.
 
-Packaging is handled by `tools/package-release.sh` (builds + signs + notarizes
-the app, and produces a `.zip` containing the app + `Install.txt`) and
-`tools/package-installer.sh` (additionally produces a GUI `.pkg`).
+The tagged release is published by CI: [`.github/workflows/release.yml`](../.github/workflows/release.yml)
+is a thin caller that delegates to the shared pipeline
+`teddychan/dragon-release-ci/.github/workflows/release-macos.yml@v5`, which builds,
+Developer ID-signs, notarizes, staples, and zips the app.
 
-**A release ships exactly two files: the `.pkg` and the `.zip`. No `.dmg`.**
-The `.zip` is both the user download and the Sparkle update payload.
+**A release ships exactly one file: the `.zip`. No `.pkg`, no `.dmg`.** That `.zip`
+(`YahooKeyKey2-<version>.zip`) is the user download, the Sparkle update payload, and
+what the Homebrew cask `Casks/yahoo-keykey-2.rb` installs from.
+
+Two scripts still package the app **locally**, outside CI: `tools/package-release.sh`
+(builds + signs + notarizes the app and produces the same `.zip` containing the app +
+`Install.txt`) and `tools/package-installer.sh` (wraps it in a GUI `.pkg`). They are a
+**legacy / local-testing path — neither is what the tagged release publishes**, and the
+`.pkg` is not published anywhere.
 
 ---
 
@@ -48,10 +56,14 @@ and notarized by Apple, otherwise Gatekeeper blocks it. You need:
 
 ---
 
-## Build & package
+## Build & package locally (legacy path)
+
+> This section is the **local** packaging path, kept for building and testing a
+> signed/notarized app on your own machine. The published release comes from CI —
+> see [Per release (automated)](#per-release-automated).
 
 Signing and notarization are controlled by two environment variables. Set both
-for a public release:
+to reproduce a public-quality build locally:
 
 ```sh
 export DEVELOPER_ID_APP="Developer ID Application: Teddy Chan (TEAMID)"
@@ -72,12 +84,16 @@ env vars:
 
 - `build/YahooKeyKey2-<version>.zip` — contains `YahooKeyKey2.app` + `Install.txt`
   (the user download **and** the Sparkle update payload).
+- `build/appcast.xml` — Developer ID-signed builds only (see
+  [Sparkle auto-update](#sparkle-auto-update-appcast)).
 
 `tools/package-installer.sh` additionally produces:
 
-- `build/YahooKeyKey2-<version>.pkg` — the GUI installer (see below).
+- `build/YahooKeyKey2-<version>.pkg` — a GUI installer for local use
+  ([details below](#gui-installer-pkg--legacy-not-shipped)).
 
-Upload **both** to the release. No `.dmg` is produced.
+Only the `.zip` belongs on a release; the `.pkg` is **not** published. Neither
+script produces a `.dmg`.
 
 The script prints a final summary stating the version, signing status
 (Developer ID vs ad-hoc), and notarization status.
@@ -124,9 +140,9 @@ If running locally instead of CI:
 2. Run `tools/package-release.sh` with `DEVELOPER_ID_APP` (and `NOTARY_PROFILE`)
    set. In addition to the `.zip`, it writes **`build/appcast.xml`**
    (EdDSA-signed; enclosure URL → the GitHub release zip).
-3. Create the GitHub release at tag `v<version>` and upload the `.zip` (Sparkle
-   downloads this) alongside the `.pkg` (first-time users). The zip must be named
-   `YahooKeyKey2-<version>.zip` so the appcast URL matches.
+3. Create the GitHub release at tag `v<version>` and upload the `.zip` — that single
+   file is the entire release (first-time users download it; Sparkle updates from it).
+   It must be named `YahooKeyKey2-<version>.zip` so the appcast URL matches.
 4. **Publish the appcast:** copy `build/appcast.xml` into the website repo at
    `docs/yahoo-keykey-2/appcast.xml`, commit, and push. GitHub Pages serves it at
    `https://www.dragonapp.com/yahoo-keykey-2/appcast.xml` — the `SUFeedURL` the app reads.
@@ -147,10 +163,9 @@ If running locally instead of CI:
 
 (Put these in the release notes / download page.)
 
-1. **Easiest:** download and run the `.pkg` installer (click through; no admin
-   password). Skip to step 3. **Or** download the `.zip` and continue:
+1. Download `YahooKeyKey2-<version>.zip` from the release and unzip it.
 2. **Copy `YahooKeyKey2.app`** (from the zip) into `~/Library/Input Methods/`
-   (create the folder if it doesn't exist).
+   (create the folder if it doesn't exist). No admin password needed.
 3. **Log out and log back in** — macOS only scans for input methods at login.
 4. Open **System Settings ▸ Keyboard ▸ Input Sources ▸ `+`**, choose
    **Traditional Chinese**, and add **Yahoo KeyKey 2 — Cangjie** and/or
@@ -178,7 +193,11 @@ If running locally instead of CI:
 
 ---
 
-## GUI installer (`.pkg`)
+## GUI installer (`.pkg`) — legacy, not shipped
+
+> **Not part of the release.** CI publishes the `.zip` only, and the Homebrew cask
+> installs from that `.zip`. This script is retained as a local option; nothing in
+> the release path builds or uploads a `.pkg`, so end users never see one.
 
 For a native double-click experience, `tools/package-installer.sh` builds a
 **GUI `.pkg`** that drives the macOS **Installer.app** flow: it installs
