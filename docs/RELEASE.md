@@ -247,7 +247,7 @@ For a quick **local / unsigned** installer, run it with no env vars:
 
 Either way it produces, in `build/`:
 
-- `build/YahooKeyKey2-1.0.0.pkg` — the GUI installer.
+- `build/YahooKeyKey2-<version>.pkg` — the GUI installer.
 
 The installer resources (`distribution.xml.template`, `welcome.txt`,
 `conclusion.txt`, `postinstall`) live in `installer/`; the script materializes
@@ -258,7 +258,7 @@ version, pkg signing status, and notarization status.
 
 ### End-user experience
 
-1. **Double-click `YahooKeyKey2-1.0.0.pkg`** → the macOS Installer GUI opens.
+1. **Double-click `YahooKeyKey2-<version>.pkg`** → the macOS Installer GUI opens.
    (For an unsigned pkg, right-click ▸ **Open** the first time.)
 2. Click through; it installs **without** an admin password into
    **`~/Library/Input Methods/`**.
