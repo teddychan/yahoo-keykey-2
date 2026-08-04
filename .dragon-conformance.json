@@ -1,0 +1,9 @@
+{
+  "app": "Yahoo! KeyKey 2",
+  "sources": ["App", "Packages"],
+  "strings": ["App/**/*.lproj/Localizable.strings"],
+  "pin": { "file": "tools/build-app.sh", "pattern": "DRAGONKIT_TAG=\"v([0-9.]+)\"" },
+  "paneOrder": { "file": "App/AppMenuController.swift" },
+  "traits": ["sparkle", "no-permissions"],
+  "exceptions": []
+}

@@ -1,0 +1,14 @@
+name: DragonKit conformance
+
+# Checks this app against dragon-kit's CONFORMANCE.md on every PR: the rules and the
+# checker live in the kit and only there, so there is no per-repo copy to drift. What
+# this repo owns is .dragon-conformance.json (where our sources / strings / pin / pane
+# order live) — everything else comes from the reusable workflow.
+#
+# Pinned at @main because no v2 tag of the workflow exists yet; move to @v2 once the kit
+# tags one, so this repo tracks the workflow's interface rather than its default branch.
+on: pull_request
+
+jobs:
+  conformance:
+    uses: teddychan/dragon-kit/.github/workflows/conformance.yml@main
