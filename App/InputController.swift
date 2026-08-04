@@ -488,6 +488,32 @@ final class InputController: IMKInputController {
         _ = commitCurrent(to: client)
     }
 
+    // IMK ends the input session when the client loses focus: the user switched app, clicked
+    // another text field, or changed input source. Nothing handled that before, and IMK does not
+    // call commitComposition for 聯想 (there is no marked text to commit), so a candidate or
+    // association page left open stayed stranded on screen over the new app — visible even after
+    // switching back to English, and unreachable because the keys that dismiss it now go to the
+    // other app (issue #70). End the session with nothing on screen.
+    override func deactivateServer(_ sender: Any!) {
+        switch SessionEndPolicy.action(hasComposition: !engine.composingText.isEmpty,
+                                       hasAssociations: !associations.isEmpty) {
+        case .idle:
+            break
+        case .dismiss:
+            clearAssociations()
+        case .commit:
+            // commitCurrent clears the marked text and hides the window; offerAssociations stays
+            // false so a system-driven commit does not open a fresh 聯想 page as we leave.
+            if let client = sender as? IMKTextInput ?? client() {
+                _ = commitCurrent(to: client)
+            } else {
+                _ = engine.commit()
+                resetCompositionState()
+                clearAssociations()
+            }
+        }
+    }
+
     @discardableResult
     private func commitCurrent(to client: IMKTextInput, offerAssociations: Bool = false) -> Bool {
         resetCompositionState()
