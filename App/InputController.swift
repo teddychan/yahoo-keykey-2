@@ -112,9 +112,12 @@ final class InputController: IMKInputController {
     // shared Dragon-App app-menu standard (liquid-glass-macos SKILL §5A) for an IME:
     //   1. quick-toggles zone (輸出簡體字 / 全形標點 / 聯想字詞), checkmarks reflect live prefs;
     //   2. any settings specific to the active input method (none for Cangjie/Simplex today);
-    //   3. App menu grouping (§5A) — About Yahoo! KeyKey 2 · 檢查更新… · 設定… · — · 解除安裝….
+    //   3. App menu grouping (§5A) — About Yahoo! KeyKey 2 · 檢查更新… · 設定….
     //      Candidate-window font size (候選字大小) is no longer offered here — the coarse
     //      小/中/大 choices were superseded by the fine-grained slider in 設定….
+    //      解除安裝… is no longer offered here either — a rarely-used destructive action does
+    //      not belong one click away in the everyday menu; it lives in 設定… as the
+    //      Uninstall pane (AppMenuController.settingsPanes).
     //      Per §5A the IME app menu omits Quit (an IME is system-managed; quitting only makes
     //      typing unresponsive until macOS relaunches it). All items are TOP-LEVEL: the macOS
     //      input menu only routes top-level selections back to the controller, so a "⋯ Yahoo!
@@ -152,12 +155,13 @@ final class InputController: IMKInputController {
             methodItems.forEach(menu.addItem)
         }
 
-        // 3. App menu grouping (§5A): About · Check for updates · Settings · — · Uninstall.
+        // 3. App menu grouping (§5A): About · Check for updates · Settings.
         // Built by the shared DragonAppMenu — the one source of truth for the app-item order,
         // naming, and icons, so the Dragon apps can't drift the way hand-rolled NSMenus did.
-        // includeQuit: false omits Quit by design (system-managed IME). items(_:) carries no
-        // leading separator, so the one added below is still ours. All items are top-level so
-        // IMK routes them.
+        // includeQuit: false omits Quit by design (system-managed IME), and the kit drops the
+        // divider with it, so these three items end the menu with nothing dangling. items(_:)
+        // carries no leading separator either, so the one added below is still ours. All items
+        // are top-level so IMK routes them.
         // Titles resolve via DragonKit's L() so they follow the picked language; IMK pulls
         // menu() fresh each time the input menu opens, so no cached menu to rebuild on change.
         // IMK calls menu() on the main thread, so entering the main actor to reach the
@@ -169,7 +173,6 @@ final class InputController: IMKInputController {
                 onAbout: { [weak self] in self?.openAbout() },
                 onSettings: { [weak self] in self?.openSettings() },
                 onCheckForUpdates: { [weak self] in self?.checkForUpdates() },
-                onUninstall: { [weak self] in self?.uninstall() },
                 includeQuit: false
             )
             DragonAppMenu.items(config).forEach(menu.addItem)
@@ -205,10 +208,6 @@ final class InputController: IMKInputController {
 
     @objc private func openSettings() {
         MainActor.assumeIsolated { AppMenuController.shared.openSettings() }
-    }
-
-    @objc private func uninstall() {
-        MainActor.assumeIsolated { AppMenuController.shared.openUninstall() }
     }
 
     // IMK calls this when the user selects one of our input modes (Info.plist
