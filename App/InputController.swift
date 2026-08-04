@@ -153,28 +153,27 @@ final class InputController: IMKInputController {
         }
 
         // 3. App menu grouping (§5A): About · Check for updates · Settings · — · Uninstall.
-        // Quit omitted by design (system-managed IME). All top-level so IMK routes them.
+        // Built by the shared DragonAppMenu — the one source of truth for the app-item order,
+        // naming, and icons, so the Dragon apps can't drift the way hand-rolled NSMenus did.
+        // includeQuit: false omits Quit by design (system-managed IME). items(_:) carries no
+        // leading separator, so the one added below is still ours. All items are top-level so
+        // IMK routes them.
         // Titles resolve via DragonKit's L() so they follow the picked language; IMK pulls
         // menu() fresh each time the input menu opens, so no cached menu to rebuild on change.
-        // IMK calls menu() on the main thread, so entering the main actor to call L() is safe.
-        let (aboutTitle, updateTitle, settingsTitle, uninstallTitle) = MainActor.assumeIsolated {
-            (L("keykey.menu.about"), L("keykey.menu.checkForUpdates"),
-             L("keykey.menu.settings"), L("keykey.menu.uninstall"))
+        // IMK calls menu() on the main thread, so entering the main actor to reach the
+        // (main-actor) DragonAppMenu is safe.
+        menu.addItem(.separator())
+        MainActor.assumeIsolated {
+            let config = DragonAppMenu.Config(
+                appName: AboutConfig.appName,
+                onAbout: { [weak self] in self?.openAbout() },
+                onSettings: { [weak self] in self?.openSettings() },
+                onCheckForUpdates: { [weak self] in self?.checkForUpdates() },
+                onUninstall: { [weak self] in self?.uninstall() },
+                includeQuit: false
+            )
+            DragonAppMenu.items(config).forEach(menu.addItem)
         }
-        menu.addItem(.separator())
-        let about = NSMenuItem(title: aboutTitle, action: #selector(openAbout), keyEquivalent: "")
-        about.target = self
-        menu.addItem(about)
-        let update = NSMenuItem(title: updateTitle, action: #selector(checkForUpdates), keyEquivalent: "")
-        update.target = self
-        menu.addItem(update)
-        let settings = NSMenuItem(title: settingsTitle, action: #selector(openSettings), keyEquivalent: ",")
-        settings.target = self
-        menu.addItem(settings)
-        menu.addItem(.separator())
-        let uninstall = NSMenuItem(title: uninstallTitle, action: #selector(uninstall), keyEquivalent: "")
-        uninstall.target = self
-        menu.addItem(uninstall)
         return menu
     }
 

@@ -73,7 +73,7 @@ echo "==> Building DragonKit (SwiftPM, release) in pinned checkout"
 # package's own tools version (6.1) — a separate compilation from the app's -swift-version 5.
 # Clone the pinned tag on first use (e.g. a fresh CI checkout); vendor/ is gitignored, never
 # committed. Idempotent: an existing checkout (local dev) is reused as-is.
-DRAGONKIT_TAG="v1.3.0"
+DRAGONKIT_TAG="v1.5.0"
 if [ ! -d "$KIT_DIR" ]; then
   echo "==> Cloning DragonKit $DRAGONKIT_TAG into vendor/ (not committed)"
   git clone --depth 1 --branch "$DRAGONKIT_TAG" https://github.com/teddychan/dragon-kit "$KIT_DIR"
