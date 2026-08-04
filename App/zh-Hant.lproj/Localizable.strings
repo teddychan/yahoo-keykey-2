@@ -45,9 +45,3 @@
 "keykey.uninstall.item.inputSources" = "從輸入來源中停用倉頡與速成";
 "keykey.uninstall.item.learningAndSettings" = "刪除使用者學習資料與偏好設定";
 "keykey.uninstall.item.trash" = "將 Yahoo! KeyKey 2 移到垃圾桶";
-
-/* IMK input-menu app items */
-"keykey.menu.about" = "關於 Yahoo! KeyKey 2…";
-"keykey.menu.checkForUpdates" = "檢查更新…";
-"keykey.menu.settings" = "設定…";
-"keykey.menu.uninstall" = "解除安裝 Yahoo! KeyKey 2…";

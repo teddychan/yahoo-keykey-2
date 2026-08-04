@@ -4,8 +4,9 @@ import DragonKit
 import DragonKitUpdates
 
 // Host-owned owner of the shared DragonKit settings window for the IME. The IMK input menu
-// (InputController.menu) routes 關於 / 設定… / 檢查更新… / 解除安裝… here; each sets the target
-// pane before showing the window, so About opens About, Updates opens Updates, etc.
+// (InputController.menu) routes 關於 / 檢查更新… / 設定… here; each sets the target pane before
+// showing the window, so About opens About, Updates opens Updates, etc. Uninstall has no menu
+// entry point by design (see DragonAppMenu) — its pane is reached from the sidebar.
 //
 // Sidebar order (host-owned): General → Sync & Backup → What's New → Updates → About →
 // Uninstall. No Permissions pane (KeyKey uses no Accessibility/Input-Monitoring). No Quit /
@@ -98,12 +99,6 @@ final class AppMenuController {
         model.syncFromPreferences()
         settingsController.show()
         updater.checkForUpdates()
-    }
-
-    func openUninstall() {
-        selection.paneID = "uninstall"
-        model.syncFromPreferences()
-        settingsController.show()
     }
 
     private func relaunch() {

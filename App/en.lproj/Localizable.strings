@@ -45,9 +45,3 @@
 "keykey.uninstall.item.inputSources" = "Disable Cangjie and Simplex from Input Sources";
 "keykey.uninstall.item.learningAndSettings" = "Delete user-learning data and preferences";
 "keykey.uninstall.item.trash" = "Move Yahoo! KeyKey 2 to the Trash";
-
-/* IMK input-menu app items */
-"keykey.menu.about" = "About Yahoo! KeyKey 2…";
-"keykey.menu.checkForUpdates" = "Check for Updates…";
-"keykey.menu.settings" = "Settings…";
-"keykey.menu.uninstall" = "Uninstall Yahoo! KeyKey 2…";
