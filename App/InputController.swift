@@ -156,16 +156,26 @@ final class InputController: IMKInputController {
         }
 
         // 3. App menu grouping (§5A): About · Check for updates · Settings.
-        // Built by the shared DragonAppMenu — the one source of truth for the app-item order,
-        // naming, and icons, so the Dragon apps can't drift the way hand-rolled NSMenus did.
-        // includeQuit: false omits Quit by design (system-managed IME), and the kit drops the
-        // divider with it, so these three items end the menu with nothing dangling. items(_:)
-        // carries no leading separator either, so the one added below is still ours. All items
-        // are top-level so IMK routes them.
+        // Sourced from the shared DragonAppMenu — the one source of truth for the app-item
+        // order, naming, and icons, so the Dragon apps can't drift the way hand-rolled NSMenus
+        // did. includeQuit: false omits Quit by design (system-managed IME), and the kit drops
+        // the divider with it, so these three items end the menu with nothing dangling.
+        // items(_:) carries no leading separator either, so the one added below is still ours.
+        // All items are top-level so IMK routes them.
         // Titles resolve via DragonKit's L() so they follow the picked language; IMK pulls
         // menu() fresh each time the input menu opens, so no cached menu to rebuild on change.
         // IMK calls menu() on the main thread, so entering the main actor to reach the
         // (main-actor) DragonAppMenu is safe.
+        //
+        // The items are RE-POINTED at real selectors below — do not "simplify" that back to
+        // the kit's closures. The kit hands back items that dispatch through a private
+        // NSMenuItem subclass whose own `target` is the item itself. That is correct AppKit,
+        // but the macOS input menu does not use plain AppKit dispatch: it routes a top-level
+        // selection back to the input controller and ignores each item's target — the very
+        // routing that makes a submenu "render but never fire" (noted above). Under that model
+        // the kit's action would be sent to InputController, which has no such method, and all
+        // three items would silently do nothing. Re-pointing at @objc methods on self is
+        // correct under BOTH dispatch models, so the items fire whichever one IMK really uses.
         menu.addItem(.separator())
         MainActor.assumeIsolated {
             let config = DragonAppMenu.Config(
@@ -175,7 +185,36 @@ final class InputController: IMKInputController {
                 onCheckForUpdates: { [weak self] in self?.checkForUpdates() },
                 includeQuit: false
             )
-            DragonAppMenu.items(config).forEach(menu.addItem)
+            let items = DragonAppMenu.items(config)
+
+            // Matched by TITLE, not by index: these titles are rebuilt from the very same L()
+            // keys and format string the kit itself used, so a hit is exact — and if the kit
+            // ever reorders or changes its item set, an unmatched item keeps the kit's own
+            // dispatch instead of being silently wired to the wrong handler (a mis-wired
+            // About-opens-Settings would be far worse than an item that doesn't fire).
+            //
+            // The *shape* of the kit's item set (exactly these three titles, canonical order,
+            // no separators) is pinned by ConfigContentTests, so a kit change fails CI rather
+            // than reaching a user. Nothing here traps: this app is linked without -O, so an
+            // assert() would be live in the shipped build, and trapping inside an IME loaded
+            // into every process breaks typing system-wide. Log and degrade, as App/ does
+            // everywhere else.
+            let selectorsByTitle: [String: Selector] = [
+                String(format: L("DragonKit.menu.about"), AboutConfig.appName): #selector(openAbout),
+                L("DragonKit.menu.checkForUpdates"): #selector(checkForUpdates),
+                L("DragonKit.menu.settings"): #selector(openSettings),
+            ]
+            for item in items {
+                guard let action = selectorsByTitle[item.title] else {
+                    NSLog("YahooKeyKey: no selector for DragonAppMenu item \"\(item.title)\"; "
+                          + "left on the kit's own dispatch and it may not fire")
+                    menu.addItem(item)
+                    continue
+                }
+                item.target = self
+                item.action = action
+                menu.addItem(item)
+            }
         }
         return menu
     }
