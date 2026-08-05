@@ -36,10 +36,9 @@
 "keykey.about.cangjieTable" = "Cangjie table";
 "keykey.about.hanConversion" = "Han conversion";
 
-/* What's New pane (2.9.0) */
-"keykey.whatsNew.summary" = "This update tidies the input menu: the app items now use standard macOS names with a leading icon, and Uninstall has moved into Settings.";
-"keykey.whatsNew.sharedMenu" = "A tidier input menu. The app items at the bottom of the 倉頡／速成 input menu — About Yahoo! KeyKey 2, Check for Updates… and Settings… — now each lead with an icon and follow standard macOS naming, matching the other Dragon apps. Nothing you type changes, and the 輸出簡體字 / 全形標點 / 聯想字詞 / 反查提示 toggles above them are untouched.";
-"keykey.whatsNew.uninstallInSettings" = "Uninstall now lives in Settings. Removing Yahoo! KeyKey 2 used to sit at the bottom of the input menu, one slip away from everyday options. It is now at 設定… ▸ Uninstall instead — the same checklist, just not in the menu you open while typing.";
+/* What's New pane (2.9.1) */
+"keykey.whatsNew.summary" = "This update fixes a selection box that could be left stranded on screen after you switched to another app.";
+"keykey.whatsNew.strandedWindow" = "The selection box no longer gets stuck on screen. If you switched to another app — or to another input source — while the candidate window or the 聯想 (associated-phrase) window was open, it stayed floating above whatever you switched to, with no way to close it: the keys that dismiss it now belonged to the other app, and it was still there after switching back to English. The window now closes as soon as Yahoo! KeyKey 2 loses focus. A half-typed code is committed on the way out; 聯想 suggestions are simply dropped, since they are offers you never picked.";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "Disable Cangjie and Simplex from Input Sources";
