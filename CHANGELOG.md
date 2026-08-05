@@ -2,6 +2,19 @@
 
 A plain-language list of changes in each version, newest first.
 
+## 2.9.0
+
+- **A tidier input menu.** The app items at the bottom of the 倉頡／速成 input menu — **關於 Yahoo!
+  KeyKey 2**, **檢查更新…** and **設定…** — now each lead with an icon and follow standard macOS
+  naming, matching the other Dragon apps. They are built from the shared DragonKit menu, so the
+  wording, order, and icons can no longer drift between apps. Nothing you type changes, and the
+  **輸出簡體字 / 全形標點 / 聯想字詞 / 反查提示** toggles above them are untouched.
+- **解除安裝 (Uninstall) now lives in Settings.** Removing Yahoo! KeyKey 2 used to sit at the
+  bottom of the input menu, one slip away from the options you use while typing. It is now at
+  **設定… ▸ 解除安裝** instead — the same checklist, just not in the menu you open mid-sentence.
+- **Under the hood.** Updated to DragonKit 2.1.0 (from 1.3.0), the shared code behind the
+  Settings, About, What's New, and Uninstall panes.
+
 ## 2.8.0
 
 - **Press Space to confirm the code (new option).** In **速成**, and in **倉頡** with the `*`

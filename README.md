@@ -75,7 +75,7 @@ Log out and back in after any update so macOS reloads the input method.
 1. Deactivate the input method: **System Settings ▸ Keyboard ▸ Input Sources**, select
    Yahoo KeyKey 2, and remove it.
 2. Remove the app — **Homebrew:** `brew uninstall --cask teddychan/tap/yahoo-keykey-2`;
-   **manual:** choose **解除安裝…** from the input menu, or delete
+   **manual:** open **設定…** from the input menu and use the **解除安裝** pane, or delete
    `~/Library/Input Methods/YahooKeyKey2.app`.
 3. Remove the leftover preferences and caches (what `brew uninstall --zap` deletes):
 

@@ -36,18 +36,12 @@
 "keykey.about.cangjieTable" = "倉頡碼表";
 "keykey.about.hanConversion" = "漢字轉換";
 
-/* What's New pane (2.8.0) */
-"keykey.whatsNew.summary" = "本次更新新增「以空白鍵確認字根」選項（適用速成與含萬用字元的倉頡），並修正三代倉頡會用錯誤字根配對出字的問題。";
-"keykey.whatsNew.strokeConfirm" = "以空白鍵確認字根。在速成、以及使用萬用字元（*）的倉頡中，字根還沒打完就會出現候選字，空白鍵因此變成翻頁而不是確認字根，打斷了倉頡「打字根、按空白」的習慣。設定… ▸ 一般 ▸ 輸入方式 新增一個選項：開啟後第一次按空白鍵只確認字根並停留在第 1 頁，再按一次才翻頁，或直接按 1–9 選字。預設關閉，一般倉頡不受影響。";
-"keykey.whatsNew.cangjieCodes" = "修正：三代倉頡會用錯誤的字根配對出字。輸入「人一弓口」（「何」的字根）時也會出現「含」，但「含」的拆碼是「人戈弓口」——旁邊的反查提示本來就是這麼顯示的。內附的三代碼表源自上游一次未去重的合併，讓 800 個字多出一組不正確的字根。這些多餘的字根已移除，每個字都保留原本正確的拆碼；五代倉頡從未受影響。";
+/* What's New pane (2.9.0) */
+"keykey.whatsNew.summary" = "本次更新整理了輸入法選單：下方的應用項目改用標準的 macOS 名稱並加上圖示，「解除安裝」則移入設定。";
+"keykey.whatsNew.sharedMenu" = "輸入法選單更整齊。倉頡／速成 輸入法選單下方的應用項目——關於 Yahoo! KeyKey 2、檢查更新…、設定…——現在各自加上圖示，並採用標準的 macOS 命名，與其他 Dragon App 一致。輸入行為完全不變，上方的 輸出簡體字／全形標點／聯想字詞／反查提示 開關也保持原樣。";
+"keykey.whatsNew.uninstallInSettings" = "「解除安裝」移到設定裡。以前要移除 Yahoo! KeyKey 2，入口就在輸入法選單最下方，打字時一不小心就可能按到。現在改放在 設定… ▸ 解除安裝——檢查清單完全相同，只是不再出現在打字時會打開的那個選單裡。";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "從輸入來源中停用倉頡與速成";
 "keykey.uninstall.item.learningAndSettings" = "刪除使用者學習資料與偏好設定";
 "keykey.uninstall.item.trash" = "將 Yahoo! KeyKey 2 移到垃圾桶";
-
-/* IMK input-menu app items */
-"keykey.menu.about" = "關於 Yahoo! KeyKey 2…";
-"keykey.menu.checkForUpdates" = "檢查更新…";
-"keykey.menu.settings" = "設定…";
-"keykey.menu.uninstall" = "解除安裝 Yahoo! KeyKey 2…";
