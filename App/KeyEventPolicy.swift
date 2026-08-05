@@ -36,9 +36,11 @@ enum KeyEventPolicy {
 // Pure input-session-lifecycle decisions for InputController.
 // See InputController.deactivateServer(_:).
 enum SessionEndPolicy {
-    /// What must happen to on-screen state when the input session ends (issue #70).
+    /// What must happen to the session's own state when it ends (issue #70). The caller hides
+    /// the candidate window in every case; this decides only what to do with composition and
+    /// suggestions.
     enum Action: Equatable {
-        /// Nothing composing and nothing suggested: no window is up, so there is nothing to do.
+        /// Nothing composing and nothing suggested: no state to clear.
         case idle
         /// 聯想 suggestions are showing with no composition. They are offers the user never typed,
         /// so they are dropped without inserting anything.

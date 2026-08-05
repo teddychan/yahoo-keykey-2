@@ -30,7 +30,8 @@ final class SessionEndPolicyTests: XCTestCase {
     }
 
     func testIdleSessionDoesNothing() {
-        // Nothing composing and nothing suggested: no window is up, so switching away is a no-op.
+        // Nothing composing and nothing suggested: no state to clear. (deactivateServer still
+        // hides the window unconditionally — that safety net is not this decision's job.)
         XCTAssertEqual(SessionEndPolicy.action(hasComposition: false, hasAssociations: false),
                        .idle)
     }

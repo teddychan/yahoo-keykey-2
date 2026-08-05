@@ -549,6 +549,11 @@ final class InputController: IMKInputController {
                 clearAssociations()
             }
         }
+        // Every branch above already hides the window for the state it handles, and refresh(_:)
+        // only shows it when there are candidates to pick — so .idle really does mean nothing is
+        // up. Hide anyway: this is the one place where being wrong strands a panel over another
+        // app with no way to dismiss it, which is the whole of issue #70. Costs one orderOut.
+        candidateWindow.hide()
     }
 
     @discardableResult
