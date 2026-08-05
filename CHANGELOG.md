@@ -2,6 +2,16 @@
 
 A plain-language list of changes in each version, newest first.
 
+## 2.9.1
+
+- **Fixed: the selection box could be left stuck on screen.** If you switched to another app —
+  or to another input source — while the candidate window or the **聯想** (associated-phrase)
+  window was open, it stayed floating above whatever you switched to, with no way to close it:
+  the keys that dismiss it now belonged to the other app, so it was still sitting there even
+  after switching back to English. The window now closes as soon as Yahoo! KeyKey 2 loses
+  focus. A half-typed code is committed on the way out; **聯想** suggestions are simply dropped,
+  since they are offers you never picked.
+
 ## 2.9.0
 
 - **A tidier input menu.** The app items at the bottom of the 倉頡／速成 input menu — **關於 Yahoo!
