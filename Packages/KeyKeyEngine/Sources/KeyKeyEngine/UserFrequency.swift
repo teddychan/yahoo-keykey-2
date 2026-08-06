@@ -101,8 +101,16 @@ public final class UserFrequency {
 
     // Persisted as a [String: Int] map (JSON has no Character key type), one char per key.
     private static func load(from url: URL) -> [Character: Int] {
+        // No file yet is the normal first-launch case, not a failure: start empty, say nothing.
+        guard FileManager.default.fileExists(atPath: url.path) else { return [:] }
         guard let data = try? Data(contentsOf: url),
               let raw = try? JSONDecoder().decode([String: Int].self, from: data) else {
+            // The file is there but unreadable. Silently returning [:] here reset the user's
+            // learning with no signal, and the next debounced save then overwrote the evidence.
+            // Log it (file name only — the full path carries the user's home directory) and move
+            // the bad file aside so it survives for diagnosis.
+            NSLog("YahooKeyKey: \(url.lastPathComponent) unreadable; starting with empty user frequency")
+            quarantine(url)
             return [:]
         }
         var result: [Character: Int] = [:]
@@ -110,6 +118,20 @@ public final class UserFrequency {
             if let ch = key.first { result[ch] = value }
         }
         return result
+    }
+
+    // Move an unreadable store aside as "<name>.corrupt" so the next save writes a fresh file
+    // instead of overwriting the broken one, keeping it around to diagnose. Best-effort: if the
+    // move fails there is nothing more to do — the store is already lost either way.
+    private static func quarantine(_ url: URL) {
+        let corrupt = url.deletingLastPathComponent()
+            .appendingPathComponent(url.lastPathComponent + ".corrupt")
+        try? FileManager.default.removeItem(at: corrupt)   // replace any earlier quarantine
+        do {
+            try FileManager.default.moveItem(at: url, to: corrupt)
+        } catch {
+            NSLog("YahooKeyKey: could not set aside the unreadable user frequency store: \(error)")
+        }
     }
 
     private static func save(_ counts: [Character: Int], to url: URL) {
