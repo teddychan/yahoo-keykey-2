@@ -23,8 +23,12 @@ jobs:
         run: swift --version
 
       # KeyKeyEngine has no external dependencies — it tests standalone.
+      # -warnings-as-errors is the gate: a compiler warning fails the build rather than
+      # scrolling past in the log. It is what gives the packages' StrictConcurrency setting
+      # (see Packages/*/Package.swift) teeth — those data-race findings are warnings under the
+      # Swift 5 language mode, so without this nothing would stop one from landing.
       - name: Engine tests (KeyKeyEngine)
-        run: swift test --package-path Packages/KeyKeyEngine
+        run: swift test --package-path Packages/KeyKeyEngine -Xswiftc -warnings-as-errors
 
       # The App-logic package depends on the pinned DragonKit checkout (vendor/ is gitignored,
       # cloned on demand). Read the SAME tag build-app.sh pins so CI never drifts from release.
@@ -35,4 +39,4 @@ jobs:
           git clone --depth 1 --branch "$TAG" https://github.com/teddychan/dragon-kit vendor/dragon-kit
 
       - name: App-logic tests (KeyKeyApp)
-        run: swift test --package-path Packages/KeyKeyApp
+        run: swift test --package-path Packages/KeyKeyApp -Xswiftc -warnings-as-errors
