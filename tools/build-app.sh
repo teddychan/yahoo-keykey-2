@@ -41,6 +41,14 @@ SDK="$(xcrun --show-sdk-path)"
 # architecture. Yahoo KeyKey 2 does not ship an Intel (x86_64) slice. macOS 26 minimum.
 TARGET="arm64-apple-macosx26.0"
 
+# Optimization. swiftc defaults to -Onone, so until now every build — including the notarized
+# release, which comes through this same script — shipped the engine and the app UNOPTIMIZED,
+# inside a process attached to every app that takes keyboard input. Measured on the bundled 五代
+# table (arm64, Xcode 26.6), -Onone vs -O: Cangjie table parse 73 -> 34 ms, 速成 table derive
+# 78 -> 8 ms, 2000 速成 compositions 21 -> 2 ms. A local debug build stays at -Onone so the
+# debugger is usable (and so assert/precondition survive into the build being tested).
+if [[ "${KEYKEY_DEBUG_ID:-}" == "1" ]]; then OPT="-Onone"; else OPT="-O"; fi
+
 # Optional: regenerate the bundled LM (Resources/data.txt) first. A clean checkout omits
 # data.txt by design; pass --build-lm to generate it via tools/build-lm.sh before building.
 if [[ "${1:-}" == "--build-lm" ]]; then
@@ -63,7 +71,7 @@ swiftc \
   -emit-module-path "$MODULE_DIR/KeyKeyEngine.swiftmodule" \
   -o "$MODULE_DIR/libKeyKeyEngine.a" \
   -sdk "$SDK" -target "$TARGET" \
-  -swift-version 5 \
+  -swift-version 5 "$OPT" \
   "$ENGINE_SRC"/*.swift
 
 echo "==> Building DragonKit (SwiftPM, release) in pinned checkout"
@@ -96,7 +104,7 @@ mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 swiftc \
   -o "$APP/Contents/MacOS/$EXECUTABLE_NAME" \
   -sdk "$SDK" -target "$TARGET" \
-  -swift-version 5 \
+  -swift-version 5 "$OPT" \
   -I "$MODULE_DIR" -L "$MODULE_DIR" -lKeyKeyEngine \
   -I "$KIT_MODULES" \
   -lDragonKit -lDragonKitUpdates \
