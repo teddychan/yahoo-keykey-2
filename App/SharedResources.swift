@@ -13,12 +13,6 @@ final class SharedResources {
     // wildcard matches surface common characters first. Computed once.
     let characterRank: [Character: Double]
     let associatedPhrases: AssociatedPhrases
-    // Cangjie table and the effective sort rank depend on the selected Cangjie version;
-    // rebuilt in place by reloadCangjieTables() when the user changes it.
-    private(set) var cangjieTable: CangjieTable
-    // Single-char rank the engines sort by: the LM `characterRank` for 五代, or empty for
-    // 三代 so the Yahoo table's native line order is preserved. User-learning applies on top.
-    private(set) var cangjieRank: [Character: Double]
     let hanConvertFilter: HanConvertFilter
     // One shared user-learning store across all controllers.
     let userFreq: UserFrequency
@@ -28,19 +22,40 @@ final class SharedResources {
     // Pinyin mode (ref-counted). Built lazily from data.txt on the first acquire.
     let pinyinIndexCache: RefCountedResource<TonelessLanguageModelIndex>
 
-    // Simplex (速成) table: only needed once a controller actually selects 速成, so it's built
-    // lazily on first access rather than eagerly at launch (building it arrays + sorts all
-    // Cangjie entries). Guarded by a lock, mirroring RefCountedResource, since SharedResources
-    // is prewarmed off-main and read from the input controller. Invalidated (not rebuilt) by
-    // loadCangjieTables() on a 倉頡版本 change; the next access rebuilds for the new version.
-    private let simplexLock = NSLock()
+    // The selected 倉頡版本, the table it loads, the sort rank that goes with it, and the two
+    // indexes derived from them are ONE piece of state that has to change together, so a single
+    // lock guards the whole set and loadCangjieTables() publishes it in one step. Previously the
+    // two caches were each locked but the table and rank they derive from were not — the mixed
+    // discipline left a version change observable half-applied (new table, old rank).
+    //
+    // SharedResources is prewarmed off the main thread and read from every input controller, so
+    // the lock is what makes that safe. NSLock is NOT recursive: code holding `tablesLock` must
+    // read these stored properties directly and never call back through the accessors below.
+    private let tablesLock = NSLock()
+    private var loadedVersion: CangjieVersion
+    private var loadedCangjieTable: CangjieTable
+    private var loadedCangjieRank: [Character: Double]
+    // Both are built lazily on first access rather than at launch: the 速成 table arrays + sorts
+    // every Cangjie entry, and the reverse (char → 倉頡 code) index is only read when 反查提示 is
+    // on (off by default). Cleared — not rebuilt — by loadCangjieTables() on a version change;
+    // the next access rebuilds against whatever was just loaded.
     private var cachedSimplexTable: SimplexTable?
-
-    // Reverse index (char → 倉頡 code) for the 反查/拆碼提示 hint. Only read when
-    // Preferences.codeHintEnabled is true (off by default), so it's built lazily on first
-    // access rather than unconditionally at launch. Same locking approach as simplexTable.
-    private let codeIndexLock = NSLock()
     private var cachedCodeIndex: CangjieCodeIndex?
+
+    // The Cangjie table for the selected 倉頡版本.
+    var cangjieTable: CangjieTable {
+        tablesLock.lock()
+        defer { tablesLock.unlock() }
+        return loadedCangjieTable
+    }
+
+    // Single-char rank the engines sort by: the LM `characterRank` for 五代, or empty for
+    // 三代 so the Yahoo table's native line order is preserved. User-learning applies on top.
+    var cangjieRank: [Character: Double] {
+        tablesLock.lock()
+        defer { tablesLock.unlock() }
+        return loadedCangjieRank
+    }
 
     private init() {
         // Read data.txt to a String ONCE, split it into lines ONCE, then build both the LM
@@ -70,8 +85,9 @@ final class SharedResources {
         // Placeholder empties satisfy Swift's two-phase init; the real table for the
         // selected version is loaded by loadCangjieTables() at the end of init (once every
         // stored property is set, so an instance method may be called).
-        cangjieTable = CangjieTable(text: "")
-        cangjieRank = characterRank
+        loadedVersion = .v5
+        loadedCangjieTable = CangjieTable(text: "")
+        loadedCangjieRank = characterRank
 
         // Load the bundled TC→SC table for the "輸出簡體字" toggle; fail safe to an empty
         // (pass-through) table if missing, so the toggle simply leaves text unchanged.
@@ -116,23 +132,27 @@ final class SharedResources {
     // the bundled ibus table + LM ranking; 三代 uses the Yahoo! KeyKey table (cj-ext) with its
     // native line order (empty rank → the engines' stable sort preserves it).
     private func loadCangjieTables(version: CangjieVersion) {
+        // Read the file OUTSIDE the lock — no reason to hold readers off during disk I/O.
+        let table: CangjieTable
+        let rank: [Character: Double]
         switch version {
         case .v5:
-            cangjieTable = Self.loadCangjie(resource: "cangjie")
-            cangjieRank = characterRank
+            table = Self.loadCangjie(resource: "cangjie")
+            rank = characterRank
         case .v3:
-            cangjieTable = Self.loadCangjie(resource: "cangjie-yahoo")
-            cangjieRank = [:]   // native table order
+            table = Self.loadCangjie(resource: "cangjie-yahoo")
+            rank = [:]   // native table order
         }
-        // Drop any cached simplexTable/cangjieCodeIndex: both are derived from cangjieTable
-        // (or the version), so they must rebuild against the table just loaded. Rebuilding is
-        // deferred to the next access rather than done eagerly here.
-        simplexLock.lock()
+        // Publish the whole set in one step, dropping the derived caches along with it: both
+        // are built from this table and version, so they must rebuild against what was just
+        // loaded. Rebuilding is deferred to the next access rather than done eagerly here.
+        tablesLock.lock()
+        loadedVersion = version
+        loadedCangjieTable = table
+        loadedCangjieRank = rank
         cachedSimplexTable = nil
-        simplexLock.unlock()
-        codeIndexLock.lock()
         cachedCodeIndex = nil
-        codeIndexLock.unlock()
+        tablesLock.unlock()
     }
 
     // Builds the Simplex table for `version`. 五代 derives it from the Cangjie table; 三代 loads
@@ -153,24 +173,27 @@ final class SharedResources {
     }
 
     // The Simplex (速成) table for the currently-selected 倉頡版本, built lazily on first access
-    // and cached until the version changes (see loadCangjieTables). Thread-safe via simplexLock.
+    // and cached until the version changes (see loadCangjieTables). Thread-safe via tablesLock.
     var simplexTable: SimplexTable {
-        simplexLock.lock()
-        defer { simplexLock.unlock() }
+        tablesLock.lock()
+        defer { tablesLock.unlock() }
         if let cached = cachedSimplexTable { return cached }
-        let built = Self.buildSimplexTable(version: Preferences.cangjieVersion, cangjieTable: cangjieTable)
+        // Built from the version PUBLISHED WITH this table, not from a fresh Preferences read:
+        // the two could disagree if the user switched 倉頡版本 between the load and this access,
+        // which would derive a 三代 Simplex table from the 五代 Cangjie table.
+        let built = Self.buildSimplexTable(version: loadedVersion, cangjieTable: loadedCangjieTable)
         cachedSimplexTable = built
         return built
     }
 
     // The reverse (char → 倉頡 code) index for the 反查/拆碼提示 hint, built lazily on first
     // access (it's only read when Preferences.codeHintEnabled is true) and cached until the
-    // 倉頡版本 changes (see loadCangjieTables). Thread-safe via codeIndexLock.
+    // 倉頡版本 changes (see loadCangjieTables). Thread-safe via tablesLock.
     var cangjieCodeIndex: CangjieCodeIndex {
-        codeIndexLock.lock()
-        defer { codeIndexLock.unlock() }
+        tablesLock.lock()
+        defer { tablesLock.unlock() }
         if let cached = cachedCodeIndex { return cached }
-        let built = CangjieCodeIndex(table: cangjieTable)
+        let built = CangjieCodeIndex(table: loadedCangjieTable)
         cachedCodeIndex = built
         return built
     }
