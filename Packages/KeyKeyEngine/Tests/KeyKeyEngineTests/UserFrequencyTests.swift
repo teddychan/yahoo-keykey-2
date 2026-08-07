@@ -80,6 +80,36 @@ final class UserFrequencyTests: XCTestCase {
         XCTAssertEqual(uf.bonus(for: "好"), 0)
     }
 
+    func testCorruptFileIsSetAsideForDiagnosis() throws {
+        // An unreadable store must not be silently overwritten by the next save: it is moved
+        // to "<name>.corrupt", contents intact, so it can still be inspected.
+        try "not json".data(using: .utf8)!.write(to: fileURL)
+        _ = UserFrequency(fileURL: fileURL)
+
+        let corrupt = fileURL.appendingPathExtension("corrupt")
+        XCTAssertFalse(FileManager.default.fileExists(atPath: fileURL.path))
+        XCTAssertEqual(try String(contentsOf: corrupt, encoding: .utf8), "not json")
+    }
+
+    func testMissingFileIsNotSetAside() {
+        // First launch has no file at all; that is normal, so nothing is quarantined.
+        let missing = tempDir.appendingPathComponent("does-not-exist.json")
+        _ = UserFrequency(fileURL: missing)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: missing.appendingPathExtension("corrupt").path))
+    }
+
+    func testStoreRecoversAfterCorruption() throws {
+        // Learning starts over from empty, but it must keep working: the next flush writes a
+        // fresh, valid file that a later instance can read back.
+        try "not json".data(using: .utf8)!.write(to: fileURL)
+        let uf = UserFrequency(fileURL: fileURL)
+        uf.record("好")
+        uf.flush()
+
+        let reloaded = UserFrequency(fileURL: fileURL)
+        XCTAssertGreaterThan(reloaded.bonus(for: "好"), 0)
+    }
+
     // MARK: - Hardening
 
     func testConcurrentRecordIsThreadSafe() {
