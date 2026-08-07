@@ -29,6 +29,15 @@ final class CandidateWindow {
     private let footerRow = NSView()
     private let footerArrow = NSTextField(labelWithString: "▼")
     private let pageLabel = NSTextField(labelWithString: "")
+    // The rows are runs inside ONE attributed string, so they cannot be exposed by annotating the
+    // label; the box publishes a synthetic accessibility element per row instead (plus one for the
+    // page indicator). Created once rather than per show so assistive technologies keep seeing the
+    // same elements while the user types.
+    private let rowElements = (0..<9).map { _ in NSAccessibilityElement() }
+    private let pageElement = NSAccessibilityElement()
+    // Page last shown, so a page turn — which changes nothing else an assistive technology can
+    // observe — can be announced. Cleared on hide so a later list never announces against it.
+    private var lastShownPage: Int?
 
     init() {
         panel = NSPanel(contentRect: NSRect(x: 0, y: 0, width: 10, height: 10),
@@ -78,6 +87,28 @@ final class CandidateWindow {
             footerRow.widthAnchor.constraint(equalTo: candLabel.widthAnchor),
         ])
         panel.contentView = content
+        configureAccessibility()
+    }
+
+    // Static half of the accessibility exposure (roles, labels, what to ignore); the per-show half
+    // is in updateAccessibility.
+    private func configureAccessibility() {
+        // The box is a list of numbered choices. The drawn views are hidden from assistive
+        // technologies because neither reads usefully: the candidate label is one attributed blob,
+        // and the footer would be spoken as the bare glyph "▼" plus "1/3". The synthetic elements
+        // below stand in for both.
+        content.setAccessibilityElement(true)
+        content.setAccessibilityRole(.list)
+        content.setAccessibilityLabel("候選字")
+        for v in [candLabel, footerArrow, pageLabel] { v.setAccessibilityElement(false) }
+        for (i, element) in rowElements.enumerated() {
+            element.setAccessibilityRole(.staticText)
+            element.setAccessibilityLabel("\(i + 1)")   // the digit that selects this candidate
+            element.setAccessibilityParent(content)
+        }
+        pageElement.setAccessibilityRole(.staticText)
+        pageElement.setAccessibilityLabel("頁數")
+        pageElement.setAccessibilityParent(content)
     }
 
     private func configureChrome(_ field: NSTextField) {
@@ -144,6 +175,46 @@ final class CandidateWindow {
         panel.setContentSize(stack.fittingSize)
         positionPanel(near: caret)
         panel.orderFront(nil)
+        updateAccessibility(pageCandidates, page: page, pageCount: pageCount, hints: hints)
+    }
+
+    // Mirror what was just drawn into the synthetic elements. Purely additive: nothing here touches
+    // the views, so drawing and layout are unaffected.
+    private func updateAccessibility(_ pageCandidates: [String], page: Int, pageCount: Int,
+                                     hints: [String?]) {
+        // Row frames are derived from the label's frame, which is only final once the panel has
+        // been resized and the stack has actually laid out.
+        content.layoutSubtreeIfNeeded()
+        let listFrame = content.convert(candLabel.bounds, from: candLabel)
+        let visible = pageCandidates.prefix(9)
+        let rowHeight = listFrame.height / CGFloat(max(1, visible.count))
+        for (i, cand) in visible.enumerated() {
+            let element = rowElements[i]
+            if i < hints.count, let hint = hints[i], !hint.isEmpty {
+                element.setAccessibilityValue("\(cand)，\(hint)")
+            } else {
+                element.setAccessibilityValue(cand)
+            }
+            // Rows run top-down inside the label and view coordinates are y-up, so row 0 is the
+            // topmost slice. Equal slices ignore the inter-row paragraph gap — close enough to put
+            // the VoiceOver cursor on the right row.
+            element.setAccessibilityFrameInParentSpace(
+                NSRect(x: listFrame.minX, y: listFrame.maxY - CGFloat(i + 1) * rowHeight,
+                       width: listFrame.width, height: rowHeight))
+        }
+        pageElement.setAccessibilityValue("第 \(page + 1) 頁，共 \(pageCount) 頁")
+        pageElement.setAccessibilityFrameInParentSpace(content.convert(footerRow.bounds, from: footerRow))
+        content.setAccessibilityChildren(Array(rowElements.prefix(visible.count)) + [pageElement])
+
+        // A page turn leaves the window, its position and its element set unchanged, so nothing
+        // would be spoken on its own — announce the new position. Only on an actual change: every
+        // keystroke re-shows page 1, and announcing that would talk over the typing.
+        if let last = lastShownPage, last != page {
+            NSAccessibility.post(element: panel, notification: .announcementRequested,
+                                 userInfo: [.announcement: "第 \(page + 1) 頁，共 \(pageCount) 頁",
+                                            .priority: NSAccessibilityPriorityLevel.high.rawValue])
+        }
+        lastShownPage = page
     }
 
     // Layer colours are CGColors and don't auto-adapt to appearance, so resolve them against the
@@ -180,5 +251,8 @@ final class CandidateWindow {
         panel.setFrameTopLeftPoint(NSPoint(x: x, y: top))
     }
 
-    func hide() { panel.orderOut(nil) }
+    func hide() {
+        panel.orderOut(nil)
+        lastShownPage = nil   // the next show starts a fresh list, not a page turn
+    }
 }
