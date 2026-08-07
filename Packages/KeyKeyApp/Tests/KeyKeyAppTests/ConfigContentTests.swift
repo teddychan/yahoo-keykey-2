@@ -41,16 +41,15 @@ final class ConfigContentTests: XCTestCase {
     @MainActor
     func testWhatsNewVersionMatchesCurrentRelease() {
         let content = WhatsNewConfig.content
-        XCTAssertEqual(content.version, "2.9.1")
-        XCTAssertEqual(content.date, "2026-08-05")
+        XCTAssertEqual(content.version, "2.10.0")
+        XCTAssertEqual(content.date, "2026-08-07")
     }
 
     @MainActor
-    func testWhatsNewHasFixedSection() {
+    func testWhatsNewSectionsAreAddedImprovedFixedInOrder() {
         let content = WhatsNewConfig.content
-        XCTAssertEqual(content.sections.count, 1)
-        XCTAssertEqual(content.sections[0].kind, .fixed)
-        XCTAssertEqual(content.sections[0].entries.count, 1)
+        XCTAssertEqual(content.sections.map(\.kind), [.added, .improved, .fixed])
+        XCTAssertEqual(content.sections.map(\.entries.count), [1, 2, 4])
     }
 
     // MARK: DragonAppMenu contract
