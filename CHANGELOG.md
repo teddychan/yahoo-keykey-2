@@ -2,6 +2,48 @@
 
 A plain-language list of changes in each version, newest first.
 
+## 2.10.0
+
+- **New: the selection box can be read by VoiceOver.** The nine candidates are drawn as one
+  piece of text, so VoiceOver read the picker as a run of digits and glyphs — or skipped it
+  altogether — even though picking a candidate is the whole job. The window now publishes a
+  proper list: each row is announced with its selecting digit, the candidate, and its 反查 code
+  hint when shown, and the page indicator reads **第 2 頁，共 3 頁** instead of a bare "▼ 1/3".
+  Turning the page is announced too. Nothing about how the window looks or behaves changed.
+- **Faster.** Builds were never compiled with optimization turned on — including the notarized
+  download — so the engine ran unoptimized inside a process attached to every app that takes
+  keyboard input. Measured on the bundled 五代 table: loading the 倉頡 table 73 → 34 ms, deriving
+  the 速成 table 78 → 8 ms, and 2000 速成 compositions 21 → 2 ms.
+- **設定 now has a proper menu bar.** Opening Settings used to put an empty menu bar on screen,
+  which meant no ⌘W to close the window and no working Undo/Cut/Copy/Paste in any text field.
+  There is now a standard **編輯** menu and **關閉 ⌘W**. There is deliberately no Quit: an input
+  method is started and stopped by macOS, not by you — the same reason the 倉頡／速成 input menu
+  has never had one.
+- **Fixed: restoring a damaged backup erased your settings.** Restoring a backup file that was
+  truncated or corrupt wiped the existing settings instead of refusing, so a bad file cost you
+  the settings you still had. A backup that cannot be read is now rejected and your current
+  settings are left alone.
+- **Fixed: a failed uninstall reported success.** If removing Yahoo! KeyKey 2 hit an error part
+  way through, the pane still said it had finished. It now reports the failure.
+- **Fixed: switching 倉頡版本 could mix the two tables.** Changing between 三代 and 五代 could
+  derive the 速成 table from one version while the 倉頡 table came from the other, offering
+  candidates under codes that belonged to the other table. Both are now always taken from the
+  same load.
+- **Fixed: an unreadable learning file silently reset your adaptive ranking.** If the file
+  holding your adaptive candidate ordering could not be read, it was quietly replaced with an
+  empty one and then overwritten, so the ranking was gone with nothing to explain it. It is now
+  set aside as `.corrupt` and the problem is logged, so a fresh file starts without destroying
+  the old one.
+- **Fixed: a future update could have reset every preference.** A flaw in the shared settings
+  code meant that the first release to add a new option would have failed to read your saved
+  settings, fallen back to defaults, and then written those defaults over the real ones. It was
+  found and fixed before any release shipped a new option, so nothing was lost — but the same
+  flaw would have hit on the next one.
+- **Under the hood.** Updated to DragonKit 2.4.0 (from 2.1.0), the shared code behind the
+  Settings, About, What's New, Backup and Uninstall panes. Compile-time data-race checking is
+  now on across the project, compiler warnings fail the build, and the input-routing logic that
+  decides paging and candidate selection was extracted into tested pure functions.
+
 ## 2.9.1
 
 - **Fixed: the selection box could be left stuck on screen.** If you switched to another app —
