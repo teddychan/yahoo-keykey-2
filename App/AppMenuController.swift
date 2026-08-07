@@ -25,6 +25,13 @@ final class AppMenuController {
         if selection.paneID == nil { selection.paneID = "general" }
         return DragonSettingsWindowController(
             title: AboutConfig.appName,
+            // Same reason, and the same spelling, as the includeQuit: false the IMK dropdown
+            // passes to DragonAppMenu (InputController): a system-managed IME is quit by the
+            // system, not by the user. The kit installs a menu bar while Settings is open, so
+            // without this the settings menu bar would reintroduce the Quit ⌘Q the dropdown
+            // deliberately omits. Not installsMainMenu: false — that would also drop ⌘W and
+            // Cut/Copy/Paste, which settings text fields get only from these menu items.
+            includeQuit: false,
             rootView: SettingsRoot(
                 appName: AboutConfig.appName,
                 panesBuilder: { [weak self] in self?.settingsPanes ?? [] },
