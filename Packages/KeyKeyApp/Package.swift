@@ -20,7 +20,11 @@ let package = Package(
             dependencies: [
                 "KeyKeyEngine",
                 .product(name: "DragonKit", package: "dragon-kit"),
-            ]
+            ],
+            // Complete data-race checking, WARNINGS only under the Swift 5 language mode below
+            // (see KeyKeyEngine/Package.swift). It covers the symlinked App/ sources too, which
+            // is the only compile-time concurrency checking any App/ file gets. Keep it clean.
+            swiftSettings: [.enableUpcomingFeature("StrictConcurrency")]
         ),
         .testTarget(name: "KeyKeyAppTests", dependencies: ["KeyKeyApp"]),
     ],

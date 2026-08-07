@@ -15,7 +15,13 @@ import Foundation
 //   - `record` updates the in-memory count immediately (so `bonus` is always current) and
 //     schedules a coalesced background save rather than writing on every keystroke.
 //   - Distinct entries and single counts are capped to bound the on-disk file.
-public final class UserFrequency {
+//
+// The `@unchecked Sendable` conformance states that sharing invariant to the compiler, which
+// cannot see it on its own. It holds because EVERY stored property is either immutable or
+// lock-guarded: `fileURL`, `lock` and `saveQueue` are `let`, and `counts`, `dirty` and
+// `saveScheduled` are read and written only while `lock` is held (or in `init`, before the
+// instance is shared). Any new stored property must follow that rule or the conformance lapses.
+public final class UserFrequency: @unchecked Sendable {
     // Default on-disk location: ~/Library/Application Support/YahooKeyKey2/user-frequency.json
     public static func defaultFileURL() -> URL {
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
