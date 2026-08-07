@@ -29,12 +29,6 @@ final class InputController: IMKInputController {
     // association mode. Paged with `candidatePage`, shown in the same numbered candidate window.
     private var associations: [String] = []
     private static let pageSize = 9
-    // Number-row key codes → digit (1–9). Layout-stable and Shift-independent, unlike
-    // `characters`/`charactersIgnoringModifiers`, which return the shifted symbol (7 → &).
-    // Used to detect Shift+digit for associated-phrase selection (issue #52).
-    private static let numberRowDigits: [UInt16: Int] = [
-        18: 1, 19: 2, 20: 3, 21: 4, 23: 5, 22: 6, 26: 7, 28: 8, 25: 9,
-    ]
 
     override init!(server: IMKServer!, delegate: Any!, client inputClient: Any!) {
         // All heavy resources are loaded ONCE in SharedResources and shared across every
@@ -312,22 +306,23 @@ final class InputController: IMKInputController {
         if !associations.isEmpty {
             let count = associations.count
             let lastPage = (count - 1) / InputController.pageSize
-            switch event.keyCode {
-            case 53: // Escape dismisses associations
+            if event.keyCode == 53 { // Escape dismisses associations
                 clearAssociations(); return true
-            case 125, 124, 121: // Down / Right arrow / Page Down → next page
-                if candidatePage < lastPage { candidatePage += 1; refresh(client) }
-                return true
-            case 126, 123, 116: // Up / Left arrow / Page Up → previous page
-                if candidatePage > 0 { candidatePage -= 1; refresh(client) }
-                return true
-            default: break
+            }
+            // Arrows / Page Up / Page Down page through the suggestions; they are consumed even
+            // at the first/last page, which they clamp to.
+            switch KeyEventPolicy.pageStep(keyCode: event.keyCode, page: candidatePage,
+                                           lastPage: lastPage) {
+            case .move(let page): candidatePage = page; refresh(client); return true
+            case .atEdge: return true
+            case .notPaging: break
             }
             // SPACE pages to the next association page (wrapping last → first). On a
             // single page, fall through to dismiss the suggestions and insert a
             // literal space.
-            if event.keyCode == 49, lastPage > 0 {
-                candidatePage = (candidatePage + 1) % (lastPage + 1)
+            if event.keyCode == 49,
+               let page = KeyEventPolicy.spacePage(page: candidatePage, lastPage: lastPage) {
+                candidatePage = page
                 refresh(client)
                 return true
             }
@@ -338,24 +333,19 @@ final class InputController: IMKInputController {
             // since `characters`/`charactersIgnoringModifiers` both apply Shift (7 → &) — and
             // a bare digit is NOT a pick, so it falls through, dismisses, and the idle engine
             // lets the app type the number.
-            let selectionDigit: Int? = {
-                switch Preferences.associationSelectionTrigger {
-                case .number:
-                    if let chars = event.characters, let d = Int(chars), (1...9).contains(d) { return d }
-                case .shift:
-                    if event.modifierFlags.contains(.shift),
-                       event.modifierFlags.intersection([.control, .option, .command]).isEmpty,
-                       let d = InputController.numberRowDigits[event.keyCode] { return d }
-                }
-                return nil
-            }()
+            let selectionDigit = KeyEventPolicy.associationSelectionDigit(
+                trigger: Preferences.associationSelectionTrigger,
+                characters: event.characters,
+                modifierFlags: event.modifierFlags,
+                keyCode: event.keyCode)
             if let d = selectionDigit {
-                let index = candidatePage * InputController.pageSize + (d - 1)
-                if index < count {
+                if let index = KeyEventPolicy.candidateIndex(digit: d, page: candidatePage,
+                                                            pageSize: InputController.pageSize,
+                                                            count: count) {
                     // Associations are full phrases that START with the just-committed
                     // character (already in the document), so insert only the remainder
                     // after it (好 + association "好像" -> insert "像", giving 好像).
-                    let suffix = String(associations[index].dropFirst())
+                    let suffix = KeyEventPolicy.associationSuffix(associations[index])
                     clearAssociations()
                     if !suffix.isEmpty {
                         client.insertText(applyHanConvert(suffix), replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
@@ -438,14 +428,13 @@ final class InputController: IMKInputController {
         if !engine.candidates.isEmpty {
             let count = engine.candidates.count
             let lastPage = (count - 1) / InputController.pageSize
-            switch event.keyCode {
-            case 125, 124, 121: // Down / Right arrow / Page Down → next page
-                if candidatePage < lastPage { candidatePage += 1; refresh(client) }
-                return true
-            case 126, 123, 116: // Up / Left arrow / Page Up → previous page
-                if candidatePage > 0 { candidatePage -= 1; refresh(client) }
-                return true
-            default: break
+            // Arrows / Page Up / Page Down page through the candidates; they are consumed even at
+            // the first/last page, which they clamp to.
+            switch KeyEventPolicy.pageStep(keyCode: event.keyCode, page: candidatePage,
+                                           lastPage: lastPage) {
+            case .move(let page): candidatePage = page; refresh(client); return true
+            case .atEdge: return true
+            case .notPaging: break
             }
             // 以空白鍵確認字根 (issue #61): 速成 and 倉頡-with-`*` show candidates before the
             // code is finished, so the Space a 倉頡 typist presses out of muscle memory pages the
@@ -463,14 +452,16 @@ final class InputController: IMKInputController {
             // SPACE pages to the next candidate page (wrapping last → first). On a
             // single page there is nothing to page, so fall through to the
             // commit-first-candidate-on-space behaviour below.
-            if event.keyCode == 49, lastPage > 0 {
-                candidatePage = (candidatePage + 1) % (lastPage + 1)
+            if event.keyCode == 49,
+               let page = KeyEventPolicy.spacePage(page: candidatePage, lastPage: lastPage) {
+                candidatePage = page
                 refresh(client)
                 return true
             }
-            if let chars = event.characters, let d = Int(chars), (1...9).contains(d) {
-                let index = candidatePage * InputController.pageSize + (d - 1)
-                if index < count {
+            if let d = KeyEventPolicy.selectionDigit(characters: event.characters) {
+                if let index = KeyEventPolicy.candidateIndex(digit: d, page: candidatePage,
+                                                            pageSize: InputController.pageSize,
+                                                            count: count) {
                     engine.selectCandidate(index)
                     return commitCurrent(to: client, offerAssociations: true)
                 }
