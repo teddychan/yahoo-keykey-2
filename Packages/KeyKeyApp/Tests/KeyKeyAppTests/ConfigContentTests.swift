@@ -59,8 +59,14 @@ final class ConfigContentTests: XCTestCase {
         XCTAssertEqual(content.originalWork,
                        OriginalWork(name: "Yahoo! KeyKey", author: "ninjapanda · zonble"))
         XCTAssertEqual(content.creditRows.count, 7)
-        XCTAssertEqual(Array(content.creditRows.map(\.value).suffix(3)),
-                       ["openvanilla/McBopomofo", "ibus-table-chinese", "OpenCC (Apache-2.0)"])
+        // Pinned as name → licence pairs, not values alone. The kit renders an Attribution as
+        // label: name, value: licence, so checking one half would let a role label ("Cangjie
+        // table") or a wrong licence back in — and these rows were role labels until 3.1.0.
+        // Licences track docs/THIRD-PARTY-NOTICES.md; the Cangjie table has no SPDX id.
+        XCTAssertEqual(content.creditRows.suffix(3).map { [$0.label, $0.value] },
+                       [["McBopomofo", "MIT"],
+                        ["ibus-table-chinese", "Freely redistributable"],
+                        ["OpenCC", "Apache-2.0"]])
     }
 
     // MARK: WhatsNewConfig

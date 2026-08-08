@@ -36,13 +36,24 @@ enum AboutConfig {
             // the row does not point at a redirect.
             licensesURL: URL(string: "https://www.dragonapp.com/yahoo-keykey-2/licenses/")!,
             originalWork: OriginalWork(name: "Yahoo! KeyKey", author: "ninjapanda · zonble"),
-            // The only app-specific rows in the pane. Unlike the canon labels above the kit does
-            // not own these — an IME's data sources have no counterpart in the other apps — so
-            // they keep their own localized keys.
+            // Attributions are name → licence, the kit's canon since 3.1.0: the thing's own name
+            // as its authors spell it, then its licence. These were role labels paired with an
+            // origin — L("keykey.about.cangjieTable") → "ibus-table-chinese" — on the reasoning
+            // that an IME's data sources have no counterpart in the other apps, so they keep their
+            // own localized keys. That reasoning was wrong on the canon's terms: a project name and
+            // a licence identifier are proper nouns, not translatable prose. The three
+            // keykey.about.* keys were deleted with the labels they fed.
+            //
+            // Every licence below is quoted from docs/THIRD-PARTY-NOTICES.md, never inferred — a
+            // wrong licence here is an attribution error, not a cosmetic one. The Cangjie-5 table
+            // has no SPDX identifier: its upstream header declares "LICENSE = Freely
+            // redistributable without restriction", so it gets that phrase rather than an invented
+            // id. It is specifically NOT GPL-3.0, which covers the surrounding ibus-table-chinese
+            // repository packaging and not the one table this app bundles.
             attributions: [
-                Attribution(component: L("keykey.about.languageModel"), source: "openvanilla/McBopomofo"),
-                Attribution(component: L("keykey.about.cangjieTable"), source: "ibus-table-chinese"),
-                Attribution(component: L("keykey.about.hanConversion"), source: "OpenCC (Apache-2.0)"),
+                Attribution(name: "McBopomofo", license: "MIT"),
+                Attribution(name: "ibus-table-chinese", license: "Freely redistributable"),
+                Attribution(name: "OpenCC", license: "Apache-2.0"),
             ]
         )
     }
