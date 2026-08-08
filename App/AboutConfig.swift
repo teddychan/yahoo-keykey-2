@@ -1,9 +1,10 @@
 import Foundation
 import DragonKit
 
-// About-pane content, ported from the old AboutWindow.swift. Reuses the same name, links,
-// and origin/data attributions. Debug builds re-id the bundle to <release-id>.debug; detect
-// that so a test build shows a distinct "Yahoo! KeyKey 2 Debug" name/version like before.
+// About-pane content. DragonKit v3 owns every row title, SF Symbol and ordering — this file
+// supplies only URLs and proper nouns, so the pane cannot drift from the other Dragon apps.
+// Debug builds re-id the bundle to <release-id>.debug; detect that so a test build shows a
+// distinct "Yahoo! KeyKey 2 Debug" name/version like before.
 enum AboutConfig {
     private static let isDebugBuild = Bundle.main.bundleIdentifier?.hasSuffix(".debug") ?? false
     static let appName = "Yahoo! KeyKey 2" + (isDebugBuild ? " Debug" : "")
@@ -17,32 +18,31 @@ enum AboutConfig {
         AboutContent(
             appName: appName,
             versionString: versionString,
-            copyright: "倉頡／簡易 輸入法",
-            links: [
-                AboutLink(
-                    title: L("keykey.about.website"),
-                    detail: "www.dragonapp.com/keykey",
-                    systemImage: "globe",
-                    url: URL(string: "https://www.dragonapp.com/keykey")!
-                ),
-                AboutLink(
-                    title: L("keykey.about.support"),
-                    detail: "teddychan/yahoo-keykey-2",
-                    systemImage: "ladybug",
-                    url: URL(string: "https://github.com/teddychan/yahoo-keykey-2/issues")!
-                ),
-                AboutLink(
-                    title: L("keykey.about.origin"),
-                    detail: "ninjapanda/YahooKeyKey",
-                    systemImage: "heart",
-                    url: URL(string: "https://github.com/ninjapanda/YahooKeyKey")!
-                ),
-            ],
-            credits: [
-                (label: L("keykey.about.origin"), value: "Yahoo! KeyKey (ninjapanda · zonble)"),
-                (label: L("keykey.about.languageModel"), value: "openvanilla/McBopomofo"),
-                (label: L("keykey.about.cangjieTable"), value: "ibus-table-chinese"),
-                (label: L("keykey.about.hanConversion"), value: "OpenCC (Apache-2.0)"),
+            // Single holder, deliberately. The dual-holder form would also name the upstream
+            // project's copyright, but this app is an independent reimplementation that uses no
+            // Yahoo! KeyKey source code (docs/THIRD-PARTY-NOTICES.md) and disclaims affiliation
+            // (README.md) — so claiming a Yahoo copyright over this binary would contradict both.
+            // The lineage is carried by originalProjectURL and originalWork instead, and the New
+            // BSD notice for the Yahoo-derived Cangjie tables lives on the licences page.
+            copyright: DragonAbout.copyright(years: "2026", holder: "Teddy Chan"),
+            // The canonical marketing page is repo-named; /keykey/ is a <meta refresh> stub whose
+            // rel=canonical points here. The kit checks this path against supportURL's repo name.
+            websiteURL: URL(string: "https://www.dragonapp.com/yahoo-keykey-2/")!,
+            supportURL: URL(string: "https://github.com/teddychan/yahoo-keykey-2/issues")!,
+            license: "MIT",
+            originalProjectURL: URL(string: "https://github.com/ninjapanda/YahooKeyKey")!,
+            // Third-party notices, chiefly OpenCC's Apache-2.0 licence and NOTICE, which that
+            // licence requires ship with the app. Trailing slash: it is the path Pages serves, so
+            // the row does not point at a redirect.
+            licensesURL: URL(string: "https://www.dragonapp.com/yahoo-keykey-2/licenses/")!,
+            originalWork: OriginalWork(name: "Yahoo! KeyKey", author: "ninjapanda · zonble"),
+            // The only app-specific rows in the pane. Unlike the canon labels above the kit does
+            // not own these — an IME's data sources have no counterpart in the other apps — so
+            // they keep their own localized keys.
+            attributions: [
+                Attribution(component: L("keykey.about.languageModel"), source: "openvanilla/McBopomofo"),
+                Attribution(component: L("keykey.about.cangjieTable"), source: "ibus-table-chinese"),
+                Attribution(component: L("keykey.about.hanConversion"), source: "OpenCC (Apache-2.0)"),
             ]
         )
     }

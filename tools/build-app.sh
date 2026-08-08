@@ -81,10 +81,16 @@ echo "==> Building DragonKit (SwiftPM, release) in pinned checkout"
 # package's own tools version (6.1) — a separate compilation from the app's -swift-version 5.
 # Clone the pinned tag on first use (e.g. a fresh CI checkout); vendor/ is gitignored, never
 # committed. Idempotent: an existing checkout (local dev) is reused as-is.
-DRAGONKIT_TAG="v2.4.0"
+DRAGONKIT_TAG="v3.0.1"
 if [ ! -d "$KIT_DIR" ]; then
   echo "==> Cloning DragonKit $DRAGONKIT_TAG into vendor/ (not committed)"
   git clone --depth 1 --branch "$DRAGONKIT_TAG" https://github.com/teddychan/dragon-kit "$KIT_DIR"
+elif [ "$(git -C "$KIT_DIR" describe --tags --exact-match 2>/dev/null || true)" != "$DRAGONKIT_TAG" ]; then
+  # Still reused as-is — pointing vendor/ at a kit branch is how the kit is co-developed — but say
+  # so, because a stale checkout links a different kit than the pin claims and About's
+  # "Built with · DragonKit vX.Y.Z" row would then misreport what the binary compiled against.
+  echo "WARNING: vendor/dragon-kit is not at $DRAGONKIT_TAG; building against it as-is." >&2
+  echo "         Remove vendor/dragon-kit to build against the pinned tag." >&2
 fi
 ( cd "$KIT_DIR" && swift build -c release )
 KIT_REL="$(cd "$KIT_DIR" && swift build -c release --show-bin-path)"
@@ -120,6 +126,16 @@ sed "s/\${EXECUTABLE_NAME}/$EXECUTABLE_NAME/g" "$APP_SRC/Info.plist" > "$APP/Con
 # About shows "<short> (<build>)" and each build differs. Falls back to 1 outside a git checkout.
 BUILD_NUM="$(git -C "$ROOT" rev-list --count HEAD 2>/dev/null || echo 1)"
 /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUM" "$APP/Contents/Info.plist"
+# Stamp the commit's own datetime beside the count, so both halves of About's
+# "v2.11.0 (812) · 2026-Aug-08 09:14:07 UTC" describe the same commit. DragonAbout reads this key;
+# without it the line silently drops the timestamp. Committer date (%cI), not author date, so a
+# rebase cannot leave it pointing at an earlier moment. Set-then-Add because the key is absent
+# from the committed template but present on a rebuild into an existing bundle.
+COMMIT_DATE="$(git -C "$ROOT" log -1 --format=%cI 2>/dev/null || true)"
+if [ -n "$COMMIT_DATE" ]; then
+  /usr/libexec/PlistBuddy -c "Set :DragonCommitDate $COMMIT_DATE" "$APP/Contents/Info.plist" 2>/dev/null \
+    || /usr/libexec/PlistBuddy -c "Add :DragonCommitDate string $COMMIT_DATE" "$APP/Contents/Info.plist"
+fi
 plutil -lint "$APP/Contents/Info.plist"
 
 echo "==> Copying bundled LM (data.txt)"

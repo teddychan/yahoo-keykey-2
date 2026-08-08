@@ -28,10 +28,7 @@
 "keykey.general.strokeConfirmationHint" = "在速成、以及使用萬用字元（*）的倉頡中，字根還沒打完就會出現候選字，此時空白鍵會直接翻到下一頁，而不是確認你打的字根。開啟後，第一次按空白鍵只會確認字根並停留在第 1 頁；再按一次空白鍵才翻頁，或直接按 1–9 選字。一般倉頡不受影響。";
 "keykey.general.language" = "語言";
 
-/* About pane */
-"keykey.about.website" = "網站";
-"keykey.about.support" = "在 GitHub 回報問題";
-"keykey.about.origin" = "向原版致敬";
+/* About pane — attribution rows only; DragonKit owns every other label in the pane */
 "keykey.about.languageModel" = "語言模型";
 "keykey.about.cangjieTable" = "倉頡碼表";
 "keykey.about.hanConversion" = "漢字轉換";

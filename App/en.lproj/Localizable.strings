@@ -28,10 +28,7 @@
 "keykey.general.strokeConfirmationHint" = "In 速成, and in 倉頡 with the * wildcard, candidates appear before the code is finished, so Space flips to the next page instead of confirming what you typed. With this on, the first Space only confirms the code and keeps page 1 — press Space again to page, or 1–9 to pick. Plain 倉頡 is unaffected.";
 "keykey.general.language" = "Language";
 
-/* About pane */
-"keykey.about.website" = "Website";
-"keykey.about.support" = "Report an issue on GitHub";
-"keykey.about.origin" = "Homage to the original";
+/* About pane — attribution rows only; DragonKit owns every other label in the pane */
 "keykey.about.languageModel" = "Language model";
 "keykey.about.cangjieTable" = "Cangjie table";
 "keykey.about.hanConversion" = "Han conversion";
