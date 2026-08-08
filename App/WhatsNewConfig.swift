@@ -1,14 +1,15 @@
 import Foundation
 import DragonKit
 
-// "What's New" content for the current release (2.10.0): VoiceOver support for the candidate
-// window, optimized builds, a real menu bar in Settings, and four fixes. Keep in sync with
-// CHANGELOG.md on release.
+// "What's New" content for the current release: VoiceOver support for the candidate window,
+// optimized builds, a real menu bar in Settings, and four fixes. The version is not passed — it
+// defaults to CFBundleShortVersionString and the kit adds the "v", so the pane cannot claim a
+// release the binary isn't. That makes the entries and the date the only things to keep in sync
+// with CHANGELOG.md on release.
 enum WhatsNewConfig {
     @MainActor
     static var content: WhatsNewContent {
         WhatsNewContent(
-            version: "2.10.0",
             date: "2026-08-07",
             summary: L("keykey.whatsNew.summary"),
             sections: [

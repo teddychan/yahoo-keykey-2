@@ -24,24 +24,56 @@ final class ConfigContentTests: XCTestCase {
     func testAboutContentStructure() {
         let content = AboutConfig.content
         XCTAssertEqual(content.appName, "Yahoo! KeyKey 2")
-        XCTAssertEqual(content.copyright, "倉頡／簡易 輸入法")
-        XCTAssertEqual(content.links.count, 3)
-        XCTAssertEqual(content.credits.count, 4)
-        // Every link carries a resolvable https URL and an SF Symbol name.
-        for link in content.links {
-            XCTAssertEqual(link.url.scheme, "https")
-            XCTAssertFalse(link.systemImage.isEmpty)
+        // A real copyright, not the IME description that used to sit in this slot.
+        XCTAssertEqual(content.copyright, "© 2026 Teddy Chan")
+        XCTAssertEqual(content.license, "MIT")
+        // Both optional link slots are filled, so all four canon rows render, in kit order. The
+        // titles and symbols are the kit's; what this pins is that the app fills the right slots.
+        XCTAssertEqual(content.linkRows.map(\.systemImage),
+                       ["globe", "lifepreserver", "heart", "doc.text"])
+        // Details are derived from the URLs, so asserting them pins where each row actually goes.
+        XCTAssertEqual(content.linkRows.map(\.detail), [
+            "dragonapp.com/yahoo-keykey-2",
+            "teddychan/yahoo-keykey-2",
+            "ninjapanda/YahooKeyKey",
+            "dragonapp.com/yahoo-keykey-2/licenses",
+        ])
+        for row in content.linkRows {
+            XCTAssertEqual(row.url.scheme, "https")
         }
-        XCTAssertEqual(content.links.map(\.detail),
-                       ["www.dragonapp.com/keykey", "teddychan/yahoo-keykey-2", "ninjapanda/YahooKeyKey"])
+    }
+
+    // The Website row must address this repo's canonical page. It pointed at
+    // www.dragonapp.com/keykey, a <meta refresh> stub whose canonical is /yahoo-keykey-2/.
+    @MainActor
+    func testAboutWebsiteMatchesSupportRepo() {
+        XCTAssertTrue(AboutConfig.content.websiteMatchesSupportRepo)
+    }
+
+    // Created by → Based on → Built with → License, then the app's own data attributions last.
+    // "Homage to the original" used to appear twice, as both a link and a credit; it is now the
+    // Original project link plus this one Based-on credit.
+    @MainActor
+    func testAboutCreditRowsEndWithTheDataAttributions() {
+        let content = AboutConfig.content
+        XCTAssertEqual(content.originalWork,
+                       OriginalWork(name: "Yahoo! KeyKey", author: "ninjapanda · zonble"))
+        XCTAssertEqual(content.creditRows.count, 7)
+        XCTAssertEqual(Array(content.creditRows.map(\.value).suffix(3)),
+                       ["openvanilla/McBopomofo", "ibus-table-chinese", "OpenCC (Apache-2.0)"])
     }
 
     // MARK: WhatsNewConfig
 
+    // The pane hardcoded "2.10.0" while About read the bundle, so the two would disagree the day
+    // 2.11.0 shipped. It now takes no version argument and reads CFBundleShortVersionString —
+    // re-adding a literal fails here, because the expectation is computed from the same bundle.
     @MainActor
-    func testWhatsNewVersionMatchesCurrentRelease() {
+    func testWhatsNewVersionTracksTheBundleAndIsPrefixed() {
         let content = WhatsNewConfig.content
-        XCTAssertEqual(content.version, "2.10.0")
+        let short = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+        XCTAssertEqual(content.displayVersion, DragonVersion.display(short ?? "1.0.0"))
+        XCTAssertTrue(content.displayVersion.hasPrefix("v"))
         XCTAssertEqual(content.date, "2026-08-07")
     }
 
