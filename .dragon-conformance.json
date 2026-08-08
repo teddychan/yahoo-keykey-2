@@ -4,6 +4,7 @@
   "strings": ["App/**/*.lproj/Localizable.strings"],
   "pin": { "file": "tools/build-app.sh", "pattern": "DRAGONKIT_TAG=\"v([0-9.]+)\"" },
   "paneOrder": { "file": "App/AppMenuController.swift" },
+  "buildFiles": ["tools/*.sh", ".github/workflows/*.yml"],
   "traits": ["sparkle", "no-permissions"],
   "exceptions": []
 }
