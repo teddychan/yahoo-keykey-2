@@ -28,11 +28,6 @@
 "keykey.general.strokeConfirmationHint" = "In 速成, and in 倉頡 with the * wildcard, candidates appear before the code is finished, so Space flips to the next page instead of confirming what you typed. With this on, the first Space only confirms the code and keeps page 1 — press Space again to page, or 1–9 to pick. Plain 倉頡 is unaffected.";
 "keykey.general.language" = "Language";
 
-/* About pane — attribution rows only; DragonKit owns every other label in the pane */
-"keykey.about.languageModel" = "Language model";
-"keykey.about.cangjieTable" = "Cangjie table";
-"keykey.about.hanConversion" = "Han conversion";
-
 /* What's New pane (2.10.0) */
 "keykey.whatsNew.summary" = "The selection box can now be read by VoiceOver, everything is faster, and Settings finally has a proper menu bar.";
 "keykey.whatsNew.voiceOver" = "The selection box can be read by VoiceOver. The nine candidates are drawn as one piece of text, so VoiceOver read the picker as a run of digits and glyphs — or skipped it altogether — even though picking a candidate is the whole job. The window now publishes a proper list: each row is announced with its selecting digit, the candidate, and its 反查 code hint when shown, and the page indicator reads 第 2 頁，共 3 頁 instead of a bare “▼ 1/3”. Turning the page is announced too. Nothing about how the window looks or behaves changed.";
