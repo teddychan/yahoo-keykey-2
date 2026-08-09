@@ -2,6 +2,13 @@
 
 A plain-language list of changes in each version, newest first.
 
+## 2.11.1
+
+- **Nothing new — this is a version number fix.** A 2.11.0 was tagged but never released: the
+  build checks that the version being released matches the version recorded in the app, the two
+  did not match, and it stopped. Rather than reuse a version number that already has a failed
+  build attached to it, the next release is 2.11.1. There is no change to the app itself.
+
 ## 2.10.0
 
 - **New: the selection box can be read by VoiceOver.** The nine candidates are drawn as one
