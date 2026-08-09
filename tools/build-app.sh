@@ -80,18 +80,14 @@ echo "==> Building DragonKit (SwiftPM, release) in pinned checkout"
 # .a), so archive them into static libraries the app's swiftc link can consume. Uses the
 # package's own tools version (6.1) — a separate compilation from the app's -swift-version 5.
 # Clone the pinned tag on first use (e.g. a fresh CI checkout); vendor/ is gitignored, never
-# committed. Idempotent: an existing checkout (local dev) is reused as-is.
+# committed. An existing checkout is reused only once it has been identified — the states and the
+# reasoning live in tools/resolve-dragon-kit.sh, which is split out so
+# tools/test-resolve-dragon-kit.sh can drive every one of them without a swiftc build.
+# DRAGONKIT_TAG stays HERE: the propagation SOP and .github/workflows/tests.yml both read the pin
+# out of this file.
 DRAGONKIT_TAG="v3.2.0"
-if [ ! -d "$KIT_DIR" ]; then
-  echo "==> Cloning DragonKit $DRAGONKIT_TAG into vendor/ (not committed)"
-  git clone --depth 1 --branch "$DRAGONKIT_TAG" https://github.com/teddychan/dragon-kit "$KIT_DIR"
-elif [ "$(git -C "$KIT_DIR" describe --tags --exact-match 2>/dev/null || true)" != "$DRAGONKIT_TAG" ]; then
-  # Still reused as-is — pointing vendor/ at a kit branch is how the kit is co-developed — but say
-  # so, because a stale checkout links a different kit than the pin claims and About's
-  # "Built with · DragonKit vX.Y.Z" row would then misreport what the binary compiled against.
-  echo "WARNING: vendor/dragon-kit is not at $DRAGONKIT_TAG; building against it as-is." >&2
-  echo "         Remove vendor/dragon-kit to build against the pinned tag." >&2
-fi
+DRAGONKIT_URL="https://github.com/teddychan/dragon-kit"
+"$ROOT/tools/resolve-dragon-kit.sh" "$KIT_DIR" "$DRAGONKIT_TAG" "$DRAGONKIT_URL"
 ( cd "$KIT_DIR" && swift build -c release )
 KIT_REL="$(cd "$KIT_DIR" && swift build -c release --show-bin-path)"
 KIT_MODULES="$KIT_REL/Modules"
