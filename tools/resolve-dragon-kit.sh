@@ -22,18 +22,34 @@
 #   detached + dirty       -> ERROR, stop
 #   detached, clean, @pin  -> silent, build (the common case)
 #   detached, clean, @tag  -> fetch the pin INTO this repository and detach at it, but ONLY once
-#                             the remote confirms the tag. The repository is never replaced.
+#                             the remote confirms the tag, and ONLY when the path is a real
+#                             directory. The repository is never replaced.
+#   ...the same, via a SYMLINK -> ERROR, stop (that checkout belongs to someone else)
 #   detached, clean, no tag-> ERROR, stop
 #   not a git checkout     -> ERROR, stop
-#   absent                 -> clone at the pin (the fresh-CI path)
+#   a file, a socket, a dangling symlink -> ERROR, stop
+#   genuinely absent       -> clone AT that path (the fresh-CI path)
 #
-# A STALE CHECKOUT IS UPDATED IN PLACE; only the ABSENT case ever creates a repository, and no case
-# deletes one. `rm -rf "$KIT_DIR"` was the whole bug: verifying HEAD against the remote proves that
-# HEAD is reproducible and nothing more — it says nothing about the other branches, tags, stashes,
-# reflog entries and unreachable objects in that repository, and no amount of verification can,
-# because none of them are reachable from HEAD. An operator sitting on a published stale tag with
-# an unpushed local branch beside it watched the resolver verify, re-clone and exit 0, having
-# deleted the branch and its only commit.
+# THE INVARIANT, and it is the whole point of this script:
+#
+#     it may UPDATE a verified repository in place, or CREATE a genuinely absent one.
+#     It must never delete or replace an existing filesystem object.
+#
+# Every round of this bug has been a way to delete something. `rm -rf "$KIT_DIR"` on a stale
+# checkout was the first: verifying HEAD against the remote proves that HEAD is reproducible and
+# nothing more — it says nothing about the other branches, tags, stashes, reflog entries and
+# unreachable objects in that repository, and no amount of verification can, because none of them
+# are reachable from HEAD. An operator sitting on a published stale tag with an unpushed local
+# branch beside it watched the resolver verify, re-clone and exit 0, having deleted the branch and
+# its only commit.
+#
+# The SAME `rm -rf` then survived one round longer on the create path, because the classification
+# above it asked `[ ! -d "$KIT_DIR" ]` — "not a DIRECTORY", which is also true of a regular file
+# and of a dangling symlink. A plain file at vendor/dragon-kit was therefore classified as absent
+# and deleted: before_type=Regular File, after_type=Directory, status 0. So the delete is not
+# narrowed here, it is GONE — this script runs no `rm` and no `mv` at all, and
+# tools/test-resolve-dragon-kit.sh asserts that structurally rather than trusting the next reader
+# to notice.
 #
 # OFFLINE CONSEQUENCE, deliberate: refreshing a stale tagged checkout takes one round-trip to the
 # kit remote, so with no network (or no credentials) that case STOPS the build instead of
@@ -49,9 +65,42 @@ DRAGONKIT_URL="$3"
 
 KIT_NEEDS_CLONE=""
 KIT_NEEDS_REFRESH=""
-if [ ! -d "$KIT_DIR" ]; then
+if [ ! -e "$KIT_DIR" ] && [ ! -L "$KIT_DIR" ]; then
+  # GENUINELY ABSENT — nothing there at all — and it takes BOTH tests to say so.
+  #
+  # `-e` alone is not enough: it follows the link, so a DANGLING symlink reads as absent, and the
+  # clone would then quietly create the link's target somewhere else in the filesystem.
+  # `-d` alone (what this asked until the create path was fixed) is worse still: "not a directory"
+  # is true of a regular file, and the clone branch it selected ended in `rm -rf "$KIT_DIR"`.
   echo "==> Cloning DragonKit $DRAGONKIT_TAG into vendor/ (not committed)"
   KIT_NEEDS_CLONE=1
+elif [ ! -e "$KIT_DIR" ]; then
+  # -L true and -e false: a DANGLING SYMLINK. Almost always an operator's link to a DragonKit
+  # checkout they have since moved or deleted, which makes it a statement of intent about where
+  # the kit lives — the one thing that must not be answered by silently populating it.
+  echo "ERROR: $KIT_DIR is a symlink to $(readlink "$KIT_DIR")," >&2
+  echo "       which does not exist, so there is no DragonKit checkout there to identify. The link" >&2
+  echo "       is left exactly as it is: this script never deletes or replaces what it finds at" >&2
+  echo "       that path, and cloning into it would create the link's TARGET instead, somewhere" >&2
+  echo "       else entirely. Point it at a DragonKit checkout, or remove the link and re-run to" >&2
+  echo "       clone the pin: rm $KIT_DIR" >&2
+  exit 1
+elif [ ! -d "$KIT_DIR" ]; then
+  # Something is there and it is not a directory: a regular file, a socket, a symlink to one.
+  # Whatever it is, this script did not put it there and cannot prove what depends on it.
+  if [ -L "$KIT_DIR" ]; then
+    KIT_WHAT="a symlink to $(readlink "$KIT_DIR"), which is not a directory"
+  elif [ -f "$KIT_DIR" ]; then
+    KIT_WHAT="a regular file"
+  else
+    KIT_WHAT="not a directory"
+  fi
+  echo "ERROR: $KIT_DIR is $KIT_WHAT, so the DragonKit the build" >&2
+  echo "       would link cannot be identified. It is left exactly as it is — this script never" >&2
+  echo "       deletes or replaces what it finds at that path, and an earlier version of it that" >&2
+  echo "       did read a plain file as \"absent\" and cleared it without a word. Move or remove it" >&2
+  echo "       yourself, then re-run to clone $DRAGONKIT_TAG there." >&2
+  exit 1
 else
   # Test for .git rather than asking git: `git -C <dir>` walks UP to the first enclosing
   # repository, so on a vendor/dragon-kit that is a plain directory (an interrupted clone) every
@@ -146,6 +195,32 @@ else
     # "could not reach the remote" a single unambiguous failure rather than a per-tag guess.
     KIT_HEAD="$(git -C "$KIT_DIR" rev-parse HEAD)"
     KIT_AT="$(printf '%s' "$KIT_TAGS" | tr '\n' ' ')"; KIT_AT="${KIT_AT% }"
+
+    # NOT THROUGH A SYMLINK. This is the only state that WRITES to an existing checkout, and a
+    # symlinked vendor/dragon-kit is a repository this build does not own — an operator's own kit
+    # clone, linked in from wherever they keep it, quite possibly open in another window or shared
+    # by a second app's workspace. Fetching into it and detaching its HEAD moves state in a
+    # repository nobody asked this script to touch, and unlike the refresh of a checkout the script
+    # created itself, there is nothing here that can put it back.
+    #
+    # Only THIS state is refused. The two symlinked states that merely READ stay exactly as they
+    # were: a clean checkout at the pin is used silently, and a branch still warns and builds,
+    # because a link to a co-development kit is precisely how the kit is co-developed.
+    #
+    # Checked before the ls-remote below, so a refusal costs no round-trip. (A symlink further UP
+    # the path — a symlinked vendor/ holding a real dragon-kit directory — is not detected; `-L`
+    # answers about the last component only. Resolving the whole path instead would misfire
+    # constantly on macOS, where /tmp and /var are themselves symlinks.)
+    if [ -L "$KIT_DIR" ]; then
+      echo "ERROR: $KIT_DIR is a symlink to $(readlink "$KIT_DIR")," >&2
+      echo "       and that checkout is at $KIT_AT, not the pinned $DRAGONKIT_TAG. Refreshing it" >&2
+      echo "       means fetching into it and moving its HEAD — in a repository this build does not" >&2
+      echo "       own, which you linked in from elsewhere and may have open right now — so it is" >&2
+      echo "       left exactly as it is. Check that checkout out at $DRAGONKIT_TAG yourself, or" >&2
+      echo "       remove the link and re-run to clone the pin here: rm $KIT_DIR" >&2
+      exit 1
+    fi
+
     KIT_TAG_REFS=()
     while IFS= read -r kit_tag; do
       [ -n "$kit_tag" ] || continue
@@ -253,31 +328,35 @@ if [ -n "$KIT_NEEDS_REFRESH" ]; then
 fi
 
 if [ -n "$KIT_NEEDS_CLONE" ]; then
-  # Reached ONLY when there was no checkout at all — the one state with no repository to lose, and
-  # so the only one this script is willing to create a directory for. A stale checkout is refreshed
-  # in place above and never arrives here.
+  # Reached ONLY when nothing whatsoever was at that path — no directory, no file, not even a
+  # dangling symlink — which is the one state with nothing to lose, and so the only one this script
+  # is willing to create anything for. A stale checkout is refreshed in place above and never
+  # arrives here.
   #
-  # Clone alongside, swap only on success: clearing the path first would leave a workspace with no
-  # kit at all when the clone then fails, and would delete anything a concurrent run had put there
-  # in the meantime.
+  # CLONED STRAIGHT INTO $KIT_DIR, not staged beside it and swapped in. The staging dance existed
+  # only to make `rm -rf "$KIT_DIR"; mv ...` survivable, and both of those are gone, so there is
+  # nothing left for it to make safe — it would now be a rename over a path this run has stopped
+  # claiming to own.
   #
-  # A UNIQUE staging dir, not a fixed "dragon-kit.incoming": that fixed path is one this run does
-  # not own. A second build running concurrently, or the leftovers of an interrupted one, share
-  # it — and the `rm -rf` that cleared it would delete a clone another process was writing into,
-  # or hand this run a half-written tree as if it were a finished clone. mktemp keeps it beside
-  # KIT_DIR so the swap stays a same-filesystem rename; the trap removes it on any exit path.
+  # Cloning direct also hands the last word to git, which is the point: git refuses a destination
+  # that already exists and is not an empty directory, and deletes nothing when it does. So if
+  # anything appears here between the classification above and this line — a concurrent build, an
+  # operator dropping a file in — the clone FAILS and that thing survives, where the delete-then-
+  # swap would have destroyed it and reported success. Verified against git: with a regular file at
+  # the destination the clone exits 128 and the file keeps its inode and its contents.
+  #
+  # No cleanup trap, and none needed: git removes what IT created if the clone fails (verified —
+  # a --branch that does not exist leaves no destination behind), and what git did not create is
+  # exactly what this script must not remove.
   mkdir -p "$(dirname "$KIT_DIR")"
-  KIT_STAGING="$(mktemp -d "$KIT_DIR.incoming.XXXXXX")"
-  trap 'rm -rf "$KIT_STAGING"' EXIT
-  trap 'exit 130' INT
-  trap 'exit 143' TERM
-  if ! git clone --depth 1 --branch "$DRAGONKIT_TAG" "$DRAGONKIT_URL" "$KIT_STAGING"; then
+  if ! git clone --depth 1 --branch "$DRAGONKIT_TAG" "$DRAGONKIT_URL" "$KIT_DIR"; then
     echo "ERROR: could not clone DragonKit $DRAGONKIT_TAG from $DRAGONKIT_URL. The existing" >&2
-    echo "       checkout (if any) was left untouched and was NOT built against. Fix the network" >&2
-    echo "       or credentials and re-run, or start clean: rm -rf $KIT_DIR" >&2
+    echo "       checkout (if any) was left untouched and was NOT built against, and nothing at" >&2
+    echo "       $KIT_DIR was deleted or replaced: that path is only ever cloned into when it is" >&2
+    echo "       empty, and git refuses a destination something else has taken rather than clearing" >&2
+    echo "       it. So if git's error above names an existing destination, look at what is there —" >&2
+    echo "       that is another process or a stray file, not a network fault. Otherwise fix the" >&2
+    echo "       network or credentials and re-run." >&2
     exit 1
   fi
-  rm -rf "$KIT_DIR"
-  mv "$KIT_STAGING" "$KIT_DIR"
-  trap - EXIT INT TERM
 fi

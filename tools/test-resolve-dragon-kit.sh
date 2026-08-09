@@ -18,6 +18,10 @@ set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 RESOLVER="$ROOT/tools/resolve-dragon-kit.sh"
 
+# Resolved once, BEFORE any case puts a shim on PATH: the concurrency case below drives the
+# resolver with a fake `git` in front, and that shim has to be able to reach the real one.
+REAL_GIT="$(command -v git)"
+
 # Hermetic git: the fixtures must not pick up the operator's ~/.gitconfig (commit.gpgsign, a
 # default branch name, an absent user identity on a CI runner).
 export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null
@@ -107,6 +111,14 @@ run() {  # $1 = kit dir, $2 = pin (default $PIN), $3 = clone url (default $REMOT
   STATUS=$?
 }
 
+# As run(), with $1 prepended to PATH — for the case that needs a `git` shim in front of the real
+# one. In a subshell so the shim cannot leak into any later case.
+run_with_path() {  # $1 = dir to prepend to PATH, then as run()
+  local shim_dir="$1"; shift
+  ( PATH="$shim_dir:$PATH"; "$RESOLVER" "$1" "${2:-$PIN}" "${3:-$REMOTE_URL}" >"$OUT" 2>"$ERR" )
+  STATUS=$?
+}
+
 # that <description> <command...> — the command runs at the call site with normal expansion,
 # so an assertion reads as the shell condition it is.
 that() {
@@ -125,13 +137,35 @@ dump() { printf '\n          --- stdout ---\n%s\n          --- stderr ---\n%s' "
 head_sha()  { git -C "$1" rev-parse HEAD 2>/dev/null; }
 head_tags() { git -C "$1" tag --points-at HEAD 2>/dev/null | tr '\n' ' ' | sed 's/ $//'; }
 
+# `ls -di` rather than stat(1), whose flags differ between BSD and GNU. An inode is what a type
+# check cannot tell you: the reproduction that opened round 5 reported before_type=Regular File and
+# after_type=Directory, but a delete-then-recreate of the same TYPE would have read as untouched.
+# shellcheck disable=SC2012  # find prints inodes only on GNU (-printf '%i'); these paths are our
+# own mktemp fixtures, so ls's weakness with exotic filenames cannot bite here.
+inode() { ls -di "$1" 2>/dev/null | awk '{print $1}'; }
+
+# Lines of a shell script that RUN rm or mv, as opposed to naming one in a comment or printing one
+# as advice in an operator-facing message ("... start clean: rm -rf vendor/dragon-kit"). The
+# leading alternation is what makes it a command position and not the "rm" inside "perform"; the
+# quote in it catches `trap 'rm -rf ...'`.
+# shellcheck disable=SC2329  # invoked indirectly, as an argument to `that`
+destructive_lines() {
+  grep -nE "(^|[[:space:]]|[;&|(]|')(rm|mv)[[:space:]]" "$1" \
+    | grep -vE '^[0-9]+:[[:space:]]*#' \
+    | grep -vE '^[0-9]+:[[:space:]]*echo '
+}
+
 # Survival asserted by OBJECT ID, not by ref name: a branch or tag name can be recreated by a fresh
 # clone or by hand, but only the original repository still holds the object underneath it. This is
 # the assertion the owner's reproduction turned on, and the one a re-cloning resolver cannot pass.
 # shellcheck disable=SC2329  # invoked indirectly, as an argument to `that`
 holds_commit() { git -C "$1" rev-parse --verify -q "$2^{commit}" >/dev/null; }
 
-# No staging directory may survive a run, on any exit path — that is the cleanup trap's job.
+# No staging directory may exist after a run, on any exit path. Round 2 cloned beside KIT_DIR and
+# swapped, and this asserted the cleanup trap ran; the swap is gone (the clone lands directly in
+# KIT_DIR now, so there is no delete to make safe), and this asserts the mechanism has not crept
+# back — a stray dragon-kit.incoming in vendor/ means someone reintroduced a rename over a path
+# this script does not own.
 no_leftovers() {
   local leftovers; leftovers="$(find "$(dirname "$1")" -maxdepth 1 -name 'dragon-kit.incoming*' 2>/dev/null)"
   if [ -z "$leftovers" ]; then ok "no staging leftovers"; else bad "staging leftovers: $leftovers"; fi
@@ -256,15 +290,19 @@ stderr_has "checkout (if any) was left untouched and was NOT built against"
 that "no checkout was left behind" test ! -e "$kit"
 no_leftovers "$kit"
 
-start "staging is unique: a clone cannot delete a directory it does not own"
-kit="$WORK/unique-staging/vendor/dragon-kit"    # absent: the only state that stages a clone
+start "a fresh clone touches nothing beside its own destination"
+kit="$WORK/unique-staging/vendor/dragon-kit"    # absent: the only state that clones at all
 mkdir -p "$(dirname "$kit")"
-decoy="$(dirname "$kit")/dragon-kit.incoming"   # what a concurrent/interrupted run used to own
+# dragon-kit.incoming is the staging path round 2 used and round 5 retired. It stands in here for
+# any neighbour in vendor/ that is not this run's business — the leftovers of an interrupted build,
+# or a clone another process is writing into. Round 2 cleared this exact path by name.
+decoy="$(dirname "$kit")/dragon-kit.incoming"
 mkdir -p "$decoy"; echo "another run's clone" > "$decoy/sentinel"
 run "$kit"
 status_is 0
-that "the fixed-path staging dir was not clobbered" test -f "$decoy/sentinel"
+that "the neighbour was not clobbered" test -f "$decoy/sentinel"
 that "the clone still landed on $PIN" test "$(head_tags "$kit")" = "$PIN"
+that "and it landed at $kit itself, not staged and renamed in" test -d "$kit/.git"
 
 # ------------------------------------------------- a branch that IS the pin says nothing
 
@@ -439,6 +477,159 @@ that "the local $PIN tag was not overwritten" test "$(git -C "$kit" rev-parse -q
 that "HEAD did not move" test "$(head_sha "$kit")" = "$before"
 that "the local commit object survives" holds_commit "$kit" "$hidden"
 no_leftovers "$kit"
+
+# --------------------------- an existing filesystem object is NEVER deleted or replaced
+#
+# The bug these pin: round 4 fixed the refresh path and left the create path destructive. It
+# classified with `[ ! -d "$KIT_DIR" ]` — "not a DIRECTORY", which is true of a regular file and of
+# a dangling symlink, not just of an absent path — and the branch that selected ended in
+# `rm -rf "$KIT_DIR"; mv "$KIT_STAGING" "$KIT_DIR"`. The owner's reproduction against bd250ba, on a
+# plain file at vendor/dragon-kit: status=0, before_type=Regular File, after_type=Directory.
+#
+# The rule now, stated as one sentence because every previous round was a special case of it: the
+# resolver may UPDATE a verified repository in place, or CREATE a genuinely absent one, and must
+# never delete or replace an existing filesystem object.
+#
+# Preservation is asserted by INODE or by contents wherever a type check would miss a
+# delete-then-recreate — before_type/after_type is what caught this one, and it would not have
+# caught a file replaced by a file.
+
+start "a regular FILE at vendor/dragon-kit is preserved, and the build stops"
+kit="$WORK/regular-file/vendor/dragon-kit"
+mkdir -p "$(dirname "$kit")"
+printf 'not a checkout\n' > "$kit"
+before_ino="$(inode "$kit")"
+that "fixture: a regular file, which \`[ ! -d ]\` reads as absent" test -f "$kit"
+run "$kit"
+status_is 1
+stderr_has "is a regular file"
+stderr_has "deletes or replaces what it finds at that path"
+that "it is still a regular file, not a checkout" test -f "$kit"
+that "the same file — not deleted and recreated" test "$(inode "$kit")" = "$before_ino"
+that "with its contents intact" grep -q "not a checkout" "$kit"
+no_leftovers "$kit"
+
+start "a DANGLING symlink is preserved, and its target is not created"
+kit="$WORK/dangling-symlink/vendor/dragon-kit"
+mkdir -p "$(dirname "$kit")"
+target="$WORK/dangling-symlink/moved-away"
+ln -s "$target" "$kit"
+that "fixture: a symlink is there" test -L "$kit"
+that "fixture: and it resolves to nothing, so \`-e\` reads it as absent" test ! -e "$kit"
+run "$kit"
+status_is 1
+stderr_has "which does not exist"
+stderr_has "clone the pin: rm $kit"
+that "the link survives" test -L "$kit"
+that "still pointing where it did" test "$(readlink "$kit")" = "$target"
+that "and nothing was created at its target" test ! -e "$target"
+no_leftovers "$kit"
+
+start "a stale checkout reached through a SYMLINK is neither fetched into nor checked out"
+# The operator's own DragonKit clone, kept elsewhere and linked in — a repository this build does
+# not own. It sits on the PUBLISHED $OLD_TAG, so the remote verification would pass and an
+# unguarded resolver would refresh it: move its HEAD, and leave refs/tags/$PIN behind in it.
+ext="$WORK/external-stale-kit"
+git clone -q --depth 1 --branch "$OLD_TAG" "$REMOTE_URL" "$ext" 2>/dev/null
+kit="$WORK/symlinked-stale/vendor/dragon-kit"
+mkdir -p "$(dirname "$kit")"
+ln -s "$ext" "$kit"
+before="$(head_sha "$ext")"
+refs_before="$(git -C "$ext" show-ref | sort)"
+that "fixture: the link resolves to a checkout at the published $OLD_TAG" test "$(head_tags "$kit")" = "$OLD_TAG"
+run "$kit"
+status_is 1
+stderr_has "is a symlink to $ext,"
+stderr_has "in a repository this build does not"
+stderr_has "remove the link and re-run to clone the pin here: rm $kit"
+that "the target's HEAD did not move" test "$(head_sha "$ext")" = "$before"
+that "every ref in the target is byte-for-byte unchanged" test "$(git -C "$ext" show-ref | sort)" = "$refs_before"
+that "the pin was not fetched into it" test -z "$(git -C "$ext" tag -l "$PIN")"
+that "no fetch was attempted at all" test ! -e "$ext/.git/FETCH_HEAD"
+that "and the link itself survives" test -L "$kit"
+no_leftovers "$kit"
+
+start "a symlinked checkout that IS the pin is still used silently (the guard is narrow)"
+ext="$WORK/external-kit-at-pin"
+git clone -q --depth 1 --branch "$PIN" "$REMOTE_URL" "$ext" 2>/dev/null
+kit="$WORK/symlinked-at-pin/vendor/dragon-kit"
+mkdir -p "$(dirname "$kit")"
+ln -s "$ext" "$kit"
+before="$(head_sha "$ext")"
+run "$kit"
+status_is 0
+quiet                                            # reading a linked-in checkout is fine; writing is not
+that "the target is untouched" test "$(head_sha "$ext")" = "$before"
+
+start "a symlinked co-development BRANCH still warns and builds (the guard is narrow)"
+ext="$WORK/external-kit-branch"
+git clone -q --depth 1 --branch "$PIN" "$REMOTE_URL" "$ext" 2>/dev/null
+git -C "$ext" checkout -q -b kit-codev
+echo "local kit work" >> "$ext/VERSION"; git -C "$ext" commit -qam "co-development commit"
+kit="$WORK/symlinked-branch/vendor/dragon-kit"
+mkdir -p "$(dirname "$kit")"
+ln -s "$ext" "$kit"
+before="$(head_sha "$ext")"
+run "$kit"
+status_is 0
+stderr_has "WARNING: vendor/dragon-kit is on branch 'kit-codev', not a checkout of the pinned"
+that "still on the branch" test "$(git -C "$ext" symbolic-ref --short HEAD)" = "kit-codev"
+that "and the co-development commit is untouched" test "$(head_sha "$ext")" = "$before"
+
+start "a target that APPEARS during the fresh-clone path is never deleted"
+kit="$WORK/appearing-target/vendor/dragon-kit"
+# The race the delete-then-swap lost, made deterministic: the classification sees an absent path,
+# and something exists by the time the clone runs. A `git` shim on PATH creates it at exactly that
+# moment — no sleeps, no background jobs — and the window it stands for is the real one. Round 4
+# `rm -rf`'d whatever was there after a successful clone and reported success.
+shim="$WORK/appearing-target-shim"
+mkdir -p "$shim"
+cat > "$shim/git" <<SHIM
+#!/bin/bash
+if [ "\$1" = clone ]; then printf 'another run got here first\n' > "$kit"; fi
+exec "$REAL_GIT" "\$@"
+SHIM
+chmod +x "$shim/git"
+run_with_path "$shim" "$kit"
+status_is 1
+stderr_has "ERROR: could not clone DragonKit $PIN from $REMOTE_URL"
+stderr_has "was deleted or replaced"
+that "what appeared is still there" test -f "$kit"
+that "with its contents intact" grep -q "another run got here first" "$kit"
+no_leftovers "$kit"
+
+start "a failed clone leaves the surrounding workspace exactly as it was"
+kit="$WORK/failed-clone-neighbours/vendor/dragon-kit"
+mkdir -p "$(dirname "$kit")"
+sibling="$(dirname "$kit")/sparkle"                  # vendor/ holds more than the kit
+mkdir -p "$sibling"; echo "vendored" > "$sibling/marker"
+decoy="$(dirname "$kit")/dragon-kit.incoming"        # an interrupted round-2 run's leftovers
+mkdir -p "$decoy"; echo "another run's clone" > "$decoy/sentinel"
+run "$kit" "$PIN" "$NO_PIN_URL"
+status_is 1
+that "no half-made checkout was left behind" test ! -e "$kit"
+that "the vendored sibling survives" test -f "$sibling/marker"
+that "and so does a leftover this run does not own" test -f "$decoy/sentinel"
+
+start "the resolver contains no path that deletes or replaces vendor/dragon-kit"
+# Structural, and deliberately not behavioural. The cases above can only cover states someone
+# thought of, and each of the four rounds of this bug was a state nobody had: an unidentified
+# checkout, a locally tagged commit, a repository with an unpushed branch beside HEAD, a plain
+# file. `rm` and `mv` are the two primitives all four needed, so assert the script RUNS neither and
+# the whole class is shut, including the next state nobody has thought of.
+that "the resolver runs no rm and no mv" test -z "$(destructive_lines "$RESOLVER")"
+# Not vacuous: the same grep, over a file that has the three shapes this script has actually worn.
+probe="$WORK/destructive-probe.sh"
+cat > "$probe" <<'PROBE'
+  rm -rf "$KIT_DIR"
+  mv "$KIT_STAGING" "$KIT_DIR"
+  trap 'rm -rf "$KIT_STAGING"' EXIT
+PROBE
+that "precondition: the grep finds all three when they ARE there" test "$(destructive_lines "$probe" | wc -l | tr -d ' ')" = "3"
+# And the resolver is not passing merely because the words are absent: it still PRINTS that remedy
+# on every error path, which is the distinction the grep has to draw.
+# shellcheck disable=SC2016  # a literal $KIT_DIR is the point — this greps the script's text
+that "precondition: and it still prints \"rm -rf \$KIT_DIR\" as advice" grep -qF -- 'rm -rf $KIT_DIR' "$RESOLVER"
 
 # ---------------------------------------------------------------- summary
 
