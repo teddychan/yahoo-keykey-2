@@ -576,6 +576,55 @@ stderr_has "WARNING: vendor/dragon-kit is on branch 'kit-codev', not a checkout 
 that "still on the branch" test "$(git -C "$ext" symbolic-ref --short HEAD)" = "kit-codev"
 that "and the co-development commit is untouched" test "$(head_sha "$ext")" = "$before"
 
+start "a stale checkout that is a linked WORKTREE is neither fetched into nor checked out"
+# The route the symlink guard cannot see, and the sixth way found into a repository this build does
+# not own. `git worktree add` leaves a REAL DIRECTORY whose .git is a FILE holding "gitdir: ...", so
+# `-d` further up is true and `-L` beside this guard is false, and the refresh went straight ahead.
+# The harm is the symlink case's exactly, twice over: a worktree SHARES refs/tags with the clone
+# that owns it, so the fetch writes the pin's tag into that clone, and the checkout then moves the
+# worktree's HEAD. Reproduced against 6995a0b — owning clone's tags [v3.0.1] before the run and
+# [v3.0.1 v3.1.0] after, worktree left detached at v3.1.0, status 0. Nor is the layout contrived:
+# ice-2 and yahoo-keykey-2 both keep linked worktrees inside their own repo roots.
+owner="$WORK/worktree-owner"
+# A FULL clone: `git worktree add` needs the ref history, and an operator's own kit clone is one.
+git clone -q --branch "$OLD_TAG" "$REMOTE_URL" "$owner" 2>/dev/null
+git -C "$owner" tag -d "$PIN" >/dev/null         # an operator whose kit predates the pin
+kit="$WORK/worktree-stale/vendor/dragon-kit"
+mkdir -p "$(dirname "$kit")"
+git -C "$owner" worktree add -q --detach "$kit" "refs/tags/$OLD_TAG"
+wt_gitdir="$(git -C "$kit" rev-parse --absolute-git-dir)"   # FETCH_HEAD is per-worktree, not shared
+before="$(head_sha "$kit")"
+refs_before="$(git -C "$owner" show-ref | sort)"
+that "fixture: a real directory, not a symlink, so the guard above cannot see it" test ! -L "$kit"
+that "fixture: whose .git is a FILE rather than a directory" test -f "$kit/.git"
+that "fixture: detached at the published $OLD_TAG, so verification would pass" test "$(head_tags "$kit")" = "$OLD_TAG"
+run "$kit"
+status_is 1
+stderr_has "is a linked git worktree of"
+stderr_has "shares its refs with the clone that"
+stderr_has "in a repository this build does not"
+that "the worktree's HEAD did not move" test "$(head_sha "$kit")" = "$before"
+that "the pin was not written into the owning clone's shared ref store" test -z "$(git -C "$owner" tag -l "$PIN")"
+that "every ref in the owning clone is byte-for-byte unchanged" test "$(git -C "$owner" show-ref | sort)" = "$refs_before"
+that "no fetch was attempted at all" test ! -e "$wt_gitdir/FETCH_HEAD"
+no_leftovers "$kit"
+
+start "a linked worktree that IS the pin is still used silently (the guard is narrow)"
+# Placement, not just presence: the same test one level up — beside the `.git` existence check that
+# every state passes through — would refuse this one too, and a worktree is an ordinary way to hold
+# a kit checkout. Only the state that WRITES is refused, exactly as with the symlink.
+owner="$WORK/worktree-owner-at-pin"
+git clone -q --branch "$PIN" "$REMOTE_URL" "$owner" 2>/dev/null
+kit="$WORK/worktree-at-pin/vendor/dragon-kit"
+mkdir -p "$(dirname "$kit")"
+git -C "$owner" worktree add -q --detach "$kit" "refs/tags/$PIN"
+before="$(head_sha "$kit")"
+that "fixture: a linked worktree, whose .git is a file" test -f "$kit/.git"
+run "$kit"
+status_is 0
+quiet                                            # reading a worktree is fine; writing to one is not
+that "the worktree is untouched" test "$(head_sha "$kit")" = "$before"
+
 start "a target that APPEARS during the fresh-clone path is never deleted"
 kit="$WORK/appearing-target/vendor/dragon-kit"
 # The race the delete-then-swap lost, made deterministic: the classification sees an absent path,

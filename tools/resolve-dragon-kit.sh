@@ -25,6 +25,7 @@
 #                             the remote confirms the tag, and ONLY when the path is a real
 #                             directory. The repository is never replaced.
 #   ...the same, via a SYMLINK -> ERROR, stop (that checkout belongs to someone else)
+#   ...the same, in a WORKTREE -> ERROR, stop (so does that one, and its refs are shared)
 #   detached, clean, no tag-> ERROR, stop
 #   not a git checkout     -> ERROR, stop
 #   a file, a socket, a dangling symlink -> ERROR, stop
@@ -218,6 +219,36 @@ else
       echo "       own, which you linked in from elsewhere and may have open right now — so it is" >&2
       echo "       left exactly as it is. Check that checkout out at $DRAGONKIT_TAG yourself, or" >&2
       echo "       remove the link and re-run to clone the pin here: rm $KIT_DIR" >&2
+      exit 1
+    fi
+
+    # NOR A LINKED WORKTREE, refused for the same reason and caught by a different test, because a
+    # symlink is not how this route arrives. `git worktree add` leaves a REAL DIRECTORY whose .git
+    # is a FILE holding "gitdir: ...", so `-d` up at the top is true and the `-L` above is false,
+    # and this branch walked straight into someone else's repository. Twice over: a worktree SHARES
+    # refs/tags with the clone that owns it, so the fetch writes refs/tags/$DRAGONKIT_TAG into that
+    # clone, and the checkout then moves the worktree's HEAD. Reproduced against the round-5 script
+    # — the owning clone's tags read [v3.0.1] before the run and [v3.0.1 v3.1.0] after, the worktree
+    # left detached at v3.1.0, status 0. The layout is not contrived: ice-2 and yahoo-keykey-2 both
+    # keep linked worktrees inside their own repo roots.
+    #
+    # `-f` on .git also catches a git SUBMODULE, which wears the same .git file. That is correct
+    # rather than incidental — it points into the superproject's modules store, so the write lands
+    # in a repository this build does not own just the same.
+    #
+    # Narrow like the symlink guard above, and checked here for the same two reasons: only the state
+    # that WRITES is refused, and refusing before the ls-remote costs no round-trip. A worktree that
+    # already IS the pin is used silently and one on a branch still warns and builds, because
+    # holding the kit in a worktree is an ordinary way to co-develop it.
+    if [ -f "$KIT_DIR/.git" ]; then
+      KIT_OWNER="$(git -C "$KIT_DIR" rev-parse --git-common-dir)"
+      echo "ERROR: $KIT_DIR is a linked git worktree of $KIT_OWNER," >&2
+      echo "       and it is at $KIT_AT, not the pinned $DRAGONKIT_TAG. Refreshing it means fetching" >&2
+      echo "       into it and moving its HEAD, in a repository this build does not own — and a" >&2
+      echo "       worktree shares its refs with the clone that owns it, so $DRAGONKIT_TAG would be" >&2
+      echo "       written into that clone as well. It is left exactly as it is. Check the worktree" >&2
+      echo "       out at $DRAGONKIT_TAG yourself, or remove it and re-run to clone the pin here:" >&2
+      echo "       git -C $KIT_OWNER worktree remove $KIT_DIR" >&2
       exit 1
     fi
 
