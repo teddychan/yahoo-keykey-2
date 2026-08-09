@@ -5,5 +5,6 @@ Packages/KeyKeyApp/.build/
 Resources/data.txt
 .lm-build/
 build/
-# Pinned DragonKit checkout (tag v1.2.1); recreated by cloning, not committed.
+# Pinned DragonKit checkout (tag: DRAGONKIT_TAG in tools/build-app.sh); recreated by
+# cloning, not committed.
 vendor/
