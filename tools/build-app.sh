@@ -31,9 +31,10 @@ MODULE_DIR="$BUILD/modules"
 EXECUTABLE_NAME="YahooKeyKey2"
 ENTITLEMENTS="$APP_SRC/YahooKeyKey2.entitlements"
 SPARKLE_CACHE="$ROOT/build/sparkle"
-# Pinned DragonKit checkout (tag v1.2.1). Cloned under vendor/ (see the adoption notes); its
-# SwiftPM build produces the DragonKit / DragonKitUpdates modules and the DragonKit resource
-# bundle. Never copied into App/ sources.
+# Pinned DragonKit checkout. Cloned under vendor/ (see the adoption notes) at the tag in
+# DRAGONKIT_TAG below — that assignment is the pin, so it is not repeated here. Its SwiftPM
+# build produces the DragonKit / DragonKitUpdates modules and the DragonKit resource bundle.
+# Never copied into App/ sources.
 KIT_DIR="$ROOT/vendor/dragon-kit"
 
 SDK="$(xcrun --show-sdk-path)"
