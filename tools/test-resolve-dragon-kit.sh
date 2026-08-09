@@ -608,6 +608,14 @@ that "the pin was not written into the owning clone's shared ref store" test -z 
 that "every ref in the owning clone is byte-for-byte unchanged" test "$(git -C "$owner" show-ref | sort)" = "$refs_before"
 that "no fetch was attempted at all" test ! -e "$wt_gitdir/FETCH_HEAD"
 no_leftovers "$kit"
+# The round-6 defect was a remedy that did not RUN — every gitfile-backed checkout was handed
+# `git worktree remove`, and on a submodule that exits 128. So the command is asserted verbatim and
+# then executed, rather than trusting that a plausible-looking string works. This layout is the only
+# one that gets a `worktree remove` at all; the submodule case below asserts it is never offered
+# there. Left until last in this case because it consumes the fixture.
+wt_common="$(git -C "$kit" rev-parse --path-format=absolute --git-common-dir)"
+that "the printed remedy names the owning clone and this worktree" test "$(grep -o 'git -C .* worktree remove .*' "$ERR")" = "git -C $wt_common worktree remove $kit"
+that "and that command actually runs" git -C "$wt_common" worktree remove "$kit"
 
 start "a linked worktree that IS the pin is still used silently (the guard is narrow)"
 # Placement, not just presence: the same test one level up — beside the `.git` existence check that
@@ -624,6 +632,43 @@ run "$kit"
 status_is 0
 quiet                                            # reading a worktree is fine; writing to one is not
 that "the worktree is untouched" test "$(head_sha "$kit")" = "$before"
+
+start "a stale SUBMODULE is refused too, and is not described as a worktree"
+# Round 6's guard was RIGHT to catch this — a submodule's .git is a file as well, and it points into
+# the superproject's modules store, so refreshing it writes into a repository this build does not
+# own. What was wrong was the sentence: every gitfile-backed checkout was called a "linked git
+# worktree" and handed `git worktree remove`, which a submodule refuses with "is not a working
+# tree", exit 128. Reproduced on a real submodule against 8b29e54. So this case asserts the refusal
+# AND that the operator is not sent to a command that cannot work.
+super="$WORK/submodule-super"
+git init -q -b main "$super"
+: > "$super/README"; git -C "$super" add README; git -C "$super" commit -qm "superproject"
+# -c protocol.file.allow=always: git refuses a file:// submodule by default (CVE-2022-39253).
+git -c protocol.file.allow=always -C "$super" submodule add -q "$REMOTE_URL" vendor/dragon-kit
+git -C "$super" commit -qm "vendor DragonKit as a submodule"
+kit="$super/vendor/dragon-kit"
+git -C "$kit" checkout -q --detach "refs/tags/$OLD_TAG"
+git -C "$kit" tag -d "$PIN" >/dev/null          # a submodule pinned before the bump: no $PIN yet
+module_dir="$(git -C "$kit" rev-parse --path-format=absolute --git-dir)"
+before="$(head_sha "$kit")"
+refs_before="$(git -C "$kit" show-ref | sort)"
+that "fixture: a real directory whose .git is a FILE, so the guard matches it" test -f "$kit/.git"
+that "fixture: and NOT a linked worktree — its git dir IS its common dir" test "$module_dir" = "$(git -C "$kit" rev-parse --path-format=absolute --git-common-dir)"
+that "fixture: which is the superproject's module store" test "${module_dir#"$(cd "$super" && pwd -P)"/.git/modules/}" = "vendor/dragon-kit"
+that "fixture: detached at the published $OLD_TAG, so verification would pass" test "$(head_tags "$kit")" = "$OLD_TAG"
+run "$kit"
+status_is 1
+stderr_has "is a gitfile-backed checkout"
+stderr_has "submodule or a --separate-git-dir checkout"
+stderr_has "in a repository this build does not"
+stderr_lacks "linked git worktree"          # it is not one, and round 6 said it was
+stderr_lacks "worktree remove"              # exits 128 here — never offer it
+that "HEAD did not move" test "$(head_sha "$kit")" = "$before"
+that "the pin was not written into the superproject's module store" test -z "$(git -C "$kit" tag -l "$PIN")"
+that "every ref in that module store is byte-for-byte unchanged" test "$(git -C "$kit" show-ref | sort)" = "$refs_before"
+that "no fetch was attempted at all" test ! -e "$module_dir/FETCH_HEAD"
+that "and the submodule is still a checkout, not replaced by a clone" test -f "$kit/.git"
+no_leftovers "$kit"
 
 start "a target that APPEARS during the fresh-clone path is never deleted"
 kit="$WORK/appearing-target/vendor/dragon-kit"

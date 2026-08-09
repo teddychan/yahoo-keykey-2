@@ -26,6 +26,7 @@
 #                             directory. The repository is never replaced.
 #   ...the same, via a SYMLINK -> ERROR, stop (that checkout belongs to someone else)
 #   ...the same, in a WORKTREE -> ERROR, stop (so does that one, and its refs are shared)
+#   ...or a SUBMODULE, likewise -> ERROR, stop (same again — but never told to `worktree remove`)
 #   detached, clean, no tag-> ERROR, stop
 #   not a git checkout     -> ERROR, stop
 #   a file, a socket, a dangling symlink -> ERROR, stop
@@ -232,23 +233,54 @@ else
     # left detached at v3.1.0, status 0. The layout is not contrived: ice-2 and yahoo-keykey-2 both
     # keep linked worktrees inside their own repo roots.
     #
-    # `-f` on .git also catches a git SUBMODULE, which wears the same .git file. That is correct
-    # rather than incidental — it points into the superproject's modules store, so the write lands
-    # in a repository this build does not own just the same.
+    # `-f` on .git also catches a git SUBMODULE and a --separate-git-dir checkout, which wear the
+    # same .git file. Catching them is correct rather than incidental — that file points into the
+    # superproject's modules store, or into a git directory kept elsewhere, so the write lands in a
+    # repository this build does not own just the same.
     #
     # Narrow like the symlink guard above, and checked here for the same two reasons: only the state
     # that WRITES is refused, and refusing before the ls-remote costs no round-trip. A worktree that
     # already IS the pin is used silently and one on a branch still warns and builds, because
     # holding the kit in a worktree is an ordinary way to co-develop it.
     if [ -f "$KIT_DIR/.git" ]; then
-      KIT_OWNER="$(git -C "$KIT_DIR" rev-parse --git-common-dir)"
-      echo "ERROR: $KIT_DIR is a linked git worktree of $KIT_OWNER," >&2
-      echo "       and it is at $KIT_AT, not the pinned $DRAGONKIT_TAG. Refreshing it means fetching" >&2
-      echo "       into it and moving its HEAD, in a repository this build does not own — and a" >&2
-      echo "       worktree shares its refs with the clone that owns it, so $DRAGONKIT_TAG would be" >&2
-      echo "       written into that clone as well. It is left exactly as it is. Check the worktree" >&2
-      echo "       out at $DRAGONKIT_TAG yourself, or remove it and re-run to clone the pin here:" >&2
-      echo "       git -C $KIT_OWNER worktree remove $KIT_DIR" >&2
+      # WHICH gitfile layout decides the REMEDY, and round 6 printed the wrong one. It called every
+      # match a "linked git worktree" and handed out `git worktree remove`, which a submodule
+      # refuses — "is not a working tree", exit 128. Reproduced on a real submodule. The refusal was
+      # never the defect and does not change here; the sentence describing it was, and an error that
+      # sends the operator to a failing command is precisely the failure this script's unusually
+      # long error text exists to prevent (the incident that started all of this was an operator
+      # having to GUESS that vendor/dragon-kit needed deleting by hand).
+      #
+      # git tells the layouts apart. For a LINKED WORKTREE --git-dir is that worktree's private
+      # <common>/worktrees/<name> while --git-common-dir stays the owning clone's .git, so the two
+      # DIFFER. For a submodule and for --separate-git-dir the git dir IS the common dir and they
+      # are equal. Verified against git across all three layouts, plus an ordinary clone as a
+      # control. Both are asked for with --path-format=absolute so the comparison cannot be decided
+      # by one of them coming back relative and the other not.
+      KIT_GITDIR="$(git -C "$KIT_DIR" rev-parse --path-format=absolute --git-dir)"
+      KIT_OWNER="$(git -C "$KIT_DIR" rev-parse --path-format=absolute --git-common-dir)"
+      if [ "$KIT_GITDIR" != "$KIT_OWNER" ]; then
+        echo "ERROR: $KIT_DIR is a linked git worktree of $KIT_OWNER," >&2
+        echo "       and it is at $KIT_AT, not the pinned $DRAGONKIT_TAG. Refreshing it means fetching" >&2
+        echo "       into it and moving its HEAD, in a repository this build does not own — and a" >&2
+        echo "       worktree shares its refs with the clone that owns it, so $DRAGONKIT_TAG would be" >&2
+        echo "       written into that clone as well. It is left exactly as it is. Check the worktree" >&2
+        echo "       out at $DRAGONKIT_TAG yourself, or remove it and re-run to clone the pin here:" >&2
+        echo "       git -C $KIT_OWNER worktree remove $KIT_DIR" >&2
+      else
+        # A submodule or a --separate-git-dir checkout. No command is offered, because the correct
+        # one depends on which of those it is and on how the owning repository is set up — and the
+        # round-6 defect was offering one anyway.
+        echo "ERROR: $KIT_DIR is a gitfile-backed checkout: its .git is a file" >&2
+        echo "       pointing at $KIT_GITDIR," >&2
+        echo "       which makes it a submodule or a --separate-git-dir checkout rather than a clone" >&2
+        echo "       this build made. It is at $KIT_AT, not the pinned $DRAGONKIT_TAG, and refreshing" >&2
+        echo "       it means fetching into that git directory and moving its HEAD," >&2
+        echo "       in a repository this build does not own. It is left exactly as it is. Check it" >&2
+        echo "       out at $DRAGONKIT_TAG through the repository that owns it — for a submodule," >&2
+        echo "       the superproject — or detach it from that repository so this path is an" >&2
+        echo "       ordinary checkout, and re-run." >&2
+      fi
       exit 1
     fi
 
