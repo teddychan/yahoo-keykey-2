@@ -32,7 +32,7 @@ PIN="v3.1.0"          # what most cases pin against
 DUAL_PIN="v3.2.0"     # a pin whose commit also carries a sample-* tag
 OLD_TAG="v3.0.1"      # an older release, for the stale-workspace cases
 
-CASES=0 FAILURES=0 CASE_NAME=""
+CASES=0 FAILURES=0
 
 # ---------------------------------------------------------------- fixtures
 
@@ -67,31 +67,37 @@ fixture() {  # $1 = workspace name, $2 = tag; echoes the kit dir
 
 # ---------------------------------------------------------------- harness
 
-start()  { CASE_NAME="$1"; CASES=$((CASES + 1)); printf '\n[%d] %s\n' "$CASES" "$1"; }
-ok()     { printf '     ok   %s\n' "$1"; }
-bad()    { printf '     FAIL %s\n' "$1"; FAILURES=$((FAILURES + 1)); }
+start() { CASES=$((CASES + 1)); printf '\n[%d] %s\n' "$CASES" "$1"; }
+ok()    { printf '     ok   %s\n' "$1"; }
+bad()   { printf '     FAIL %s\n' "$1"; FAILURES=$((FAILURES + 1)); }
 
 run() {  # $1 = kit dir, $2 = pin (default $PIN), $3 = clone url (default $REMOTE_URL)
   "$RESOLVER" "$1" "${2:-$PIN}" "${3:-$REMOTE_URL}" >"$OUT" 2>"$ERR"
   STATUS=$?
 }
 
-status_is()      { [ "$STATUS" -eq "$1" ] && ok "exit status $1" || bad "exit status: want $1, got $STATUS"; }
-stderr_has()     { grep -qF -- "$1" "$ERR" && ok "stderr: \"$1\"" || bad "stderr lacks \"$1\"$(dump)"; }
-stderr_lacks()   { grep -qF -- "$1" "$ERR" && bad "stderr should not mention \"$1\"$(dump)" || ok "stderr silent on \"$1\""; }
-stdout_has()     { grep -qF -- "$1" "$OUT" && ok "stdout: \"$1\"" || bad "stdout lacks \"$1\"$(dump)"; }
-quiet()          { [ ! -s "$OUT" ] && [ ! -s "$ERR" ] && ok "said nothing at all" || bad "expected silence$(dump)"; }
-is_true()        { eval "$1" && ok "$2" || bad "$2"; }
+# that <description> <command...> — the command runs at the call site with normal expansion,
+# so an assertion reads as the shell condition it is.
+that() {
+  local what="$1"; shift
+  if "$@"; then ok "$what"; else bad "$what"; fi
+}
+
+status_is()    { if [ "$STATUS" -eq "$1" ]; then ok "exit status $1"; else bad "exit status: want $1, got $STATUS"; fi; }
+stderr_has()   { if grep -qF -- "$1" "$ERR"; then ok "stderr: \"$1\""; else bad "stderr lacks \"$1\"$(dump)"; fi; }
+stderr_lacks() { if grep -qF -- "$1" "$ERR"; then bad "stderr should not mention \"$1\"$(dump)"; else ok "stderr silent on \"$1\""; fi; }
+stdout_has()   { if grep -qF -- "$1" "$OUT"; then ok "stdout: \"$1\""; else bad "stdout lacks \"$1\"$(dump)"; fi; }
+quiet()        { if [ ! -s "$OUT" ] && [ ! -s "$ERR" ]; then ok "said nothing at all"; else bad "expected silence$(dump)"; fi; }
 
 dump() { printf '\n          --- stdout ---\n%s\n          --- stderr ---\n%s' "$(sed 's/^/          /' "$OUT")" "$(sed 's/^/          /' "$ERR")"; }
 
 head_sha()  { git -C "$1" rev-parse HEAD 2>/dev/null; }
-head_tags() { git -C "$1" tag --points-at HEAD 2>/dev/null | tr '\n' ' '; }
+head_tags() { git -C "$1" tag --points-at HEAD 2>/dev/null | tr '\n' ' ' | sed 's/ $//'; }
 
 # No staging directory may survive a run, on any exit path — that is the cleanup trap's job.
 no_leftovers() {
   local leftovers; leftovers="$(find "$(dirname "$1")" -maxdepth 1 -name 'dragon-kit.incoming*' 2>/dev/null)"
-  [ -z "$leftovers" ] && ok "no staging leftovers" || bad "staging leftovers: $leftovers"
+  if [ -z "$leftovers" ]; then ok "no staging leftovers"; else bad "staging leftovers: $leftovers"; fi
 }
 
 build_remote
@@ -103,7 +109,7 @@ kit="$WORK/fresh/vendor/dragon-kit"          # note: vendor/ does not exist eith
 run "$kit"
 status_is 0
 stdout_has "==> Cloning DragonKit $PIN into vendor/ (not committed)"
-is_true '[ "$(head_tags "$kit")" = "'"$PIN"' " ]' "cloned checkout is at $PIN"
+that "cloned checkout is at $PIN" test "$(head_tags "$kit")" = "$PIN"
 no_leftovers "$kit"
 
 start "a checkout at the exact pinned tag is used silently"
@@ -112,25 +118,25 @@ before="$(head_sha "$kit")"
 run "$kit"
 status_is 0
 quiet
-is_true '[ "$(head_sha "$kit")" = "'"$before"'" ]' "checkout untouched"
+that "checkout untouched" test "$(head_sha "$kit")" = "$before"
 
 start "a dual-tagged pinned commit is recognised as the pin (git describe gets this wrong)"
 kit="$(fixture dual-tag "$DUAL_PIN")"
 before="$(head_sha "$kit")"
 described="$(git -C "$kit" describe --tags --exact-match HEAD 2>/dev/null)"
-is_true '[ "$(head_tags "$kit")" = "sample-v1.4.0 '"$DUAL_PIN"' " ]' "fixture HEAD carries both tag series"
-is_true '[ "$described" != "'"$DUAL_PIN"'" ]' "precondition: describe answers \"$described\", not the pin"
+that "fixture HEAD carries both tag series" test "$(head_tags "$kit")" = "sample-v1.4.0 $DUAL_PIN"
+that "precondition: describe answers \"$described\", not the pin" test "$described" != "$DUAL_PIN"
 run "$kit" "$DUAL_PIN"
 status_is 0
 quiet
-is_true '[ "$(head_sha "$kit")" = "'"$before"'" ]' "checkout untouched — not re-cloned every build"
+that "checkout untouched — not re-cloned every build" test "$(head_sha "$kit")" = "$before"
 
 start "a clean checkout at an older tag is refreshed to the pin"
 kit="$(fixture stale-tag "$OLD_TAG")"
 run "$kit"
 status_is 0
 stdout_has "==> vendor/dragon-kit is at $OLD_TAG, not the pinned $PIN; re-cloning at the pin"
-is_true '[ "$(head_tags "$kit")" = "'"$PIN"' " ]' "checkout is now at $PIN"
+that "checkout is now at $PIN" test "$(head_tags "$kit")" = "$PIN"
 no_leftovers "$kit"
 
 start "a plain directory inside a git repo is not mistaken for a checkout (git -C walks up)"
@@ -143,7 +149,7 @@ status_is 1
 stderr_has "exists but is not a git checkout"
 stderr_has "Remove it and re-run: rm -rf $kit"
 stderr_lacks "parent-branch-must-never-be-reported"
-is_true '[ -e "'"$kit"'/half-written-clone" ]' "directory left for the operator to remove"
+that "directory left for the operator to remove" test -e "$kit/half-written-clone"
 
 start "a diverged co-development branch warns and builds"
 kit="$(fixture codev-branch "$PIN")"
@@ -154,8 +160,8 @@ run "$kit"
 status_is 0
 stderr_has "WARNING: vendor/dragon-kit is on branch 'kit-codev', not a checkout of the pinned"
 stderr_has "Remove vendor/dragon-kit to build against the pinned tag."
-is_true '[ "$(git -C "'"$kit"'" symbolic-ref --short HEAD)" = "kit-codev" ]' "still on the branch"
-is_true '[ "$(head_sha "$kit")" = "'"$before"'" ]' "co-development commit preserved"
+that "still on the branch" test "$(git -C "$kit" symbolic-ref --short HEAD)" = "kit-codev"
+that "co-development commit preserved" test "$(head_sha "$kit")" = "$before"
 
 start "a dirty branch sitting on the pinned tag still warns and builds"
 kit="$(fixture codev-at-pin "$PIN")"
@@ -164,7 +170,7 @@ echo "uncommitted kit work" >> "$kit/VERSION"
 run "$kit"
 status_is 0
 stderr_has "WARNING: vendor/dragon-kit is on branch 'kit-codev', not a checkout of the pinned"
-is_true 'grep -q "uncommitted kit work" "'"$kit"'/VERSION"' "edit preserved — a branch is never replaced"
+that "edit preserved — a branch is never replaced" grep -q "uncommitted kit work" "$kit/VERSION"
 
 start "a dirty detached checkout stops the build"
 kit="$(fixture dirty-detached "$OLD_TAG")"
@@ -174,20 +180,20 @@ run "$kit"
 status_is 1
 stderr_has "ERROR: vendor/dragon-kit is detached with uncommitted changes"
 stderr_has "co-develop the kit, or discard them: rm -rf $kit"
-is_true 'grep -q "stray edit" "'"$kit"'/VERSION"' "edit preserved"
-is_true '[ "$(head_sha "$kit")" = "'"$before"'" ]' "not re-cloned over"
+that "edit preserved" grep -q "stray edit" "$kit/VERSION"
+that "not re-cloned over" test "$(head_sha "$kit")" = "$before"
 
 start "a clean but UNTAGGED detached commit stops the build (never discarded)"
 kit="$(fixture untagged-detached "$PIN")"
 echo "unpushed local kit commit" >> "$kit/VERSION"
 git -C "$kit" commit -qam "local commit on a detached HEAD"
 before="$(head_sha "$kit")"; short="$(git -C "$kit" rev-parse --short HEAD)"
-is_true '[ -z "$(head_tags "$kit")" ]' "fixture HEAD carries no tag and the tree is clean"
+that "fixture HEAD carries no tag and the tree is clean" test -z "$(head_tags "$kit")"
 run "$kit"
 status_is 1
 stderr_has "ERROR: vendor/dragon-kit is detached at commit $short and carries no tag,"
 stderr_has "that commit disposable — it may be local work no remote has"
-is_true '[ "$(head_sha "$kit")" = "'"$before"'" ]' "the local commit survives"
+that "the local commit survives" test "$(head_sha "$kit")" = "$before"
 no_leftovers "$kit"
 
 start "an untracked file at the pinned tag stops the build (About would misreport it)"
@@ -198,8 +204,8 @@ run "$kit"
 status_is 1
 stderr_has "ERROR: vendor/dragon-kit is detached with uncommitted changes"
 stderr_has "Refused even when HEAD carries $PIN"
-is_true '[ -f "'"$kit"'/NOTES.txt" ]' "untracked file preserved"
-is_true '[ "$(head_sha "$kit")" = "'"$before"'" ]' "checkout untouched"
+that "untracked file preserved" test -f "$kit/NOTES.txt"
+that "checkout untouched" test "$(head_sha "$kit")" = "$before"
 
 start "a failed clone leaves the existing checkout intact"
 kit="$(fixture failed-clone "$OLD_TAG")"        # stale, so a re-clone is attempted
@@ -208,8 +214,8 @@ run "$kit" "$PIN" "file://$WORK/no-such-remote"
 status_is 1
 stderr_has "ERROR: could not clone DragonKit $PIN from file://$WORK/no-such-remote"
 stderr_has "checkout (if any) was left untouched and was NOT built against"
-is_true '[ "$(head_tags "$kit")" = "'"$OLD_TAG"' " ]' "existing checkout still at $OLD_TAG"
-is_true '[ "$(head_sha "$kit")" = "'"$before"'" ]' "existing checkout unchanged"
+that "existing checkout still at $OLD_TAG" test "$(head_tags "$kit")" = "$OLD_TAG"
+that "existing checkout unchanged" test "$(head_sha "$kit")" = "$before"
 no_leftovers "$kit"
 
 start "staging is unique: a re-clone cannot delete a directory it does not own"
@@ -218,8 +224,8 @@ decoy="$(dirname "$kit")/dragon-kit.incoming"   # what a concurrent/interrupted 
 mkdir -p "$decoy"; echo "another run's clone" > "$decoy/sentinel"
 run "$kit"
 status_is 0
-is_true '[ -f "'"$decoy"'/sentinel" ]' "the fixed-path staging dir was not clobbered"
-is_true '[ "$(head_tags "$kit")" = "'"$PIN"' " ]' "re-clone still landed on $PIN"
+that "the fixed-path staging dir was not clobbered" test -f "$decoy/sentinel"
+that "re-clone still landed on $PIN" test "$(head_tags "$kit")" = "$PIN"
 
 # ---------------------------------------------------------------- summary
 
