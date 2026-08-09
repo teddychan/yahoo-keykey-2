@@ -52,7 +52,7 @@ enum AboutConfig {
             // repository packaging and not the one table this app bundles.
             attributions: [
                 Attribution(name: "McBopomofo", license: "MIT"),
-                Attribution(name: "ibus-table-chinese", license: "Freely redistributable"),
+                Attribution(name: "ibus-table-chinese", license: "Freely redistributable without restriction"),
                 Attribution(name: "OpenCC", license: "Apache-2.0"),
             ]
         )

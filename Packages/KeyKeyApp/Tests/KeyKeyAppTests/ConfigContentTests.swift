@@ -65,7 +65,7 @@ final class ConfigContentTests: XCTestCase {
         // Licences track docs/THIRD-PARTY-NOTICES.md; the Cangjie table has no SPDX id.
         XCTAssertEqual(content.creditRows.suffix(3).map { [$0.label, $0.value] },
                        [["McBopomofo", "MIT"],
-                        ["ibus-table-chinese", "Freely redistributable"],
+                        ["ibus-table-chinese", "Freely redistributable without restriction"],
                         ["OpenCC", "Apache-2.0"]])
     }
 
