@@ -82,6 +82,20 @@ fixture() {  # $1 = workspace name, $2 = tag; echoes the kit dir
   printf '%s' "$kit"
 }
 
+# The owner's reproduction, as a fixture: a checkout that is detached, clean and sitting on a
+# PUBLISHED stale tag — so the remote verification passes and the refresh goes ahead — which also
+# holds a branch and a commit that exist in no remote and are reachable from nothing but that
+# branch. Sets $kit and $hidden rather than echoing, because a command substitution would run it
+# in a subshell and lose $hidden.
+stale_with_local_work() {  # $1 = workspace name; sets $kit and $hidden
+  kit="$(fixture "$1" "$OLD_TAG")"
+  git -C "$kit" checkout -q -b hidden-work
+  echo "work no remote has" >> "$kit/VERSION"
+  git -C "$kit" commit -qam "unpushed local commit"
+  hidden="$(git -C "$kit" rev-parse HEAD)"
+  git -C "$kit" checkout -q --detach "refs/tags/$OLD_TAG"   # back to the published stale tag
+}
+
 # ---------------------------------------------------------------- harness
 
 start() { CASES=$((CASES + 1)); printf '\n[%d] %s\n' "$CASES" "$1"; }
@@ -110,6 +124,12 @@ dump() { printf '\n          --- stdout ---\n%s\n          --- stderr ---\n%s' "
 
 head_sha()  { git -C "$1" rev-parse HEAD 2>/dev/null; }
 head_tags() { git -C "$1" tag --points-at HEAD 2>/dev/null | tr '\n' ' ' | sed 's/ $//'; }
+
+# Survival asserted by OBJECT ID, not by ref name: a branch or tag name can be recreated by a fresh
+# clone or by hand, but only the original repository still holds the object underneath it. This is
+# the assertion the owner's reproduction turned on, and the one a re-cloning resolver cannot pass.
+# shellcheck disable=SC2329  # invoked indirectly, as an argument to `that`
+holds_commit() { git -C "$1" rev-parse --verify -q "$2^{commit}" >/dev/null; }
 
 # No staging directory may survive a run, on any exit path — that is the cleanup trap's job.
 no_leftovers() {
@@ -152,7 +172,7 @@ start "a clean checkout at an older tag is refreshed to the pin"
 kit="$(fixture stale-tag "$OLD_TAG")"
 run "$kit"
 status_is 0
-stdout_has "==> vendor/dragon-kit is at $OLD_TAG, not the pinned $PIN; re-cloning at the pin"
+stdout_has "==> vendor/dragon-kit is at $OLD_TAG, not the pinned $PIN; fetching the pin into it"
 that "checkout is now at $PIN" test "$(head_tags "$kit")" = "$PIN"
 no_leftovers "$kit"
 
@@ -224,28 +244,27 @@ stderr_has "Refused even when HEAD carries $PIN"
 that "untracked file preserved" test -f "$kit/NOTES.txt"
 that "checkout untouched" test "$(head_sha "$kit")" = "$before"
 
-start "a failed clone leaves the existing checkout intact"
-kit="$(fixture failed-clone "$OLD_TAG")"        # stale, so a re-clone is attempted
-before="$(head_sha "$kit")"
-# Against a remote that answers but has no $PIN: the stale tag verifies, and the clone that
-# follows then fails for real. An unreachable URL would now stop at the verification step and
-# never reach the clone at all — case 18 covers that path.
+start "a failed clone leaves no half-made checkout behind (the absent path)"
+kit="$WORK/failed-clone/vendor/dragon-kit"      # absent, so a clone is attempted
+# Against a remote that answers but has no $PIN. This is the ONLY path that still clones: a stale
+# checkout is refreshed in place and never reaches the clone, so its own failure mode is a fetch
+# that fails — covered among the update-in-place cases at the end.
 run "$kit" "$PIN" "$NO_PIN_URL"
 status_is 1
 stderr_has "ERROR: could not clone DragonKit $PIN from $NO_PIN_URL"
 stderr_has "checkout (if any) was left untouched and was NOT built against"
-that "existing checkout still at $OLD_TAG" test "$(head_tags "$kit")" = "$OLD_TAG"
-that "existing checkout unchanged" test "$(head_sha "$kit")" = "$before"
+that "no checkout was left behind" test ! -e "$kit"
 no_leftovers "$kit"
 
-start "staging is unique: a re-clone cannot delete a directory it does not own"
-kit="$(fixture unique-staging "$OLD_TAG")"
+start "staging is unique: a clone cannot delete a directory it does not own"
+kit="$WORK/unique-staging/vendor/dragon-kit"    # absent: the only state that stages a clone
+mkdir -p "$(dirname "$kit")"
 decoy="$(dirname "$kit")/dragon-kit.incoming"   # what a concurrent/interrupted run used to own
 mkdir -p "$decoy"; echo "another run's clone" > "$decoy/sentinel"
 run "$kit"
 status_is 0
 that "the fixed-path staging dir was not clobbered" test -f "$decoy/sentinel"
-that "re-clone still landed on $PIN" test "$(head_tags "$kit")" = "$PIN"
+that "the clone still landed on $PIN" test "$(head_tags "$kit")" = "$PIN"
 
 # ------------------------------------------------- a branch that IS the pin says nothing
 
@@ -274,14 +293,17 @@ that "checkout untouched — a branch is never replaced" test "$(head_sha "$kit"
 
 start "a published LIGHTWEIGHT stale tag verifies against the remote and is refreshed"
 kit="$(fixture published-lightweight "$OLD_TAG")"
+: > "$kit/.git/keykey-same-repo-sentinel"       # survives only if this .git is never replaced
 run "$kit"
 status_is 0
-stdout_has "==> vendor/dragon-kit is at $OLD_TAG, not the pinned $PIN; re-cloning at the pin"
+stdout_has "==> vendor/dragon-kit is at $OLD_TAG, not the pinned $PIN; fetching the pin into it"
 that "checkout is now at $PIN" test "$(head_tags "$kit")" = "$PIN"
+that "the same repository was updated, not a new one" test -f "$kit/.git/keykey-same-repo-sentinel"
 no_leftovers "$kit"
 
 start "a published ANNOTATED stale tag is refreshed too (the naive ls-remote compare fails here)"
 kit="$(fixture published-annotated "$ANNOT_TAG")"
+: > "$kit/.git/keykey-same-repo-sentinel"
 unpeeled="$(git ls-remote --tags "$REMOTE_URL" "refs/tags/$ANNOT_TAG" | awk '{print $1}')"
 # Asserted as a PRECONDITION so this case cannot pass vacuously: if refs/tags/$ANNOT_TAG ever
 # starts reporting the commit itself, the fixture has stopped reproducing the hazard and should
@@ -289,8 +311,9 @@ unpeeled="$(git ls-remote --tags "$REMOTE_URL" "refs/tags/$ANNOT_TAG" | awk '{pr
 that "precondition: refs/tags/$ANNOT_TAG reports a tag object, not the commit" test "$unpeeled" != "$(head_sha "$kit")"
 run "$kit"
 status_is 0
-stdout_has "==> vendor/dragon-kit is at $ANNOT_TAG, not the pinned $PIN; re-cloning at the pin"
+stdout_has "==> vendor/dragon-kit is at $ANNOT_TAG, not the pinned $PIN; fetching the pin into it"
 that "checkout is now at $PIN" test "$(head_tags "$kit")" = "$PIN"
+that "the same repository was updated, not a new one" test -f "$kit/.git/keykey-same-repo-sentinel"
 no_leftovers "$kit"
 
 start "a LOCAL-ONLY tag stops the build, and the commit under it survives"
@@ -335,6 +358,86 @@ stderr_has "With no network a stale checkout stops the build rather than refresh
 stderr_has "pin: rm -rf $kit"
 that "existing checkout still at $OLD_TAG" test "$(head_tags "$kit")" = "$OLD_TAG"
 that "the commit survives" test "$(head_sha "$kit")" = "$before"
+no_leftovers "$kit"
+
+# ------------------------------------------- a stale checkout is UPDATED IN PLACE, never replaced
+#
+# The bug these pin: the refresh above was `rm -rf` plus a fresh clone. Verifying HEAD against the
+# remote made that safe for HEAD and for nothing else — a repository's other branches, tags,
+# stashes and reflogs are not reachable from HEAD, so no verification could ever speak for them,
+# and they went with the directory. Reproduced by the owner against 13f7150 on a checkout that was
+# detached and clean at a published stale tag with an unpushed branch beside it: the resolver
+# verified, re-cloned, exited 0, and the branch and its commit were gone.
+#
+# Every case here asserts the surviving OBJECT, not just the ref name.
+
+start "an unpushed local BRANCH and its commit survive a successful refresh"
+stale_with_local_work hidden-branch
+that "fixture: detached and clean at the published $OLD_TAG" test "$(head_tags "$kit")" = "$OLD_TAG"
+that "fixture: and holding a branch no remote has" test "$(git -C "$kit" rev-parse -q --verify refs/heads/hidden-work)" = "$hidden"
+run "$kit"
+status_is 0
+stdout_has "==> vendor/dragon-kit is at $OLD_TAG, not the pinned $PIN; fetching the pin into it"
+that "the refresh landed on $PIN" test "$(head_tags "$kit")" = "$PIN"
+that "the branch ref survives" test "$(git -C "$kit" rev-parse -q --verify refs/heads/hidden-work)" = "$hidden"
+that "and so does the commit object under it" holds_commit "$kit" "$hidden"
+no_leftovers "$kit"
+
+start "a local TAG elsewhere in the repository survives a successful refresh"
+stale_with_local_work local-tag-elsewhere
+git -C "$kit" tag scratch-2026-08 "$hidden"
+git -C "$kit" branch -q -D hidden-work          # the tag is now the ONLY ref holding that commit
+run "$kit"
+status_is 0
+that "the refresh landed on $PIN" test "$(head_tags "$kit")" = "$PIN"
+that "the unrelated tag still points where it did" test "$(git -C "$kit" rev-parse -q --verify refs/tags/scratch-2026-08)" = "$hidden"
+that "and so does the commit object under it" holds_commit "$kit" "$hidden"
+
+start "the refreshed checkout ends DETACHED at the pin, with the pin's tag ref present locally"
+kit="$(fixture ends-detached "$OLD_TAG")"
+run "$kit"
+status_is 0
+that "HEAD is detached, not on a branch" test -z "$(git -C "$kit" symbolic-ref -q --short HEAD)"
+that "HEAD is the pinned commit" test "$(head_sha "$kit")" = "$(git -C "$kit" rev-parse --verify "refs/tags/$PIN^{commit}")"
+that "refs/tags/$PIN is a local ref, not a bare FETCH_HEAD" git -C "$kit" show-ref --verify --quiet "refs/tags/$PIN"
+that "so --points-at HEAD names the pin" test "$(head_tags "$kit")" = "$PIN"
+that "and the tree is clean" test -z "$(git -C "$kit" status --porcelain)"
+# Not an inference — run the resolver again. A refresh that detached at an unnamed commit would
+# leave the NEXT build stopping on "carries no tag"; the silent at-the-pin path is the proof.
+run "$kit"
+status_is 0
+quiet
+
+start "a FAILED fetch leaves HEAD and every local ref exactly as they were"
+stale_with_local_work failed-fetch
+git -C "$kit" tag scratch-2026-08 "$hidden"
+before="$(head_sha "$kit")"
+refs_before="$(git -C "$kit" show-ref | sort)"
+# $NO_PIN_URL answers the verification lookup for $OLD_TAG but carries no $PIN, so the refresh gets
+# past verification and then fails at the fetch itself — the half-moved case.
+run "$kit" "$PIN" "$NO_PIN_URL"
+status_is 1
+stderr_has "ERROR: could not fetch DragonKit $PIN into $kit"
+stderr_has "Nothing was deleted and HEAD did not move"
+that "HEAD did not move" test "$(head_sha "$kit")" = "$before"
+that "still at $OLD_TAG, which is a usable kit" test "$(head_tags "$kit")" = "$OLD_TAG"
+that "every local ref is byte-for-byte unchanged" test "$(git -C "$kit" show-ref | sort)" = "$refs_before"
+that "the hidden commit object survives" holds_commit "$kit" "$hidden"
+no_leftovers "$kit"
+
+start "a repository already holding a DIFFERENT $PIN tag is preserved, not clobbered"
+stale_with_local_work moved-pin
+git -C "$kit" tag "$PIN" "$hidden"              # the pin's NAME, re-pointed at local work
+pin_before="$(git -C "$kit" rev-parse -q --verify "refs/tags/$PIN")"
+before="$(head_sha "$kit")"
+that "fixture: the local $PIN names the local commit, not the remote's" test "$pin_before" != "$(git ls-remote --tags "$REMOTE_URL" "refs/tags/$PIN" | awk '{print $1}')"
+run "$kit"
+status_is 1
+stderr_has "ERROR: could not fetch DragonKit $PIN into $kit"
+stderr_has "carries a DIFFERENT $PIN"
+that "the local $PIN tag was not overwritten" test "$(git -C "$kit" rev-parse -q --verify "refs/tags/$PIN")" = "$pin_before"
+that "HEAD did not move" test "$(head_sha "$kit")" = "$before"
+that "the local commit object survives" holds_commit "$kit" "$hidden"
 no_leftovers "$kit"
 
 # ---------------------------------------------------------------- summary
