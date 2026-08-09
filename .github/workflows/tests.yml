@@ -22,6 +22,14 @@ jobs:
       - name: Swift version
         run: swift --version
 
+      # Regression tests for the vendor/dragon-kit resolution in tools/build-app.sh. Runs first
+      # and offline (throwaway local git repos, ~1s): the states it covers — a stale pin, a
+      # co-development branch, an unpushed detached commit, a dirty tree at the pin — are ones a
+      # CI runner's own clean checkout never reaches, so nothing else here would catch a
+      # regression in them until it stranded a workspace.
+      - name: Build-script tests (vendor/dragon-kit resolution)
+        run: ./tools/test-resolve-dragon-kit.sh
+
       # KeyKeyEngine has no external dependencies — it tests standalone.
       # -warnings-as-errors is the gate: a compiler warning fails the build rather than
       # scrolling past in the log. It is what gives the packages' StrictConcurrency setting

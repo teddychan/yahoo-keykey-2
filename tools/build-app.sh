@@ -80,83 +80,14 @@ echo "==> Building DragonKit (SwiftPM, release) in pinned checkout"
 # .a), so archive them into static libraries the app's swiftc link can consume. Uses the
 # package's own tools version (6.1) — a separate compilation from the app's -swift-version 5.
 # Clone the pinned tag on first use (e.g. a fresh CI checkout); vendor/ is gitignored, never
-# committed. An existing checkout is reused only once it has been identified: it is either at the
-# pin, or on a branch (kit co-development, warned about), or stale-but-disposable (re-cloned at
-# the pin), or unidentifiable (build stops). Reusing an unidentified checkout is what stranded
-# established workspaces on v3.0.1 after the 3.1.0 bump — that kit has no
-# Attribution(name:license:), so App/AboutConfig.swift failed to compile until the operator
-# guessed that vendor/dragon-kit had to be deleted by hand.
+# committed. An existing checkout is reused only once it has been identified — the states and the
+# reasoning live in tools/resolve-dragon-kit.sh, which is split out so
+# tools/test-resolve-dragon-kit.sh can drive every one of them without a swiftc build.
+# DRAGONKIT_TAG stays HERE: the propagation SOP and .github/workflows/tests.yml both read the pin
+# out of this file.
 DRAGONKIT_TAG="v3.2.0"
 DRAGONKIT_URL="https://github.com/teddychan/dragon-kit"
-KIT_NEEDS_CLONE=""
-if [ ! -d "$KIT_DIR" ]; then
-  echo "==> Cloning DragonKit $DRAGONKIT_TAG into vendor/ (not committed)"
-  KIT_NEEDS_CLONE=1
-else
-  # Test for .git rather than asking git: `git -C <dir>` walks UP to the first enclosing
-  # repository, so on a vendor/dragon-kit that is a plain directory (an interrupted clone) every
-  # query below would be answered by yahoo-keykey-2 itself — the branch check reported THIS repo's
-  # branch and the build went ahead against a directory holding no kit at all, failing later and
-  # further away with "Could not find Package.swift".
-  if [ ! -e "$KIT_DIR/.git" ]; then
-    echo "ERROR: $KIT_DIR exists but is not a git checkout, so the DragonKit it would build" >&2
-    echo "       cannot be identified. Remove it and re-run: rm -rf $KIT_DIR" >&2
-    exit 1
-  fi
-  # `git tag --points-at HEAD`, not `git describe --tags --exact-match`: dragon-kit carries TWO tag
-  # series on the same commits — vX.Y.Z for the library and sample-vX.Y.Z for its sample app — and
-  # `describe` prints exactly one name, so on a dual-tagged commit it can name the series we are
-  # not pinning against. This is not hypothetical: 808d5a7 carries both v2.0.0 and sample-v1.2.0,
-  # and `describe --tags --exact-match` there answers "sample-v1.2.0". Pinned at v2.0.0 the old
-  # check would therefore have called a perfectly correct checkout stale on every single build.
-  # v3.1.0 happens to be singly tagged, which is the only reason this never fired. --points-at
-  # lists every tag on the commit; test for membership.
-  KIT_TAGS="$(git -C "$KIT_DIR" tag --points-at HEAD 2>/dev/null || true)"
-  KIT_BRANCH="$(git -C "$KIT_DIR" symbolic-ref -q --short HEAD 2>/dev/null || true)"
-  if printf '%s\n' "$KIT_TAGS" | grep -qxF "$DRAGONKIT_TAG"; then
-    : # At the pin — the common case. Use it, silently.
-  elif [ -n "$KIT_BRANCH" ]; then
-    # Deliberately a warning and never an error: pointing vendor/ at a kit branch is how the kit is
-    # co-developed, and the branch is the operator's own work, so it is neither replaced nor
-    # refused. Say so loudly, because it links a different kit than the pin claims and About's
-    # "Built with · DragonKit vX.Y.Z" row would then misreport what the binary compiled against.
-    echo "WARNING: vendor/dragon-kit is on branch '$KIT_BRANCH', not $DRAGONKIT_TAG; building" >&2
-    echo "         against it as-is (this is how the kit is co-developed). About's \"Built with ·" >&2
-    echo "         DragonKit vX.Y.Z\" row will report that branch's kit, not the pin." >&2
-    echo "         Remove vendor/dragon-kit to build against the pinned tag." >&2
-  elif [ -n "$(git -C "$KIT_DIR" status --porcelain 2>/dev/null)" ]; then
-    # Detached and edited. Re-cloning would throw the edits away and building would link a kit no
-    # version identifies, so do neither — the operator decides.
-    echo "ERROR: vendor/dragon-kit is not at $DRAGONKIT_TAG and has uncommitted changes, so the" >&2
-    echo "       DragonKit it would build cannot be identified. Put the changes on a branch to" >&2
-    echo "       co-develop the kit, or discard them: rm -rf $KIT_DIR" >&2
-    exit 1
-  else
-    # A different tag (or a bare detached commit) with a clean tree: an established workspace left
-    # on an older pin. Nothing here is the operator's — vendor/ is gitignored and this checkout is
-    # reproduced by cloning — so bring it to the pin rather than failing the build.
-    KIT_AT="$(printf '%s' "$KIT_TAGS" | tr '\n' ' ')"
-    [ -n "$KIT_AT" ] || KIT_AT="commit $(git -C "$KIT_DIR" rev-parse --short HEAD)"
-    echo "==> vendor/dragon-kit is at $KIT_AT, not the pinned $DRAGONKIT_TAG; re-cloning at the pin"
-    KIT_NEEDS_CLONE=1
-  fi
-fi
-if [ -n "$KIT_NEEDS_CLONE" ]; then
-  # Clone alongside, swap only on success: `rm -rf` first would leave a workspace with no kit at
-  # all when the clone then fails. Re-cloning rather than `git checkout "$DRAGONKIT_TAG"` because
-  # this is a --depth 1 --branch <tag> clone, which holds no object for any other tag.
-  KIT_STAGING="$KIT_DIR.incoming"
-  rm -rf "$KIT_STAGING"
-  if ! git clone --depth 1 --branch "$DRAGONKIT_TAG" "$DRAGONKIT_URL" "$KIT_STAGING"; then
-    rm -rf "$KIT_STAGING"
-    echo "ERROR: could not clone DragonKit $DRAGONKIT_TAG from $DRAGONKIT_URL. The existing" >&2
-    echo "       checkout (if any) was left untouched and was NOT built against. Fix the network" >&2
-    echo "       or credentials and re-run, or start clean: rm -rf $KIT_DIR" >&2
-    exit 1
-  fi
-  rm -rf "$KIT_DIR"
-  mv "$KIT_STAGING" "$KIT_DIR"
-fi
+"$ROOT/tools/resolve-dragon-kit.sh" "$KIT_DIR" "$DRAGONKIT_TAG" "$DRAGONKIT_URL"
 ( cd "$KIT_DIR" && swift build -c release )
 KIT_REL="$(cd "$KIT_DIR" && swift build -c release --show-bin-path)"
 KIT_MODULES="$KIT_REL/Modules"
