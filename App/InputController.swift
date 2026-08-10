@@ -172,11 +172,21 @@ final class InputController: IMKInputController {
         // correct under BOTH dispatch models, so the items fire whichever one IMK really uses.
         menu.addItem(.separator())
         MainActor.assumeIsolated {
+            // A Debug build passes onCheckForUpdates: nil, which drops the item from the input
+            // menu entirely — the same mechanism a Sparkle-less Mac App Store build uses, and
+            // what dragon-kit's own sample app does. MAC-APP-RELEASE-LIFECYCLE.md requires the
+            // local build not to read the production appcast, and the SUEnableAutomaticChecks
+            // false that build-app.sh stamps only covers SCHEDULED checks — this item is a
+            // user-initiated one, sitting in the everyday menu. DragonUpdater builds Sparkle
+            // lazily, so removing the item is also what keeps it uninitialized on the ordinary
+            // path. An item left in place but made inert would read as a bug instead.
             let config = DragonAppMenu.Config(
                 appName: AboutConfig.appName,
                 onAbout: { [weak self] in self?.openAbout() },
                 onSettings: { [weak self] in self?.openSettings() },
-                onCheckForUpdates: { [weak self] in self?.checkForUpdates() },
+                onCheckForUpdates: DragonAbout.isDebugBuild()
+                    ? nil
+                    : { [weak self] in self?.checkForUpdates() },
                 includeQuit: false
             )
             let items = DragonAppMenu.items(config)

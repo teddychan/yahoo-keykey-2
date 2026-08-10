@@ -1,4 +1,5 @@
 import Cocoa
+import DragonKit
 import KeyKeyEngine
 
 // Process-wide, load-once store for the heavy IME resources. IMK creates one
@@ -8,6 +9,14 @@ import KeyKeyEngine
 // UserFrequency is a shared class), so reads do not copy.
 final class SharedResources {
     static let shared = SharedResources()
+
+    // Where KeyKey's own on-disk data lives (today: the user-learning store). A local debug
+    // build gets its OWN directory rather than sharing the installed IME's — the reasoning is
+    // on UserFrequency.supportDirectory(named:). The Uninstall pane removes this exact URL, so
+    // the two must be named in one place (AppMenuController.uninstallConfig reads it here).
+    static let supportDirectory = UserFrequency.supportDirectory(
+        named: DragonAbout.isDebugBuild() ? "YahooKeyKey2 Debug" : "YahooKeyKey2"
+    )
 
     // Single-character LM ranking (higher = more common), used so Cangjie/Simplex
     // wildcard matches surface common characters first. Computed once.
@@ -102,7 +111,9 @@ final class SharedResources {
         hanConvertFilter = HanConvertFilter(direction: .traditionalToSimplified, table: hanConvertTable)
 
         // Load the persisted user-learning store once (fail-safe to empty if absent/corrupt).
-        userFreq = UserFrequency()
+        // Explicit directory, not the engine's default: a debug build must not read or write
+        // the installed IME's counts.
+        userFreq = UserFrequency(fileURL: UserFrequency.defaultFileURL(directory: Self.supportDirectory))
 
         // Pinyin syllable map: small, always loaded; fail-safe to empty if the resource is missing.
         if let url = Bundle.main.url(forResource: "pinyin-zhuyin", withExtension: "txt"),

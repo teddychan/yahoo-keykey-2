@@ -86,7 +86,7 @@ echo "==> Building DragonKit (SwiftPM, release) in pinned checkout"
 # tools/test-resolve-dragon-kit.sh can drive every one of them without a swiftc build.
 # DRAGONKIT_TAG stays HERE: the propagation SOP and .github/workflows/tests.yml both read the pin
 # out of this file.
-DRAGONKIT_TAG="v3.2.0"
+DRAGONKIT_TAG="v3.3.0"
 DRAGONKIT_URL="https://github.com/teddychan/dragon-kit"
 "$ROOT/tools/resolve-dragon-kit.sh" "$KIT_DIR" "$DRAGONKIT_TAG" "$DRAGONKIT_URL"
 ( cd "$KIT_DIR" && swift build -c release )
@@ -214,8 +214,36 @@ if [[ "${KEYKEY_DEBUG_ID:-}" == "1" ]]; then
   sed -i '' "s|${RELEASE_BUNDLE_ID}|${DEBUG_BUNDLE_ID}|g" "$PLIST"
   # Distinct name in the menu bar / Input Sources picker.
   sed -i '' "s|<string>Yahoo KeyKey 2</string>|<string>Yahoo KeyKey 2 Debug</string>|g" "$PLIST"
-  # A throwaway local build must not offer to auto-update itself off the release appcast.
+  # The version field stays the numeric candidate for the NEXT public release — never
+  # "2.11.1 (Debug)". MAC-APP-RELEASE-LIFECYCLE.md makes CFBundleShortVersionString the sole
+  # source of truth the release tag is asserted against, and the shared release workflow
+  # compares the tag to exactly this key, so a channel label inside it breaks the tag gate.
+  # This app never grew that mutation — clipmenu-2, ice-2 and spectacle-2 each did — so assert
+  # it rather than trust it: the day someone adds one, the debug build fails here, not the tag.
+  SHORT_VERSION="$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$PLIST")"
+  if [[ ! "$SHORT_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    echo "ERROR: CFBundleShortVersionString must be a numeric X.Y.Z candidate, got '$SHORT_VERSION'" >&2
+    exit 1
+  fi
+  # The word "Debug" lives HERE instead, as build-channel metadata. DragonAbout (v3.3.0+) reads
+  # this key and renders "v2.11.1 Debug (<build>) · <commit date> UTC", so a screenshot in a bug
+  # report identifies the build without the version field ever carrying a non-numeric value.
+  # Set-then-Add because the key is absent from the committed template but present on a rebuild
+  # into an existing bundle — the same shape as the DragonCommitDate stamp above.
+  /usr/libexec/PlistBuddy -c "Set :DragonBuildChannel Debug" "$PLIST" 2>/dev/null \
+    || /usr/libexec/PlistBuddy -c "Add :DragonBuildChannel string Debug" "$PLIST"
+  # Belt and braces with InputController's DragonAbout.isDebugBuild() guard: the app hands the
+  # IMK input menu no route into Sparkle in a Debug build, and this makes the plist say so too,
+  # so a scheduled check is impossible even if that guard is ever removed.
   plutil -replace SUEnableAutomaticChecks -bool false "$PLIST"
+  # And take the production feed URL out of the Debug bundle altogether, which closes the one
+  # route the menu guard does not: 設定… ▸ 更新 keeps its pane (the canon sidebar order must be
+  # identical in both channels), and opening it is enough to make DragonUpdater build Sparkle.
+  # Without SUFeedURL, SPUUpdater.start() throws, DragonUpdater catches that and returns nil, so
+  # canCheckForUpdates is false and the pane's button renders disabled — an honest "updates are
+  # off in a local build" rather than a live button pointed at the release appcast. Absence is
+  # fine: this runs again on a rebuild into an existing bundle, where the key is already gone.
+  /usr/libexec/PlistBuddy -c "Delete :SUFeedURL" "$PLIST" 2>/dev/null || true
   # Re-key the localized input-mode display names (倉頡 / 速成) to the .debug mode ids, and
   # re-label the localized app name so the picker/menu show "Yahoo KeyKey 2 Debug" (the
   # localized CFBundleDisplayName here would otherwise override the Info.plist value above).

@@ -28,7 +28,12 @@ cp -R "$SRC" "$DST"
 
 echo "==> Registering + launching"
 "$LSREG" -f "$DST" 2>/dev/null || true
-open "$DST"
+# -n launches the bundle at THIS exact path. A plain `open` resolves through Launch Services,
+# which is free to activate some other registered copy of the same id — and this repo carries
+# several worktrees, each able to leave a `build/Yahoo KeyKey 2 Debug.app` registered, so
+# "debugging a binary you did not just compile" is a live hazard here rather than a theoretical
+# one. The release IME is a different id and was never reachable either way.
+open -n "$DST"
 
 cat <<EOF
 

@@ -3,14 +3,19 @@ import DragonKit
 
 // About-pane content. DragonKit v3 owns every row title, SF Symbol and ordering — this file
 // supplies only URLs and proper nouns, so the pane cannot drift from the other Dragon apps.
-// Debug builds re-id the bundle to <release-id>.debug; detect that so a test build shows a
-// distinct "Yahoo! KeyKey 2 Debug" name/version like before.
+// A local debug build is re-id'd to <release-id>.debug and stamped DragonBuildChannel = Debug
+// by tools/build-app.sh, so a test build still shows a distinct "Yahoo! KeyKey 2 Debug" name.
 enum AboutConfig {
-    private static let isDebugBuild = Bundle.main.bundleIdentifier?.hasSuffix(".debug") ?? false
+    // The channel the build script stamped, not the bundle id's ".debug" suffix this used to
+    // sniff. Two derivations of one fact drift; the kit owns this one as of DragonKit 3.3.0.
+    private static let isDebugBuild = DragonAbout.isDebugBuild()
     static let appName = "Yahoo! KeyKey 2" + (isDebugBuild ? " Debug" : "")
 
+    // No " Debug" appended here any more: DragonAbout.versionString() renders the channel
+    // itself from DragonBuildChannel — "v2.11.1 Debug (183) · 2026-Aug-09 17:31:39 UTC".
+    // Appending it again would put a second "Debug" after the timestamp, at the line's end.
     static var versionString: String {
-        return DragonAbout.versionString() + (isDebugBuild ? " Debug" : "")
+        DragonAbout.versionString()
     }
 
     @MainActor
