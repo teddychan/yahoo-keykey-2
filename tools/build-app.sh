@@ -251,6 +251,26 @@ if [[ "${KEYKEY_DEBUG_ID:-}" == "1" ]]; then
     [ -f "$sf" ] || continue
     sed -i '' "s|${RELEASE_BUNDLE_ID}|${DEBUG_BUNDLE_ID}|g" "$sf"
     sed -i '' 's|"Yahoo KeyKey 2"|"Yahoo KeyKey 2 Debug"|g' "$sf"
+    # And mark the mode names themselves. Re-keying moved the KEYS to the .debug mode ids but left
+    # their VALUES reading exactly "倉頡" / "速成" / "拼音" — character for character the release
+    # IME's. These are the strings System Settings ▸ Keyboard ▸ Input Sources actually lists, so the
+    # picker showed two identical entries per mode with no way to tell which build you were adding,
+    # and the ⌃Space switcher and the menu-bar item were equally ambiguous once both were enabled.
+    #
+    # That defeated the point of the whole .debug identity: MAC-APP-RELEASE-LIFECYCLE.md requires
+    # every hands-on build to say "Debug" visibly, and for an IME the mode name is the only place a
+    # user ever sees it — the bundle name suffixed above never appears in the picker's list rows.
+    # Reported from a screenshot of two indistinguishable 倉頡 entries.
+    #
+    # Runs after the re-key so it matches the .debug ids, and only rewrites lines whose key is a
+    # .debug mode id, so CFBundleName/CFBundleDisplayName above are untouched. `rm -rf "$APP"` at
+    # the top of this script recreates the bundle every build, so this always starts from the
+    # pristine source file — the substitution is never applied twice.
+    sed -i '' -E "s|^(\"${DEBUG_BUNDLE_ID}\.[A-Za-z]+\" = \"[^\"]*)(\";)$|\1 (Debug)\2|" "$sf"
+    # These files are now regex-edited rather than merely re-keyed, so prove each one still parses.
+    # A malformed .strings does not fail the build or the launch: macOS silently falls back to
+    # showing the raw KEY as the mode name, which would read as a much stranger bug than this one.
+    plutil -lint "$sf" >/dev/null
   done
   plutil -lint "$PLIST"
 fi
