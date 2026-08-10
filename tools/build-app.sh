@@ -236,6 +236,14 @@ if [[ "${KEYKEY_DEBUG_ID:-}" == "1" ]]; then
   # IMK input menu no route into Sparkle in a Debug build, and this makes the plist say so too,
   # so a scheduled check is impossible even if that guard is ever removed.
   plutil -replace SUEnableAutomaticChecks -bool false "$PLIST"
+  # And take the production feed URL out of the Debug bundle altogether, which closes the one
+  # route the menu guard does not: 設定… ▸ 更新 keeps its pane (the canon sidebar order must be
+  # identical in both channels), and opening it is enough to make DragonUpdater build Sparkle.
+  # Without SUFeedURL, SPUUpdater.start() throws, DragonUpdater catches that and returns nil, so
+  # canCheckForUpdates is false and the pane's button renders disabled — an honest "updates are
+  # off in a local build" rather than a live button pointed at the release appcast. Absence is
+  # fine: this runs again on a rebuild into an existing bundle, where the key is already gone.
+  /usr/libexec/PlistBuddy -c "Delete :SUFeedURL" "$PLIST" 2>/dev/null || true
   # Re-key the localized input-mode display names (倉頡 / 速成) to the .debug mode ids, and
   # re-label the localized app name so the picker/menu show "Yahoo KeyKey 2 Debug" (the
   # localized CFBundleDisplayName here would otherwise override the Info.plist value above).

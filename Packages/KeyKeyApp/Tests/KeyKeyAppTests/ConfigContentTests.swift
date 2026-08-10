@@ -82,14 +82,16 @@ final class ConfigContentTests: XCTestCase {
         let short = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
         XCTAssertEqual(content.displayVersion, DragonVersion.display(short ?? "1.0.0"))
         XCTAssertTrue(content.displayVersion.hasPrefix("v"))
-        XCTAssertEqual(content.date, "2026-08-07")
+        XCTAssertEqual(content.date, "2026-08-10")
     }
 
+    // 2.11.2 is a maintenance release: one improvement (the About pane, which shipped in 2.11.1
+    // undescribed) and one fix scoped to local test builds. No .added section — nothing was.
     @MainActor
-    func testWhatsNewSectionsAreAddedImprovedFixedInOrder() {
+    func testWhatsNewSectionsAreImprovedThenFixed() {
         let content = WhatsNewConfig.content
-        XCTAssertEqual(content.sections.map(\.kind), [.added, .improved, .fixed])
-        XCTAssertEqual(content.sections.map(\.entries.count), [1, 2, 4])
+        XCTAssertEqual(content.sections.map(\.kind), [.improved, .fixed])
+        XCTAssertEqual(content.sections.map(\.entries.count), [1, 1])
     }
 
     // MARK: DragonAppMenu contract
