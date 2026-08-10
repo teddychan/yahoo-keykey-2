@@ -73,9 +73,48 @@ final class AppMenuController {
     // be the literal "Application Support/YahooKeyKey2", which the release IME and the .debug
     // build shared — so uninstalling the debug build deleted the installed IME's learning data.
     // MAC-APP-RELEASE-LIFECYCLE.md: uninstall must never target the public bundle from Debug.
+    /// The bundle id Homebrew installed: the fallback for the running bundle's id below, and the
+    /// gate the cask token is issued against — deliberately not both at once, see
+    /// ``homebrewCaskToken``.
+    ///
+    /// A named constant because this app has carried three ids over its life:
+    /// `com.github.teddychan.inputmethod.YahooKeyKey2` through v1.7.0,
+    /// `com.dragonapp.yahoo-keykey` through v2.0.0, and this one since. The cask's `zap trash:`
+    /// still lists both legacy ids, so "which id is current" is not a question to answer by
+    /// retyping a literal.
+    static let releaseBundleID = "com.dragonapp.inputmethod.yahoo-keykey"
+
+    /// The Homebrew cask token, or `nil` when this bundle is not the one brew installed.
+    ///
+    /// KeyKey ships as the cask `yahoo-keykey-2` — the token declared by `Casks/yahoo-keykey-2.rb`
+    /// in teddychan/homebrew-tap, not inferred from the repo name. Homebrew never watches the
+    /// filesystem, so an IME that deletes itself leaves brew's receipt still claiming the cask is
+    /// installed and `Caskroom/yahoo-keykey-2/<version>/YahooKeyKey2.app` a dangling symlink;
+    /// `brew install --cask yahoo-keykey-2` then refuses outright — "already installed" — for an
+    /// app that isn't there, pointing at nothing that would fix it. Naming the token lets the kit's
+    /// post-exit shell run `brew uninstall --cask --force yahoo-keykey-2` and clear that record.
+    /// The cask installs to `~/Library/Input Methods/` rather than `/Applications`, which changes
+    /// nothing here: brew removes whatever its receipt points at.
+    ///
+    /// **Never a flat token.** `brew uninstall --cask` is not bundle-scoped, and
+    /// `Casks/yahoo-keykey-2.rb` carries `uninstall quit: "com.dragonapp.inputmethod.yahoo-keykey"`
+    /// — so from the local Debug build, which `tools/build-app.sh` re-ids
+    /// `…yahoo-keykey.debug` precisely so it cannot reach the installed IME's learning data or
+    /// updater, a flat token would quit and delete the installed IME instead.
+    ///
+    /// The comparison is the kit's ``UninstallConfig/caskToken(_:ifBundleIs:actual:)`` rather than
+    /// a local `==`, because it has to fail closed on the case hand-written versions got wrong: a
+    /// debug id, another app's id and a *missing* id all return `nil`. Hence the raw
+    /// `Bundle.main.bundleIdentifier` — the default — never `uninstallConfig`'s fallen-back
+    /// `bundleID`, which answers the release id for the one build with no business authorising a
+    /// delete. ice-2 and the sample app each shipped that bug.
+    private var homebrewCaskToken: String? {
+        UninstallConfig.caskToken("yahoo-keykey-2", ifBundleIs: Self.releaseBundleID)
+    }
+
     private var uninstallConfig: UninstallConfig {
         let library = FileManager.default.homeDirectoryForCurrentUser.appending(path: "Library")
-        let bundleID = Bundle.main.bundleIdentifier ?? "com.dragonapp.inputmethod.yahoo-keykey"
+        let bundleID = Bundle.main.bundleIdentifier ?? Self.releaseBundleID
         return UninstallConfig(
             appName: AboutConfig.appName,
             bundleID: bundleID,
@@ -88,7 +127,8 @@ final class AppMenuController {
             extraCleanupPaths: [
                 SharedResources.supportDirectory,
                 library.appending(path: "Caches/\(bundleID)"),
-            ]
+            ],
+            homebrewCask: homebrewCaskToken
         )
     }
 
