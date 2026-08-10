@@ -24,9 +24,28 @@ permissions:
 
 jobs:
   release:
-    uses: teddychan/dragon-release-ci/.github/workflows/release-macos.yml@v5
+    uses: teddychan/dragon-release-ci/.github/workflows/release-macos.yml@v6
     secrets: inherit
     with:
+      # v6's tag gate replaces v5's `VERSION=${TAG##*v}`, which left a value containing no "v"
+      # untouched — so a workflow_dispatch arrived with a BRANCH ref and produced VERSION=main.
+      # It also accepts only exact `vX.Y.Z`, and requires whats_new_path: the two move together,
+      # because passing whats_new_path to v5 fails at startup (v5 does not define the input) and
+      # omitting it on v6 fails the gate.
+      #
+      # The config file FIRST — the version and section checks read that one — then every
+      # translation. KeyKey's entries are abstract `L()` keys ("keykey.whatsNew.summary"), so the
+      # text a user actually reads lives in these .strings and the .swift can sit still through a
+      # complete rewrite of the notes. Watching only the .swift would reject that real rewrite and
+      # wave through a release whose notes never changed. Needs dragon-release-ci >= v6.2.0, which
+      # is what made the input accept a list.
+      #
+      # These are the real files, not the symlinks under Packages/KeyKeyApp/Sources/KeyKeyApp/ —
+      # the gate stats each path and diffs it, so it must name what git tracks.
+      whats_new_path: >-
+        App/WhatsNewConfig.swift
+        App/en.lproj/Localizable.strings
+        App/zh-Hant.lproj/Localizable.strings
       build_kind: script
       # Yahoo KeyKey 2 now targets the macOS 26 SDK, so build on the macos-26 image.
       swiftpm_runner: macos-26
