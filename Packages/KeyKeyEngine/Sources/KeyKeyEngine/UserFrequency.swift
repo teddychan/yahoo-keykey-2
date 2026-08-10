@@ -22,11 +22,26 @@ import Foundation
 // `saveScheduled` are read and written only while `lock` is held (or in `init`, before the
 // instance is shared). Any new stored property must follow that rule or the conformance lapses.
 public final class UserFrequency: @unchecked Sendable {
-    // Default on-disk location: ~/Library/Application Support/YahooKeyKey2/user-frequency.json
-    public static func defaultFileURL() -> URL {
+    // The app's own Application Support directory: ~/Library/Application Support/<name>.
+    //
+    // The name is a PARAMETER, and the app passes a distinct one for a local debug build,
+    // because this directory is the only piece of KeyKey's state that the `.debug` bundle id
+    // does not separate on its own: `UserDefaults.standard` is the bundle-id domain and the
+    // cache dir is `Caches/<bundle id>`, but this was a hardcoded literal shared by the
+    // release IME and the debug one. Typing in the debug build therefore trained the installed
+    // IME's candidate ranking, and — the reason it had to change — running Uninstall in the
+    // debug build deleted it, which MAC-APP-RELEASE-LIFECYCLE.md forbids outright ("uninstall
+    // operations must never target the public bundle from Debug"). The default is the release
+    // name, unchanged, so an installed user's learning data stays exactly where it is.
+    public static func supportDirectory(named name: String = "YahooKeyKey2") -> URL {
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent("Library/Application Support")
-        return base.appendingPathComponent("YahooKeyKey2").appendingPathComponent("user-frequency.json")
+        return base.appendingPathComponent(name)
+    }
+
+    // Default on-disk location: ~/Library/Application Support/YahooKeyKey2/user-frequency.json
+    public static func defaultFileURL(directory: URL = UserFrequency.supportDirectory()) -> URL {
+        directory.appendingPathComponent("user-frequency.json")
     }
 
     private static let weight = 10.0

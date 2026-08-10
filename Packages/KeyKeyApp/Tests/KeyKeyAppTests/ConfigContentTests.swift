@@ -11,7 +11,9 @@ final class ConfigContentTests: XCTestCase {
 
     @MainActor
     func testAboutAppNameIsReleaseNameOutsideDebugBuild() {
-        // The test bundle id does not end in ".debug", so no " Debug" suffix is appended.
+        // The test bundle carries no DragonBuildChannel, so DragonAbout.isDebugBuild() is
+        // false and no " Debug" suffix is appended. (It used to sniff the bundle id's ".debug"
+        // suffix; the channel the build script stamps is the kit-owned signal since 3.3.0.)
         XCTAssertEqual(AboutConfig.appName, "Yahoo! KeyKey 2")
     }
 

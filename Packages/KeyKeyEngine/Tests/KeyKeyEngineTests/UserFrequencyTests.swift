@@ -183,6 +183,20 @@ final class UserFrequencyTests: XCTestCase {
         XCTAssertEqual(url.deletingLastPathComponent().lastPathComponent, "YahooKeyKey2")
     }
 
+    // A local debug build passes its own directory name so it can't read, train, or (via the
+    // Uninstall pane) delete the installed release IME's learning data — the one piece of
+    // KeyKey state the `.debug` bundle id does not separate on its own. The release default
+    // must stay put, or every existing install silently loses its counts.
+    func testNamedSupportDirectoryIsDistinctFromTheReleaseDefault() {
+        let release = UserFrequency.supportDirectory()
+        let debug = UserFrequency.supportDirectory(named: "YahooKeyKey2 Debug")
+        XCTAssertEqual(release.lastPathComponent, "YahooKeyKey2")
+        XCTAssertNotEqual(release, debug)
+        XCTAssertEqual(release.deletingLastPathComponent(), debug.deletingLastPathComponent())
+        XCTAssertEqual(UserFrequency.defaultFileURL(directory: debug),
+                       debug.appendingPathComponent("user-frequency.json"))
+    }
+
     func testFlushToUnwritableLocationDoesNotCrash() {
         // A path under a regular file (not a directory) can't have its parent dir created, so
         // save() hits its catch branch. The failure must be swallowed — no crash, no throw.

@@ -65,9 +65,14 @@ final class AppMenuController {
     }
 
     // Uninstall config ported from the old Uninstaller.swift: wipe the bundle-id defaults
-    // domain, the Application Support/YahooKeyKey2 dir (user-frequency.json), and caches; then
+    // domain, the app's Application Support dir (user-frequency.json), and caches; then
     // DragonUninstaller moves the bundle to the Trash. The bundle here is the IME under
     // ~/Library/Input Methods.
+    //
+    // Every path below is derived from the RUNNING bundle, never typed. The support dir used to
+    // be the literal "Application Support/YahooKeyKey2", which the release IME and the .debug
+    // build shared — so uninstalling the debug build deleted the installed IME's learning data.
+    // MAC-APP-RELEASE-LIFECYCLE.md: uninstall must never target the public bundle from Debug.
     private var uninstallConfig: UninstallConfig {
         let library = FileManager.default.homeDirectoryForCurrentUser.appending(path: "Library")
         let bundleID = Bundle.main.bundleIdentifier ?? "com.dragonapp.inputmethod.yahoo-keykey"
@@ -81,7 +86,7 @@ final class AppMenuController {
                 L("keykey.uninstall.item.trash"),
             ],
             extraCleanupPaths: [
-                library.appending(path: "Application Support/YahooKeyKey2"),
+                SharedResources.supportDirectory,
                 library.appending(path: "Caches/\(bundleID)"),
             ]
         )
