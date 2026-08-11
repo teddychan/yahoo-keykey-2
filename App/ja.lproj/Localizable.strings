@@ -29,8 +29,8 @@
 "keykey.general.language" = "言語";
 
 /* What's New pane (2.12.0) */
-"keykey.whatsNew.summary" = "Yahoo! KeyKey 2 が「言語」メニューに並ぶ 7 言語すべてに翻訳されました。入力の動作は何も変わりません。";
-"keykey.whatsNew.allLanguages" = "Yahoo! KeyKey 2 は English と繁體中文 に加えて、Español、Français、日本語、한국어、简体中文 を話すようになりました。2.11.5 ではこの 5 言語を「言語」メニューから外しました。それらは Dragon App 共通コードの言語であって Yahoo! KeyKey 2 の言語ではなく、選んでも共通の設定パネルだけが翻訳され、ほかの文字はすべて英語のままだったからです。今回それらが戻り、しかも今度はメニューの向こう側にある言葉もすべて翻訳されています。";
+"keykey.whatsNew.summary" = "小さな修正です。Yahoo! KeyKey 2 に著作権表示が追加され、「情報」に表示されるものと同じになりました。入力の動作は何も変わりません。";
+"keykey.whatsNew.copyrightNotice" = "Finder の「情報を見る」に Yahoo! KeyKey 2 の著作権表示が表示されるようになりました。これまではアプリが著作権表示を持っておらず、その欄は空のままでした。";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "入力ソースから倉頡と速成を無効にする";

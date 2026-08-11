@@ -91,15 +91,22 @@ final class ConfigContentTests: XCTestCase {
         XCTAssertEqual(content.date, "2026-08-11")
     }
 
-    // 2.12.0 is a single `.added`: the five localizations KeyKey did not have. It closes 2.11.5
-    // from the other side — that release narrowed the Language menu to the two languages KeyKey
-    // actually had, and this one translates the app so the menu can open back up.
+    // 2.12.1 is a single `.fixed`: `App/Info.plist` had no `NSHumanReadableCopyright`, so Finder's
+    // Get Info panel showed no copyright line for the app at all. It now carries
+    // `© 2026 Teddy Chan`, byte-for-byte what About's copyright row renders.
     //
-    // Only one entry, and deliberately no `.changed`. The DragonKit pin does not move — 2.11.6
-    // already took it to 4.0.0 — and the appcast mirror this release retires is invisible, since
-    // installed copies have read the app-owned feed since 2.11.4. 2.11.5 and 2.11.6 each carried a
-    // pin entry because the bump was the substance of those releases; repeating it every time is
-    // the padding those entries avoided. 2.11.2 pinned [.improved, .fixed] for a different pair.
+    // `.fixed`, not `.added` — a bundle is expected to carry that field, and this one shipped
+    // without it. KeyKey is the app whose About copyright slot once held `倉頡／簡易 輸入法`, the
+    // defect DragonKit still cites in `DragonAbout.copyright(years:holder:)`; the bundle's own
+    // notice being absent was the same failure one field over.
+    //
+    // One entry, and no second section. LICENSE's holder also changes here, from "Lung Sang Chan
+    // (teddychan)" to "Teddy Chan" so all five apps name it one way — but that is the same person
+    // either way and nothing observable from inside the app, so claiming it would be padding.
+    //
+    // 2.12.0 pinned a single `.added` for the five localizations KeyKey did not have. 2.11.5 and
+    // 2.11.6 each carried a DragonKit pin entry because the bump was the substance of those
+    // releases; 2.11.2 pinned [.improved, .fixed] for a different pair.
     //
     // Entry KEYS are pinned, not just kinds and counts, because kinds and counts had stopped
     // catching anything: 2.11.3, 2.11.4 and the 2.11.5 draft were all [.changed] with one entry —
@@ -110,12 +117,12 @@ final class ConfigContentTests: XCTestCase {
     // text SAYS is the release gate's job — it diffs every locale's .strings file — so between
     // them a stale pane cannot ship.
     @MainActor
-    func testWhatsNewAnnouncesTheNewLocalizations() {
+    func testWhatsNewAnnouncesTheCopyrightNoticeFix() {
         let content = WhatsNewConfig.content
-        XCTAssertEqual(content.sections.map(\.kind), [.added])
+        XCTAssertEqual(content.sections.map(\.kind), [.fixed])
         XCTAssertEqual(content.sections.map(\.entries.count), [1])
         XCTAssertEqual(content.sections.flatMap(\.entries), [
-            L("keykey.whatsNew.allLanguages"),
+            L("keykey.whatsNew.copyrightNotice"),
         ])
     }
 
