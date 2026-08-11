@@ -2,6 +2,19 @@
 
 A plain-language list of changes in each version, newest first.
 
+## 2.11.6
+
+- **Under the hood: updated to DragonKit 4.0.0** (from 3.4.0), the shared code behind the Settings
+  window's About, What's New, Backup & Restore, Updates and Uninstall panes. This version fixes the
+  About pane's rows in place — the licences page is now required, and the original project's
+  repository travels with the credit that names it, so no Dragon app can list an upstream project
+  it never links or name bundled data whose licences are published nowhere. Yahoo! KeyKey 2's About
+  pane already looked exactly the way the shared code now requires: it had all four link rows and
+  the single-holder copyright, and its own reasoning about that copyright — that an independent
+  reimplementation using no upstream source cannot assert the upstream author's copyright over this
+  binary — is what the shared code adopted for every app. So nothing here moves. The About pane
+  reports the new number; that is the whole of what you can see.
+
 ## 2.11.5
 
 - **Fixed: the Language menu in Settings offered languages Yahoo! KeyKey 2 does not have.** Beside

@@ -1,8 +1,11 @@
 import Foundation
 import DragonKit
 
-// About-pane content. DragonKit v3 owns every row title, SF Symbol and ordering — this file
+// About-pane content. DragonKit v4 owns every row title, SF Symbol and ordering — this file
 // supplies only URLs and proper nouns, so the pane cannot drift from the other Dragon apps.
+// As of 4.0.0 the slots are closed by the initializer itself: an omitted licences page or an
+// upstream project credited without a link is a compile error here rather than something found
+// by putting five screenshots side by side.
 // A local debug build is re-id'd to <release-id>.debug and stamped DragonBuildChannel = Debug
 // by tools/build-app.sh, so a test build still shows a distinct "Yahoo! KeyKey 2 Debug" name.
 enum AboutConfig {
@@ -23,24 +26,38 @@ enum AboutConfig {
         AboutContent(
             appName: appName,
             versionString: versionString,
-            // Single holder, deliberately. The dual-holder form would also name the upstream
-            // project's copyright, but this app is an independent reimplementation that uses no
-            // Yahoo! KeyKey source code (docs/THIRD-PARTY-NOTICES.md) and disclaims affiliation
-            // (README.md) — so claiming a Yahoo copyright over this binary would contradict both.
-            // The lineage is carried by originalProjectURL and originalWork instead, and the New
-            // BSD notice for the Yahoo-derived Cangjie tables lives on the licences page.
+            // Single holder — and now the only form the kit offers. The dual-holder form would
+            // also name the upstream project's copyright, but this app is an independent
+            // reimplementation that uses no Yahoo! KeyKey source code
+            // (docs/THIRD-PARTY-NOTICES.md) and disclaims affiliation (README.md) — so claiming a
+            // Yahoo copyright over this binary would contradict both. That was this app's own
+            // reading until DragonKit 4.0.0 adopted it kit-wide: copyright(original:years:holder:)
+            // is gone and CONFORMANCE §R13 enforces the single holder, so this is no longer a
+            // local decision KeyKey could drift back out of. The lineage is carried by
+            // originalWork below, and the New BSD notice for the Yahoo-derived Cangjie tables
+            // lives on the licences page.
             copyright: DragonAbout.copyright(years: "2026", holder: "Teddy Chan"),
             // The canonical marketing page is repo-named; /keykey/ is a <meta refresh> stub whose
             // rel=canonical points here. The kit checks this path against supportURL's repo name.
             websiteURL: URL(string: "https://www.dragonapp.com/yahoo-keykey-2/")!,
             supportURL: URL(string: "https://github.com/teddychan/yahoo-keykey-2/issues")!,
-            license: "MIT",
-            originalProjectURL: URL(string: "https://github.com/ninjapanda/YahooKeyKey")!,
             // Third-party notices, chiefly OpenCC's Apache-2.0 licence and NOTICE, which that
             // licence requires ship with the app. Trailing slash: it is the path Pages serves, so
-            // the row does not point at a redirect.
+            // the row does not point at a redirect. Required as of DragonKit 4.0.0; it moved ahead
+            // of `license:` with the signature, and the two are not interchangeable — this is the
+            // third-party notices page, `license:` is this app's own licence.
             licensesURL: URL(string: "https://www.dragonapp.com/yahoo-keykey-2/licenses/")!,
-            originalWork: OriginalWork(name: "Yahoo! KeyKey", author: "ninjapanda · zonble"),
+            license: "MIT",
+            // One value, both rows: the upstream repository used to be a separate
+            // `originalProjectURL:` argument beside this credit, and DragonKit 4.0.0 folded it in
+            // because two apps passed the credit without the URL and shipped a "Based on" row
+            // linking nowhere. It drives the Original project link and the Based on credit alike,
+            // so they cannot disagree or go missing one at a time.
+            originalWork: OriginalWork(
+                name: "Yahoo! KeyKey",
+                author: "ninjapanda · zonble",
+                url: URL(string: "https://github.com/ninjapanda/YahooKeyKey")!
+            ),
             // Attributions are name → licence, the kit's canon since 3.1.0: the thing's own name
             // as its authors spell it, then its licence. These were role labels paired with an
             // origin — L("keykey.about.cangjieTable") → "ibus-table-chinese" — on the reasoning

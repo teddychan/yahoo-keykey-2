@@ -58,8 +58,14 @@ final class ConfigContentTests: XCTestCase {
     @MainActor
     func testAboutCreditRowsEndWithTheDataAttributions() {
         let content = AboutConfig.content
+        // The url is part of OriginalWork as of DragonKit 4.0.0, and it is the same value the
+        // `heart` link row above renders — one value feeding both rows is the point of folding it
+        // in, so asserting it here pins the credit and the link together.
         XCTAssertEqual(content.originalWork,
-                       OriginalWork(name: "Yahoo! KeyKey", author: "ninjapanda · zonble"))
+                       OriginalWork(name: "Yahoo! KeyKey",
+                                    author: "ninjapanda · zonble",
+                                    url: URL(string: "https://github.com/ninjapanda/YahooKeyKey")!))
+        XCTAssertEqual(content.originalProjectURL, content.originalWork?.url)
         XCTAssertEqual(content.creditRows.count, 7)
         // Pinned as name → licence pairs, not values alone. The kit renders an Attribution as
         // label: name, value: licence, so checking one half would let a role label ("Cangjie
@@ -85,30 +91,28 @@ final class ConfigContentTests: XCTestCase {
         XCTAssertEqual(content.date, "2026-08-11")
     }
 
-    // 2.11.5 leads with a fix and follows with the pin bump that made it possible: the Language
-    // menu offered all seven locales DragonKit ships while KeyKey has two, and `languages:` — the
-    // argument that fixes it — is new in 3.4.0. `.fixed` first because the menu was making an
-    // offer the app could not keep, then `.changed` for the bump itself.
-    //
-    // The release was drafted as maintenance-only, a single `.changed` about the bump, before the
-    // bug behind it was found; that draft would have shipped notes silent on the only thing in the
-    // release a user can notice. 2.11.2 pinned [.improved, .fixed] for a different pair.
+    // 2.11.6 is a lone `.changed`: the DragonKit pin moves to 4.0.0, which makes the About pane's
+    // rows the initializer's own signature rather than a convention five apps followed by hand.
+    // No `.fixed`, deliberately — this app's About pane was the correct one, so the migration
+    // changed no behaviour and claiming a fix would invent a defect KeyKey never had. 2.11.5 was
+    // [.fixed, .changed] for a real bug the bump exposed; 2.11.2 was [.improved, .fixed].
     //
     // Entry KEYS are pinned, not just kinds and counts, because kinds and counts had stopped
     // catching anything: 2.11.3, 2.11.4 and the 2.11.5 draft were all [.changed] with one entry —
     // three in a row — so a release that forgot to touch the notes would have passed unchanged
-    // while shipping its predecessor's text. Compared against the same L() keys WhatsNewConfig
-    // builds the entries from, so this holds in whatever language the test bundle resolves,
-    // exactly as the DragonAppMenu test below compares titles against the kit's keys. What the
-    // text SAYS is the release gate's job — it diffs both .strings files — so between them a
-    // stale pane cannot ship.
+    // while shipping its predecessor's text. That is live again here, 2.11.6 being a single
+    // `.changed` reusing the sharedCode key, and the keys alone would not have caught it either:
+    // what makes this assertion bite is that keykey.whatsNew.languagePicker is gone from the list.
+    // Compared against the same L() keys WhatsNewConfig builds the entries from, so this holds in
+    // whatever language the test bundle resolves, exactly as the DragonAppMenu test below compares
+    // titles against the kit's keys. What the text SAYS is the release gate's job — it diffs both
+    // .strings files — so between them a stale pane cannot ship.
     @MainActor
-    func testWhatsNewLeadsWithTheLanguageMenuFix() {
+    func testWhatsNewIsTheSharedCodeBumpAlone() {
         let content = WhatsNewConfig.content
-        XCTAssertEqual(content.sections.map(\.kind), [.fixed, .changed])
-        XCTAssertEqual(content.sections.map(\.entries.count), [1, 1])
+        XCTAssertEqual(content.sections.map(\.kind), [.changed])
+        XCTAssertEqual(content.sections.map(\.entries.count), [1])
         XCTAssertEqual(content.sections.flatMap(\.entries), [
-            L("keykey.whatsNew.languagePicker"),
             L("keykey.whatsNew.sharedCode"),
         ])
     }
