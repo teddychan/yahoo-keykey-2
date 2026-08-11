@@ -4,13 +4,18 @@ A plain-language list of changes in each version, newest first.
 
 ## 2.11.5
 
+- **Fixed: the Language menu in Settings offered languages Yahoo! KeyKey 2 does not have.** Beside
+  English and 繁體中文 it listed Español, Français, 日本語, 한국어 and 简体中文 — the languages the
+  shared Dragon App code is translated into, not the ones Yahoo! KeyKey 2 is. Choosing one of them
+  translated the About, What's New, Updates and Uninstall panes and left every other word in
+  English, which is not a language setting anyone wanted. The menu now offers the two languages
+  Yahoo! KeyKey 2 actually has. A choice already made outside those two stays listed and stays
+  selected until you move off it, so nobody is left on a language they can no longer see in the
+  menu.
 - **Under the hood: updated to DragonKit 3.4.0** (from 3.3.0), the shared code behind the Settings
-  window's About, What's New, Backup & Restore, Updates and Uninstall panes. Nothing it provides to
-  Yahoo! KeyKey 2 changed in this version, so nothing about typing or any window behaves
-  differently — the About pane reports the new number, which is the only difference there is to
-  see. The bump is there to keep the shared code current: every Dragon app is required to sit on
-  the newest published version, so a version behind is a build failure rather than a drift nobody
-  notices.
+  window's About, What's New, Backup & Restore, Updates and Uninstall panes — and the version that
+  added the setting the fix above needed, so the two arrived together. The About pane reports the
+  new number; nothing else it provides changed.
 
 ## 2.11.4
 

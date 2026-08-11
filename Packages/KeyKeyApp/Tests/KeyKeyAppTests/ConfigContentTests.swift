@@ -85,26 +85,102 @@ final class ConfigContentTests: XCTestCase {
         XCTAssertEqual(content.date, "2026-08-11")
     }
 
-    // 2.11.5 is maintenance only: one `.changed` entry, the DragonKit pin moving to 3.4.0.
-    // `.changed` and not `.fixed` because nothing was broken, and not `.improved` because the bump
-    // is for pin currency rather than to adopt an API. 2.11.2 pinned [.improved, .fixed] for a
-    // different pair; changing what the pane claims has to change this too, which is the point.
+    // 2.11.5 leads with a fix and follows with the pin bump that made it possible: the Language
+    // menu offered all seven locales DragonKit ships while KeyKey has two, and `languages:` — the
+    // argument that fixes it — is new in 3.4.0. `.fixed` first because the menu was making an
+    // offer the app could not keep, then `.changed` for the bump itself.
     //
-    // The entry's KEY is pinned as of 2.11.5, because kind and count alone had stopped catching
-    // anything. 2.11.3, 2.11.4 and this release are all [.changed] with one entry — three in a
-    // row — so a release that forgot to touch the notes at all would have passed this test
-    // unchanged while shipping its predecessor's text. The key names the subject, and this one
-    // moved from update delivery to the shared code, so it changes when the claim does. Compared
-    // against the same L() key WhatsNewConfig builds the entry from, so it holds in whatever
-    // language the test bundle resolves, exactly as the DragonAppMenu test below compares titles
-    // against the kit's keys. What the text SAYS is the release gate's job — it diffs the two
-    // .strings files — so between them a stale pane cannot ship.
+    // The release was drafted as maintenance-only, a single `.changed` about the bump, before the
+    // bug behind it was found; that draft would have shipped notes silent on the only thing in the
+    // release a user can notice. 2.11.2 pinned [.improved, .fixed] for a different pair.
+    //
+    // Entry KEYS are pinned, not just kinds and counts, because kinds and counts had stopped
+    // catching anything: 2.11.3, 2.11.4 and the 2.11.5 draft were all [.changed] with one entry —
+    // three in a row — so a release that forgot to touch the notes would have passed unchanged
+    // while shipping its predecessor's text. Compared against the same L() keys WhatsNewConfig
+    // builds the entries from, so this holds in whatever language the test bundle resolves,
+    // exactly as the DragonAppMenu test below compares titles against the kit's keys. What the
+    // text SAYS is the release gate's job — it diffs both .strings files — so between them a
+    // stale pane cannot ship.
     @MainActor
-    func testWhatsNewSectionsAreASingleChanged() {
+    func testWhatsNewLeadsWithTheLanguageMenuFix() {
         let content = WhatsNewConfig.content
-        XCTAssertEqual(content.sections.map(\.kind), [.changed])
-        XCTAssertEqual(content.sections.map(\.entries.count), [1])
-        XCTAssertEqual(content.sections.first?.entries.first, L("keykey.whatsNew.sharedCode"))
+        XCTAssertEqual(content.sections.map(\.kind), [.fixed, .changed])
+        XCTAssertEqual(content.sections.map(\.entries.count), [1, 1])
+        XCTAssertEqual(content.sections.flatMap(\.entries), [
+            L("keykey.whatsNew.languagePicker"),
+            L("keykey.whatsNew.sharedCode"),
+        ])
+    }
+
+    // MARK: LanguagePicker configuration
+
+    // The picker must offer exactly the languages KeyKey has translated ITSELF into, and nothing
+    // observable tied those two facts together until this test. That is how 2.11.4 shipped a menu
+    // offering Español, Français, 日本語, 한국어 and 简体中文 with no KeyKey strings behind them:
+    // App/GeneralPane.swift called LanguagePicker() bare and took the kit's default of
+    // DragonLanguage.selectable, all seven locales DragonKit ships.
+    //
+    // It cannot be asserted through the type. LanguagePicker keeps `languages` private and
+    // `offeredLanguages` internal, so a constructed picker reveals nothing to an app-side test —
+    // and App/GeneralPane.swift is not one of the files symlinked into this package, so the call
+    // site is not reachable as code either. What is reachable is the pair of artifacts that must
+    // agree: the argument written at the call site, and the .lproj directories that exist. Reading
+    // those from disk is how the sibling engine suites reach Resources/, and comparing source text
+    // against the repo is what Scripts/dragon-conformance.py does with these same files.
+    //
+    // Fails in every direction that matters: a new App/ja.lproj without widening the picker,
+    // widening the picker without shipping the .lproj, and reverting to a bare LanguagePicker().
+    @MainActor
+    func testLanguagePickerOffersExactlyTheShippedLocalizations() throws {
+        var dir = URL(fileURLWithPath: #filePath)
+        var found: URL?
+        for _ in 0..<8 {
+            dir = dir.deletingLastPathComponent()
+            if FileManager.default.fileExists(atPath: dir.appendingPathComponent("App/GeneralPane.swift").path) {
+                found = dir.appendingPathComponent("App")
+                break
+            }
+        }
+        guard let appDir = found else { throw XCTSkip("App/GeneralPane.swift not present above this package") }
+
+        // Comment lines go first, so prose naming the call cannot satisfy the search below.
+        let code = try String(contentsOf: appDir.appendingPathComponent("GeneralPane.swift"), encoding: .utf8)
+            .split(separator: "\n", omittingEmptySubsequences: false)
+            .filter { !$0.trimmingCharacters(in: .whitespaces).hasPrefix("//") }
+            .joined(separator: "\n")
+
+        guard let call = code.range(of: "LanguagePicker(languages:"),
+              let open = code.range(of: "[", range: call.upperBound..<code.endIndex),
+              let close = code.range(of: "]", range: open.upperBound..<code.endIndex) else {
+            return XCTFail("""
+                App/GeneralPane.swift passes no explicit `languages:` to LanguagePicker, so it takes \
+                the kit's default of DragonLanguage.selectable — all seven locales DragonKit ships, \
+                against the \(shippedLocalizations(in: appDir).count) KeyKey is translated into.
+                """)
+        }
+
+        let tokens = code[open.upperBound..<close.lowerBound]
+            .split(separator: ",")
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines).trimmingCharacters(in: CharacterSet(charactersIn: ".")) }
+            .filter { !$0.isEmpty }
+        // Case names in source ("zhHant") to locale codes ("zh-Hant"), which is what an .lproj is
+        // named. Asserting the count survives the mapping stops an unrecognized token from being
+        // dropped and letting both sides agree by being equally short.
+        let offered = Set(tokens.compactMap { token in
+            DragonLanguage.allCases.first { String(describing: $0) == token }?.rawValue
+        })
+        XCTAssertEqual(offered.count, tokens.count,
+                       "a language in the picker's list matches no DragonLanguage case: \(tokens)")
+
+        XCTAssertEqual(offered, shippedLocalizations(in: appDir),
+                       "the Language picker and App/*.lproj disagree")
+    }
+
+    /// The locale codes KeyKey ships its own strings in, read from the `.lproj` directories.
+    private func shippedLocalizations(in appDir: URL) -> Set<String> {
+        let names = (try? FileManager.default.contentsOfDirectory(atPath: appDir.path)) ?? []
+        return Set(names.filter { $0.hasSuffix(".lproj") }.map { String($0.dropLast(".lproj".count)) })
     }
 
     // MARK: DragonAppMenu contract

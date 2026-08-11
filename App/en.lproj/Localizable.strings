@@ -29,8 +29,9 @@
 "keykey.general.language" = "Language";
 
 /* What's New pane (2.11.5) */
-"keykey.whatsNew.summary" = "A maintenance release. Nothing about typing changes, and nothing you can see behaves differently — this one only brings the shared code behind the Settings window up a version.";
-"keykey.whatsNew.sharedCode" = "Yahoo! KeyKey 2 is now built with DragonKit 3.4.0, the shared code behind the Settings window's About, What's New, Backup & Restore, Updates and Uninstall panes. Nothing it gives Yahoo! KeyKey 2 changed in this version, so nothing here works differently — the About pane reports the new number, and that is the whole of it.";
+"keykey.whatsNew.summary" = "This one fixes the Language menu in Settings, which offered languages Yahoo! KeyKey 2 has never been translated into. Nothing about typing changes.";
+"keykey.whatsNew.languagePicker" = "The Language menu in Settings no longer offers languages Yahoo! KeyKey 2 does not have. Beside English and 繁體中文 it listed Español, Français, 日本語, 한국어 and 简体中文, and choosing one of those translated only the About, What's New, Updates and Uninstall panes while every other word stayed in English. It now offers the two languages Yahoo! KeyKey 2 is actually translated into. If you had already picked one of the others, it stays in the menu and stays selected until you move off it, so you can still see where you are and change it.";
+"keykey.whatsNew.sharedCode" = "Yahoo! KeyKey 2 is now built with DragonKit 3.4.0, the shared code behind the Settings window's About, What's New, Backup & Restore, Updates and Uninstall panes — and the version that added the setting the fix above needed. The About pane reports the new number; nothing else about it is different.";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "Disable Cangjie and Simplex from Input Sources";

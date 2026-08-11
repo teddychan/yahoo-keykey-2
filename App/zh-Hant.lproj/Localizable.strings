@@ -29,8 +29,9 @@
 "keykey.general.language" = "語言";
 
 /* What's New pane (2.11.5) */
-"keykey.whatsNew.summary" = "這是一次維護性更新。打字的部分完全沒有改變，你看得到的地方也都一樣——這次只是把設定視窗共用的程式碼升上一個版本。";
-"keykey.whatsNew.sharedCode" = "Yahoo! KeyKey 2 現在改用 DragonKit 3.4.0 建構，那是設定視窗中「關於」、「新功能」、「備份與還原」、「更新」與「解除安裝」各面板共用的程式碼。這個版本並沒有改變它提供給 Yahoo! KeyKey 2 的任何功能，因此沒有任何地方的運作方式不同——「關於」面板會顯示新的版本號，僅此而已。";
+"keykey.whatsNew.summary" = "這次修正了設定中的「語言」選單——它列出了 Yahoo! KeyKey 2 從未翻譯過的語言。打字的部分完全沒有改變。";
+"keykey.whatsNew.languagePicker" = "設定中的「語言」選單不再列出 Yahoo! KeyKey 2 沒有的語言。它原本除了 English 與繁體中文，還列出 Español、Français、日本語、한국어 與简体中文；選了其中任何一個，只有「關於」、「新功能」、「更新」與「解除安裝」四個面板會被翻譯，其餘文字全都退回英文。現在只會列出 Yahoo! KeyKey 2 實際翻譯過的這兩種語言。如果你先前已經選了其他語言，它仍會留在選單中並維持選取狀態，直到你切換離開，因此你依然看得到自己目前的設定，也改得回來。";
+"keykey.whatsNew.sharedCode" = "Yahoo! KeyKey 2 現在改用 DragonKit 3.4.0 建構，那是設定視窗中「關於」、「新功能」、「備份與還原」、「更新」與「解除安裝」各面板共用的程式碼，也正是這個版本才提供上述修正所需的設定。「關於」面板會顯示新的版本號，其他部分沒有任何不同。";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "從輸入來源中停用倉頡與速成";
