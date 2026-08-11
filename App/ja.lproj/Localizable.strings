@@ -1,0 +1,38 @@
+/* App-specific strings for Yahoo! KeyKey 2. DragonKit's own UI strings live in its own
+   bundle (7 languages) and are not duplicated here. */
+
+/* Sidebar pane title (General). Other panes use DragonKit's built-in titles. */
+"keykey.pane.general" = "一般";
+
+/* General pane */
+"keykey.general.input" = "入力";
+"keykey.general.outputSimplified" = "簡体字で出力";
+"keykey.general.fullWidthPunctuation" = "全角の句読点";
+"keykey.general.associatedPhrases" = "連想入力（聯想）";
+"keykey.general.associationContinuationOnly" = "連想候補に続きの文字だけを表示";
+"keykey.general.associationContinuationOnlyHint" = "「關係」ではなく「係／心／於」を表示します（オリジナルの Yahoo! KeyKey と同じ）。確定される文字は変わりません。";
+"keykey.general.associationTrigger" = "連想候補の選択キー";
+"keykey.general.associationTriggerNumber" = "数字キー";
+"keykey.general.associationTriggerShift" = "Shift + 数字";
+"keykey.general.associationTriggerHint" = "「Shift + 数字」を選ぶと、数字キーだけを押したときは連想候補を選ばずにその数字を入力します。文字のすぐ後に数字を打つとき（例：「這周有7天」）に便利です。";
+"keykey.general.codeHint" = "倉頡コードのヒントを表示";
+"keykey.general.codeHintHint" = "候補の横にその文字の倉頡コード（例：倉 → 人口竹口）を表示し、分解の学習と確認に役立てます。";
+"keykey.general.appearance" = "外観";
+"keykey.general.candidateFontSize" = "候補の文字サイズ";
+"keykey.general.inputMethod" = "入力方式";
+"keykey.general.cangjieVersion" = "倉頡のバージョン";
+"keykey.general.cangjieV5" = "第5世代倉頡";
+"keykey.general.cangjieV3" = "第3世代倉頡（Yahoo KeyKey 互換）";
+"keykey.general.cangjieVersionHint" = "「第3世代倉頡」はオリジナルの Yahoo! KeyKey のコード表と候補順を使います（倉頡と速成の両方に適用）。すぐに反映されます。";
+"keykey.general.strokeConfirmation" = "スペースキーでコードを確定";
+"keykey.general.strokeConfirmationHint" = "速成、および * ワイルドカードを使う倉頡では、コードを打ち終わる前に候補が出るため、スペースキーは打ったコードを確定せずに次のページへ送ってしまいます。オンにすると、最初のスペースキーはコードの確定だけを行い 1 ページ目に留まります。もう一度スペースキーを押すとページが進み、1〜9 で直接選べます。通常の倉頡は影響を受けません。";
+"keykey.general.language" = "言語";
+
+/* What's New pane (2.12.0) */
+"keykey.whatsNew.summary" = "Yahoo! KeyKey 2 が「言語」メニューに並ぶ 7 言語すべてに翻訳されました。入力の動作は何も変わりません。";
+"keykey.whatsNew.allLanguages" = "Yahoo! KeyKey 2 は English と繁體中文 に加えて、Español、Français、日本語、한국어、简体中文 を話すようになりました。2.11.5 ではこの 5 言語を「言語」メニューから外しました。それらは Dragon App 共通コードの言語であって Yahoo! KeyKey 2 の言語ではなく、選んでも共通の設定パネルだけが翻訳され、ほかの文字はすべて英語のままだったからです。今回それらが戻り、しかも今度はメニューの向こう側にある言葉もすべて翻訳されています。";
+
+/* Uninstall pane checklist */
+"keykey.uninstall.item.inputSources" = "入力ソースから倉頡と速成を無効にする";
+"keykey.uninstall.item.learningAndSettings" = "学習データと環境設定を削除する";
+"keykey.uninstall.item.trash" = "Yahoo! KeyKey 2 をゴミ箱に入れる";
