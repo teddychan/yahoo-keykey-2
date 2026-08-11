@@ -35,10 +35,26 @@ echo "==> Registering + launching"
 # one. The release IME is a different id and was never reachable either way.
 open -n "$DST"
 
+# Make the menu bar re-read the input-source names. TextInputMenuAgent caches them per input
+# source id and does not notice a bundle whose InfoPlist.strings changed underneath it, so the
+# ⌃Space menu and the menu-bar item kept listing this build as a plain "倉頡" — pixel-identical to
+# the installed release's row — while System Settings ▸ Input Sources, which reads TIS live,
+# correctly showed "倉頡 (Debug)". The agent on the machine where this was found had been running
+# for five days, since before the debug bundle id first existed.
+#
+# That is the whole point of the labels: an IME's mode name is the only place its identity is ever
+# visible to a user, and the menu is where you pick between the two builds. lsregister above
+# refreshes Launch Services, which is a different cache and does not cover this.
+#
+# launchd respawns both agents immediately; the menu-bar item redraws within a second.
+killall TextInputMenuAgent 2>/dev/null || true
+killall TextInputSwitcher 2>/dev/null || true
+
 cat <<EOF
 
 Debug IME installed: $DST
 Add it in System Settings -> Keyboard -> Input Sources -> + -> Chinese, Traditional ->
-"Yahoo KeyKey 2 Debug". If it doesn't appear, log out/in once (it registers separately
-from the release IME).
+"倉頡 (Debug)" / "速成 (Debug)" / "拼音 (Debug)" — the suffix is how you tell this build's modes
+apart from the installed release's, which are named plainly. If they don't appear at all, log
+out/in once (this registers separately from the release IME).
 EOF
