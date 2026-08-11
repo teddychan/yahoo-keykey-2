@@ -24,23 +24,35 @@ import Foundation
 public final class UserFrequency: @unchecked Sendable {
     // The app's own Application Support directory: ~/Library/Application Support/<name>.
     //
-    // The name is a PARAMETER, and the app passes a distinct one for a local debug build,
-    // because this directory is the only piece of KeyKey's state that the `.debug` bundle id
-    // does not separate on its own: `UserDefaults.standard` is the bundle-id domain and the
+    // The name is a REQUIRED parameter, and the app passes a distinct one for a local debug
+    // build, because this directory is the only piece of KeyKey's state that the `.debug` bundle
+    // id does not separate on its own: `UserDefaults.standard` is the bundle-id domain and the
     // cache dir is `Caches/<bundle id>`, but this was a hardcoded literal shared by the
     // release IME and the debug one. Typing in the debug build therefore trained the installed
     // IME's candidate ranking, and — the reason it had to change — running Uninstall in the
     // debug build deleted it, which MAC-APP-RELEASE-LIFECYCLE.md forbids outright ("uninstall
-    // operations must never target the public bundle from Debug"). The default is the release
-    // name, unchanged, so an installed user's learning data stays exactly where it is.
-    public static func supportDirectory(named name: String = "YahooKeyKey2") -> URL {
+    // operations must never target the public bundle from Debug").
+    //
+    // 2.11.2 fixed that by threading an explicit name through from the app. It left `= "YahooKeyKey2"`
+    // here, and matching defaults on `defaultFileURL(directory:)` and `init(fileURL:)` below, so the
+    // chain still bottomed out on the RELEASE directory: a bare `UserFrequency()` from any build
+    // reopened the installed IME's learning data, and the safe value was one omitted argument away.
+    // The defaults are gone so the compiler asks the question instead. ice-2 keeps its equivalent
+    // default and makes it fail TOWARD the Debug folder (`SettingsBackup.defaultFolder`), which it
+    // can do because it may read `Bundle.main.bundleIdentifier`; the right answer here is different
+    // because KeyKeyEngine is a pure engine package with no app dependency — not DragonKit, so no
+    // `isDebugBuild()`, and teaching it the IME's bundle id would invert that layering. A required
+    // argument needs no runtime knowledge at all and cannot be got wrong at runtime.
+    public static func supportDirectory(named name: String) -> URL {
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent("Library/Application Support")
         return base.appendingPathComponent(name)
     }
 
-    // Default on-disk location: ~/Library/Application Support/YahooKeyKey2/user-frequency.json
-    public static func defaultFileURL(directory: URL = UserFrequency.supportDirectory()) -> URL {
+    // On-disk location within a given directory: <directory>/user-frequency.json. `directory` is
+    // required for the reason on `supportDirectory(named:)` above — it used to default to the
+    // release directory, which is what let the whole chain bottom out there.
+    public static func defaultFileURL(directory: URL) -> URL {
         directory.appendingPathComponent("user-frequency.json")
     }
 
@@ -58,7 +70,9 @@ public final class UserFrequency: @unchecked Sendable {
     private var dirty = false           // a save is pending/coalescing
     private var saveScheduled = false   // a debounced save is already queued
 
-    public init(fileURL: URL = UserFrequency.defaultFileURL()) {
+    // `fileURL` is required: see `supportDirectory(named:)`. A defaulted one meant `UserFrequency()`
+    // opened the installed release IME's counts from whatever build called it.
+    public init(fileURL: URL) {
         self.fileURL = fileURL
         self.counts = UserFrequency.load(from: fileURL)
     }
