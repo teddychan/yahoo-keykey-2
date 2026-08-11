@@ -60,7 +60,24 @@ private struct GeneralPaneView: View {
             }
 
             DragonSection(LocalizedStringKey(L("keykey.general.language"))) {
-                LanguagePicker()
+                // Exactly the languages KeyKey has translated ITSELF into: App/en.lproj and
+                // App/zh-Hant.lproj. The parameter defaults to DragonLanguage.selectable — all
+                // seven locales the kit ships — and taking that default is what shipped through
+                // 2.11.4: Settings offered Español, Français, 日本語, 한국어 and 简体中文, and
+                // choosing one translated the kit's four panes while every KeyKey string fell back
+                // to English. ice-2 hit the same default first and hand-rolled its own picker,
+                // which CONFORMANCE forbids; DragonKit 3.4.0 added this argument instead, and this
+                // release is the pin bump that makes it available.
+                //
+                // Widen this only together with a new .lproj — ConfigContentTests'
+                // testLanguagePickerOffersExactlyTheShippedLocalizations compares the two and
+                // fails in either direction.
+                //
+                // No onChange: it exists for apps whose own strings cannot switch live (ice-2
+                // mirrors the choice into AppleLanguages and relaunches). Every KeyKey string is
+                // read through L(), which dragonLocalized() re-resolves in place, so there is
+                // nothing to relaunch for.
+                LanguagePicker(languages: [.en, .zhHant])
             }
         }
     }
