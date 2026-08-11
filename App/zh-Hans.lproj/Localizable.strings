@@ -29,8 +29,8 @@
 "keykey.general.language" = "语言";
 
 /* What's New pane (2.12.0) */
-"keykey.whatsNew.summary" = "Yahoo! KeyKey 2 现已翻译成「语言」菜单所列出的全部七种语言。打字的部分完全没有改变。";
-"keykey.whatsNew.allLanguages" = "除了 English 与繁體中文，Yahoo! KeyKey 2 现在也会说 Español、Français、日本語、한국어 与简体中文。2.11.5 曾把这五种语言从「语言」菜单中移除，因为那是 Dragon App 共用代码的语言，而不是 Yahoo! KeyKey 2 的——选了其中任何一个，只有共用的设置面板会被翻译，其余文字全都退回英文。现在它们回来了，而且这一次，菜单背后的每一个字也都翻译好了。";
+"keykey.whatsNew.summary" = "一处小修复：Yahoo! KeyKey 2 现在带有版权声明，与「关于」中显示的一致。打字的部分完全没有改变。";
+"keykey.whatsNew.copyrightNotice" = "访达的「显示简介」现在会显示 Yahoo! KeyKey 2 的版权声明。此前应用完全没有版权声明，该行一直是空的。";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "从输入源中停用仓颉与速成";

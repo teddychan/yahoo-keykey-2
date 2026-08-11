@@ -2,6 +2,31 @@
 
 A plain-language list of changes in each version, newest first.
 
+## 2.12.1
+
+- **Fixed: Yahoo! KeyKey 2 now carries a copyright notice.** `App/Info.plist` had no
+  `NSHumanReadableCopyright`, so Finder's Get Info panel showed no copyright line for the app at
+  all. It now reads `© 2026 Teddy Chan` — byte-for-byte the string the About pane's copyright row
+  renders. Nothing about typing changes.
+
+  Found by auditing the field across all five Dragon apps, where it sat in four different states:
+  a tagline in ClipMenu 2 (`ClipMenu modern rewrite.`), two holders in Ice 2, and absent here, in
+  Spectacle 2 and in Dragon Sample App. Yahoo! KeyKey 2 is the app whose *About* copyright slot
+  once held `倉頡／簡易 輸入法` — the defect DragonKit still cites in
+  `DragonAbout.copyright(years:holder:)` — so the bundle's own notice being missing entirely was
+  the same failure one field over.
+
+  The key is an optional Apple one that no licence names, so it is presentation rather than a
+  legal notice, and the rule for presentation is the one About already follows: a single holder,
+  the app's own. `LICENSE` is where the MIT grant lives and is untouched apart from the name form
+  below.
+
+- **Under the hood: `LICENSE` names the holder "Teddy Chan".** It read
+  `Copyright (c) 2026 Lung Sang Chan (teddychan)`, the only one of the five apps to use that form —
+  the other four say `Teddy Chan`, and so does every About pane. Same person, same grant, same
+  year; only the spelling is unified. Not in the release notes, because there is nothing a user
+  can observe from inside the app.
+
 ## 2.12.0
 
 - **Added: Yahoo! KeyKey 2 now speaks all seven languages the Language menu offers.** Español,

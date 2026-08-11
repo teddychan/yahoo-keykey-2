@@ -29,8 +29,8 @@
 "keykey.general.language" = "Langue";
 
 /* What's New pane (2.12.0) */
-"keykey.whatsNew.summary" = "Yahoo! KeyKey 2 est désormais traduit dans les sept langues que propose le menu Langue. Rien ne change à la saisie.";
-"keykey.whatsNew.allLanguages" = "Yahoo! KeyKey 2 parle maintenant Español, Français, 日本語, 한국어 et 简体中文, en plus de English et 繁體中文. La version 2.11.5 avait retiré ces cinq langues du menu Langue parce qu’il s’agissait des langues du code partagé de Dragon App et non de celles de Yahoo! KeyKey 2 : en choisir une traduisait les panneaux partagés des Réglages et laissait tout le reste en anglais. Elles sont de retour, et cette fois chaque mot qui se trouve derrière elles est traduit aussi.";
+"keykey.whatsNew.summary" = "Une petite correction : Yahoo! KeyKey 2 comporte désormais une mention de copyright, la même que celle affichée dans À propos. Rien ne change à la saisie.";
+"keykey.whatsNew.copyrightNotice" = "La fenêtre « Lire les informations » du Finder affiche désormais la mention de copyright de Yahoo! KeyKey 2. L’app n’en comportait aucune, la ligne restait donc vide.";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "Désactiver 倉頡 et 速成 dans les sources de saisie";
