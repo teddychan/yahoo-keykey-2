@@ -6,8 +6,12 @@ App Store distribution is **not** used for this version.
 
 The tagged release is published by CI: [`.github/workflows/release.yml`](../.github/workflows/release.yml)
 is a thin caller that delegates to the shared pipeline
-`teddychan/dragon-release-ci/.github/workflows/release-macos.yml@v5`, which builds,
-Developer ID-signs, notarizes, staples, and zips the app.
+`teddychan/dragon-release-ci/.github/workflows/release-macos.yml@v6`, which builds,
+Developer ID-signs, notarizes, staples, and zips the app. The `@v6` pin is not
+interchangeable with the older `@v5`: v6 gates the trigger on an exact `vX.Y.Z` tag (v5's
+version parse turned a `workflow_dispatch` on a branch into version `main`) and requires
+the `whats_new_path` input, so a release whose What's New text never changed is rejected —
+see the caller's comments for why that input names the `.strings` files too.
 
 **A release ships exactly one file: the `.zip`. No `.pkg`, no `.dmg`.** That `.zip`
 (`YahooKeyKey2-<version>.zip`) is the user download, the Sparkle update payload, and
@@ -122,30 +126,52 @@ The recommended path is CI: bump the version (step 1 below), commit, then push a
 `v<version>` tag to `teddychan/yahoo-keykey-2`. `.github/workflows/release.yml`
 (GitHub-hosted macOS runner) builds, Developer ID-signs, notarizes, staples, zips,
 uploads the `.zip` to the GitHub release, publishes the EdDSA-signed appcast to
-`docs/yahoo-keykey-2/appcast.xml` on the website repo, and bumps the Homebrew cask.
+`docs/yahoo-keykey-2/appcast.xml` **in this repo**, mirrors that same file to the website
+repo, and bumps the Homebrew cask.
 It requires these repository secrets: `DEVELOPER_ID_CERT_P12_BASE64`,
 `DEVELOPER_ID_CERT_PASSWORD`, `NOTARY_KEY_P8_BASE64`, `NOTARY_KEY_ID`,
 `NOTARY_ISSUER_ID`, `PUBLIC_RELEASE_TOKEN`, `SPARKLE_EDDSA_PRIVATE_KEY` (the same
 set used by clipmenu-2 / ice-2).
 
-1. Bump `CFBundleShortVersionString` **and** `CFBundleVersion` in `App/Info.plist`.
-   `CFBundleVersion` must strictly increase — Sparkle compares it to decide what's
-   newer. (The CI build fails if the tag doesn't match `CFBundleShortVersionString`.)
+The appcast became app-owned across 2.11.3 and 2.11.4 — the caller passes `appcast_repo:
+teddychan/yahoo-keykey-2`, where it used to take the default of the marketing-site repo. A
+Sparkle appcast is update infrastructure, not marketing content, so it belongs in the app's
+own repository: an outage, a permission problem, or a rejected change on the marketing site
+then cannot interfere with update delivery. `appcast_mirror_repo:
+teddychan/www.dragonapp.com` keeps publishing the identical file to the old location for
+copies still at 2.11.3 or older, which read the site and only the site; the mirror is
+dropped at the next **minor** release. The three-step migration, and why the mirror cannot
+go sooner, is spelled out in the comments in `.github/workflows/release.yml`.
+
+1. Bump **only** `CFBundleShortVersionString` in `App/Info.plist`. (The CI build fails if
+   the tag doesn't match it.) Leave `CFBundleVersion` alone — the committed value is an
+   inert placeholder, `23` since v2.3.0. The real build number is stamped into the bundle
+   at build time from `git rev-list --count HEAD` (`tools/build-app.sh` locally, the same
+   number in CI), which is why 2.11.3 shipped build 190 and 2.11.4 build 192 while the
+   plist never moved. Sparkle does compare `CFBundleVersion` to decide what's newer — the
+   commit count is what keeps it increasing, so hand-bumping the placeholder changes
+   nothing, and "fixing" a number that is deliberately inert only wastes the next
+   releaser's time.
 
 ### Per release (manual fallback)
 
 If running locally instead of CI:
 
-1. Bump the versions as above.
+1. Bump the version as above.
 2. Run `tools/package-release.sh` with `DEVELOPER_ID_APP` (and `NOTARY_PROFILE`)
    set. In addition to the `.zip`, it writes **`build/appcast.xml`**
    (EdDSA-signed; enclosure URL → the GitHub release zip).
 3. Create the GitHub release at tag `v<version>` and upload the `.zip` — that single
    file is the entire release (first-time users download it; Sparkle updates from it).
    It must be named `YahooKeyKey2-<version>.zip` so the appcast URL matches.
-4. **Publish the appcast:** copy `build/appcast.xml` into the website repo at
-   `docs/yahoo-keykey-2/appcast.xml`, commit, and push. GitHub Pages serves it at
-   `https://www.dragonapp.com/yahoo-keykey-2/appcast.xml` — the `SUFeedURL` the app reads.
+4. **Publish the appcast:** copy `build/appcast.xml` over `docs/yahoo-keykey-2/appcast.xml`
+   **in this repo**, commit, and push. That is the file the app reads — `App/Info.plist`'s
+   `SUFeedURL` is
+   `https://raw.githubusercontent.com/teddychan/yahoo-keykey-2/main/docs/yahoo-keykey-2/appcast.xml`.
+   While the mirror is still in place ([above](#per-release-automated)), copy the same file
+   into the website repo at `docs/yahoo-keykey-2/appcast.xml` as well: GitHub Pages serves
+   it at `https://www.dragonapp.com/yahoo-keykey-2/appcast.xml`, which is the only feed
+   2.11.3 and older know about.
 5. Bump the Homebrew cask `Casks/yahoo-keykey-2.rb` in `teddychan/homebrew-tap`
    (version + the `.zip` sha256; the cask installs the app from the `.zip`).
 
