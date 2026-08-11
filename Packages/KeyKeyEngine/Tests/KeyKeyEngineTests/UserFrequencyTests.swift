@@ -178,17 +178,20 @@ final class UserFrequencyTests: XCTestCase {
     }
 
     func testDefaultFileURLPointsAtAppSupport() {
-        let url = UserFrequency.defaultFileURL()
+        let url = UserFrequency.defaultFileURL(directory: UserFrequency.supportDirectory(named: "YahooKeyKey2"))
         XCTAssertEqual(url.lastPathComponent, "user-frequency.json")
         XCTAssertEqual(url.deletingLastPathComponent().lastPathComponent, "YahooKeyKey2")
     }
 
     // A local debug build passes its own directory name so it can't read, train, or (via the
     // Uninstall pane) delete the installed release IME's learning data — the one piece of
-    // KeyKey state the `.debug` bundle id does not separate on its own. The release default
-    // must stay put, or every existing install silently loses its counts.
+    // KeyKey state the `.debug` bundle id does not separate on its own. The release name must
+    // keep resolving where it always did, or every existing install silently loses its counts.
+    //
+    // Both names are spelled out here because neither is a default any more: the parameters were
+    // required in 2.11.3 so no build can reach the release directory by simply omitting one.
     func testNamedSupportDirectoryIsDistinctFromTheReleaseDefault() {
-        let release = UserFrequency.supportDirectory()
+        let release = UserFrequency.supportDirectory(named: "YahooKeyKey2")
         let debug = UserFrequency.supportDirectory(named: "YahooKeyKey2 Debug")
         XCTAssertEqual(release.lastPathComponent, "YahooKeyKey2")
         XCTAssertNotEqual(release, debug)
