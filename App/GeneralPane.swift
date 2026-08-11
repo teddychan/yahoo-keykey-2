@@ -60,24 +60,29 @@ private struct GeneralPaneView: View {
             }
 
             DragonSection(LocalizedStringKey(L("keykey.general.language"))) {
-                // Exactly the languages KeyKey has translated ITSELF into: App/en.lproj and
-                // App/zh-Hant.lproj. The parameter defaults to DragonLanguage.selectable — all
-                // seven locales the kit ships — and taking that default is what shipped through
-                // 2.11.4: Settings offered Español, Français, 日本語, 한국어 and 简体中文, and
-                // choosing one translated the kit's four panes while every KeyKey string fell back
-                // to English. ice-2 hit the same default first and hand-rolled its own picker,
-                // which CONFORMANCE forbids; DragonKit 3.4.0 added this argument instead, and this
-                // release is the pin bump that makes it available.
+                // No argument, which means DragonLanguage.selectable — all seven locales the kit
+                // ships. That is correct again as of 2.12.0, because KeyKey now ships all seven
+                // itself: App/{en,es,fr,ja,ko,zh-Hans,zh-Hant}.lproj.
                 //
-                // Widen this only together with a new .lproj — ConfigContentTests'
-                // testLanguagePickerOffersExactlyTheShippedLocalizations compares the two and
-                // fails in either direction.
+                // It was NOT correct through 2.11.4, when this same bare call shipped against two
+                // .lproj — Settings offered Español, Français, 日本語, 한국어 and 简体中文, and
+                // choosing one translated the shared panes while every KeyKey string fell back to
+                // English. 2.11.5 narrowed it to `languages: [.en, .zhHant]`, which was the honest
+                // list for a two-language app; this release closes the gap the other way instead,
+                // so the narrowing is no longer needed.
+                //
+                // Bare rather than a literal seven, so the day the kit adds an eighth locale the
+                // picker offers it and the checks below fail loudly, instead of a stale list
+                // quietly hiding a language KeyKey has not translated yet. What keeps that honest:
+                // ConfigContentTests' testLanguagePickerOffersExactlyTheShippedLocalizations, and
+                // DragonKit CONFORMANCE §R13, which compares this call site against App/*.lproj
+                // for every Dragon app rather than only this one.
                 //
                 // No onChange: it exists for apps whose own strings cannot switch live (ice-2
                 // mirrors the choice into AppleLanguages and relaunches). Every KeyKey string is
                 // read through L(), which dragonLocalized() re-resolves in place, so there is
                 // nothing to relaunch for.
-                LanguagePicker(languages: [.en, .zhHant])
+                LanguagePicker()
             }
         }
     }

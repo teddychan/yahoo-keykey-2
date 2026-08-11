@@ -1,0 +1,38 @@
+/* App-specific strings for Yahoo! KeyKey 2. DragonKit's own UI strings live in its own
+   bundle (7 languages) and are not duplicated here. */
+
+/* Sidebar pane title (General). Other panes use DragonKit's built-in titles. */
+"keykey.pane.general" = "通用";
+
+/* General pane */
+"keykey.general.input" = "输入";
+"keykey.general.outputSimplified" = "输出简体字";
+"keykey.general.fullWidthPunctuation" = "全角标点";
+"keykey.general.associatedPhrases" = "联想词（聯想）";
+"keykey.general.associationContinuationOnly" = "联想只显示后续字";
+"keykey.general.associationContinuationOnlyHint" = "显示「系／心／于」而非「关系」，与原版 Yahoo! KeyKey 一致。实际输入的字不变。";
+"keykey.general.associationTrigger" = "联想选字键";
+"keykey.general.associationTriggerNumber" = "数字键";
+"keykey.general.associationTriggerShift" = "Shift + 数字";
+"keykey.general.associationTriggerHint" = "选「Shift + 数字」时，单独按数字键会输入该数字，而不会选取联想词，方便在字后紧接着输入数字（例如「这周有7天」）。";
+"keykey.general.codeHint" = "反查提示";
+"keykey.general.codeHintHint" = "在候选字旁显示该字的仓颉拆码（例：仓 → 人口竹口），方便学习与核对。";
+"keykey.general.appearance" = "外观";
+"keykey.general.candidateFontSize" = "候选字大小";
+"keykey.general.inputMethod" = "输入方式";
+"keykey.general.cangjieVersion" = "仓颉版本";
+"keykey.general.cangjieV5" = "五代仓颉";
+"keykey.general.cangjieV3" = "三代仓颉（兼容 Yahoo KeyKey）";
+"keykey.general.cangjieVersionHint" = "「三代仓颉」使用 Yahoo! KeyKey 原版的拆码与候选字顺序（同时应用于仓颉与速成），立即生效。";
+"keykey.general.strokeConfirmation" = "以空格键确认字根";
+"keykey.general.strokeConfirmationHint" = "在速成、以及使用通配符（*）的仓颉中，字根还没输完就会出现候选字，此时空格键会直接翻到下一页，而不是确认你输入的字根。开启后，第一次按空格键只确认字根并停留在第 1 页；再按一次空格键才翻页，或直接按 1–9 选字。普通仓颉不受影响。";
+"keykey.general.language" = "语言";
+
+/* What's New pane (2.12.0) */
+"keykey.whatsNew.summary" = "Yahoo! KeyKey 2 现已翻译成「语言」菜单所列出的全部七种语言。打字的部分完全没有改变。";
+"keykey.whatsNew.allLanguages" = "除了 English 与繁體中文，Yahoo! KeyKey 2 现在也会说 Español、Français、日本語、한국어 与简体中文。2.11.5 曾把这五种语言从「语言」菜单中移除，因为那是 Dragon App 共用代码的语言，而不是 Yahoo! KeyKey 2 的——选了其中任何一个，只有共用的设置面板会被翻译，其余文字全都退回英文。现在它们回来了，而且这一次，菜单背后的每一个字也都翻译好了。";
+
+/* Uninstall pane checklist */
+"keykey.uninstall.item.inputSources" = "从输入源中停用仓颉与速成";
+"keykey.uninstall.item.learningAndSettings" = "删除用户学习数据与偏好设置";
+"keykey.uninstall.item.trash" = "将 Yahoo! KeyKey 2 移到废纸篓";

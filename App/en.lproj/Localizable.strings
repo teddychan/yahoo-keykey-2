@@ -28,9 +28,9 @@
 "keykey.general.strokeConfirmationHint" = "In 速成, and in 倉頡 with the * wildcard, candidates appear before the code is finished, so Space flips to the next page instead of confirming what you typed. With this on, the first Space only confirms the code and keeps page 1 — press Space again to page, or 1–9 to pick. Plain 倉頡 is unaffected.";
 "keykey.general.language" = "Language";
 
-/* What's New pane (2.11.6) */
-"keykey.whatsNew.summary" = "Housekeeping only. Yahoo! KeyKey 2 is built with a new version of the code it shares with the other Dragon apps. Nothing about typing changes, and nothing in the app moves.";
-"keykey.whatsNew.sharedCode" = "Yahoo! KeyKey 2 is now built with DragonKit 4.0.0, the shared code behind the Settings window's About, What's New, Backup & Restore, Updates and Uninstall panes. This version fixes the About pane's rows in place, so none of the Dragon apps can quietly grow, drop or rename one. Yahoo! KeyKey 2's About pane already looked exactly the way the shared code now requires — it was the app the others were brought in line with — so the only thing that changes on screen is the DragonKit version the About pane reports.";
+/* What's New pane (2.12.0) */
+"keykey.whatsNew.summary" = "Yahoo! KeyKey 2 is now translated into all seven languages the Language menu offers. Nothing about typing changes.";
+"keykey.whatsNew.allLanguages" = "Yahoo! KeyKey 2 now speaks Español, Français, 日本語, 한국어 and 简体中文, alongside English and 繁體中文. Version 2.11.5 took those five out of the Language menu because they were the shared Dragon App code's languages and not Yahoo! KeyKey 2's — choosing one translated the shared Settings panes and left every other word in English. They are back, and this time every word behind them is translated too.";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "Disable Cangjie and Simplex from Input Sources";

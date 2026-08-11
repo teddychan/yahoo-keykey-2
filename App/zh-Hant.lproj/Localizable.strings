@@ -28,9 +28,9 @@
 "keykey.general.strokeConfirmationHint" = "在速成、以及使用萬用字元（*）的倉頡中，字根還沒打完就會出現候選字，此時空白鍵會直接翻到下一頁，而不是確認你打的字根。開啟後，第一次按空白鍵只會確認字根並停留在第 1 頁；再按一次空白鍵才翻頁，或直接按 1–9 選字。一般倉頡不受影響。";
 "keykey.general.language" = "語言";
 
-/* What's New pane (2.11.6) */
-"keykey.whatsNew.summary" = "這一版只是例行維護。Yahoo! KeyKey 2 改用新版的共用程式碼建構，那是各個 Dragon App 共同使用的部分。打字的部分完全沒有改變，介面也沒有任何移動。";
-"keykey.whatsNew.sharedCode" = "Yahoo! KeyKey 2 現在改用 DragonKit 4.0.0 建構，那是設定視窗中「關於」、「新功能」、「備份與還原」、「更新」與「解除安裝」各面板共用的程式碼。這一版把「關於」面板的各列固定下來，讓任何一個 Dragon App 都無法再私自增加、刪除或改名其中一列。Yahoo! KeyKey 2 的「關於」面板原本就與共用程式碼現在要求的樣子完全一致——其他幾個 App 正是以它為準對齊的——所以畫面上唯一的變化，就是「關於」面板顯示的 DragonKit 版本號。";
+/* What's New pane (2.12.0) */
+"keykey.whatsNew.summary" = "Yahoo! KeyKey 2 現在已翻譯成「語言」選單所列出的全部七種語言。打字的部分完全沒有改變。";
+"keykey.whatsNew.allLanguages" = "除了 English 與繁體中文，Yahoo! KeyKey 2 現在也會說 Español、Français、日本語、한국어 與简体中文。2.11.5 把這五種語言從「語言」選單移除，因為那是 Dragon App 共用程式碼的語言，而不是 Yahoo! KeyKey 2 的——選了其中任何一個，只有共用的設定面板會被翻譯，其餘文字全都退回英文。現在它們回來了，而且這一次，選單背後的每一個字也都翻譯好了。";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "從輸入來源中停用倉頡與速成";

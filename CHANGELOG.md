@@ -2,6 +2,25 @@
 
 A plain-language list of changes in each version, newest first.
 
+## 2.12.0
+
+- **Added: Yahoo! KeyKey 2 now speaks all seven languages the Language menu offers.** Español,
+  Français, 日本語, 한국어 and 简体中文 join English and 繁體中文, and every word of Yahoo! KeyKey 2's
+  own interface is translated into each — the General pane and its explanations, the uninstall
+  checklist, and these release notes. 2.11.5 took those five languages out of the menu because they
+  were the shared Dragon App code's languages and not Yahoo! KeyKey 2's, so choosing one translated
+  the shared Settings panes and left everything else in English. This release closes that gap from
+  the other side, so the menu offers them again and means it. In System Settings ▸ Keyboard ▸ Input
+  Sources, a Simplified Chinese system now sees 仓颉 and 速成 written in simplified characters.
+- **Under the hood: the update feed no longer publishes a copy to the website.** Yahoo! KeyKey 2 has
+  read its updates from this repository since 2.11.4, and the website copy existed only so that
+  copies still on 2.11.3 or older — which read the website and nothing else — were not cut off
+  while everyone moved across. Since Sparkle checks daily, anyone who has launched the app even
+  once since 2.11.4 moved long ago. Nothing changes for them. A copy that has not been launched in
+  all that time will report no updates available rather than an error; reinstalling from the
+  releases page brings it back. The website's old file is left in place, stale, rather than
+  deleted, because a stale file is a quiet no-op where a missing one would be a visible failure.
+
 ## 2.11.6
 
 - **Under the hood: updated to DragonKit 4.0.0** (from 3.4.0), the shared code behind the Settings

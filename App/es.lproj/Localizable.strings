@@ -1,0 +1,38 @@
+/* App-specific strings for Yahoo! KeyKey 2. DragonKit's own UI strings live in its own
+   bundle (7 languages) and are not duplicated here. */
+
+/* Sidebar pane title (General). Other panes use DragonKit's built-in titles. */
+"keykey.pane.general" = "General";
+
+/* General pane */
+"keykey.general.input" = "Entrada";
+"keykey.general.outputSimplified" = "Escribir en chino simplificado";
+"keykey.general.fullWidthPunctuation" = "Puntuación de ancho completo";
+"keykey.general.associatedPhrases" = "Frases asociadas (聯想)";
+"keykey.general.associationContinuationOnly" = "Mostrar solo la continuación en las frases asociadas";
+"keykey.general.associationContinuationOnlyHint" = "Muestra 係／心／於 en lugar de 關係, como el Yahoo! KeyKey original. Lo que se confirma no cambia.";
+"keykey.general.associationTrigger" = "Tecla de selección de frases asociadas";
+"keykey.general.associationTriggerNumber" = "Tecla numérica";
+"keykey.general.associationTriggerShift" = "Mayús + número";
+"keykey.general.associationTriggerHint" = "Con «Mayús + número», una tecla numérica sola escribe el dígito en lugar de elegir una frase asociada, lo que resulta práctico para escribir números justo después de un carácter (por ejemplo, 這周有7天).";
+"keykey.general.codeHint" = "Mostrar el código Cangjie";
+"keykey.general.codeHintHint" = "Muestra el código Cangjie de cada carácter junto al candidato (por ejemplo, 倉 → 人口竹口) para ayudarte a aprender y comprobar su descomposición.";
+"keykey.general.appearance" = "Apariencia";
+"keykey.general.candidateFontSize" = "Tamaño del texto de los candidatos";
+"keykey.general.inputMethod" = "Método de entrada";
+"keykey.general.cangjieVersion" = "Versión de Cangjie";
+"keykey.general.cangjieV5" = "Cangjie de 5.ª generación";
+"keykey.general.cangjieV3" = "Cangjie de 3.ª generación (compatible con Yahoo KeyKey)";
+"keykey.general.cangjieVersionHint" = "El «Cangjie de 3.ª generación» usa la tabla de códigos y el orden de candidatos del Yahoo! KeyKey original (se aplica tanto a 倉頡 como a 速成) y surte efecto de inmediato.";
+"keykey.general.strokeConfirmation" = "Pulsar Espacio para confirmar el código";
+"keykey.general.strokeConfirmationHint" = "En 速成, y en 倉頡 con el comodín *, los candidatos aparecen antes de que el código esté terminado, así que Espacio pasa a la página siguiente en lugar de confirmar lo que has escrito. Con esta opción activada, el primer Espacio solo confirma el código y se queda en la página 1: vuelve a pulsar Espacio para cambiar de página, o 1–9 para elegir. El 倉頡 normal no se ve afectado.";
+"keykey.general.language" = "Idioma";
+
+/* What's New pane (2.12.0) */
+"keykey.whatsNew.summary" = "Yahoo! KeyKey 2 ya está traducido a los siete idiomas que ofrece el menú Idioma. Nada cambia al escribir.";
+"keykey.whatsNew.allLanguages" = "Yahoo! KeyKey 2 ahora habla Español, Français, 日本語, 한국어 y 简体中文, además de English y 繁體中文. La versión 2.11.5 retiró esos cinco del menú Idioma porque eran los idiomas del código compartido de Dragon App y no los de Yahoo! KeyKey 2: al elegir uno se traducían los paneles compartidos de Ajustes y todo lo demás se quedaba en inglés. Han vuelto, y esta vez también está traducida cada palabra que hay detrás de ellos.";
+
+/* Uninstall pane checklist */
+"keykey.uninstall.item.inputSources" = "Desactivar 倉頡 y 速成 en Fuentes de entrada";
+"keykey.uninstall.item.learningAndSettings" = "Eliminar los datos de aprendizaje y las preferencias";
+"keykey.uninstall.item.trash" = "Mover Yahoo! KeyKey 2 a la Papelera";

@@ -1,0 +1,38 @@
+/* App-specific strings for Yahoo! KeyKey 2. DragonKit's own UI strings live in its own
+   bundle (7 languages) and are not duplicated here. */
+
+/* Sidebar pane title (General). Other panes use DragonKit's built-in titles. */
+"keykey.pane.general" = "일반";
+
+/* General pane */
+"keykey.general.input" = "입력";
+"keykey.general.outputSimplified" = "간체자로 출력";
+"keykey.general.fullWidthPunctuation" = "전각 문장 부호";
+"keykey.general.associatedPhrases" = "연상 입력(聯想)";
+"keykey.general.associationContinuationOnly" = "연상 후보에 이어지는 글자만 표시";
+"keykey.general.associationContinuationOnlyHint" = "「關係」 대신 「係／心／於」를 표시합니다(원래 Yahoo! KeyKey와 같음). 실제로 입력되는 글자는 바뀌지 않습니다.";
+"keykey.general.associationTrigger" = "연상 후보 선택 키";
+"keykey.general.associationTriggerNumber" = "숫자 키";
+"keykey.general.associationTriggerShift" = "Shift + 숫자";
+"keykey.general.associationTriggerHint" = "「Shift + 숫자」를 선택하면 숫자 키만 눌렀을 때 연상 후보를 고르지 않고 그 숫자를 입력합니다. 글자 바로 뒤에 숫자를 입력할 때(예: 「這周有7天」) 편리합니다.";
+"keykey.general.codeHint" = "창힐 코드 힌트 표시";
+"keykey.general.codeHintHint" = "후보 옆에 그 글자의 창힐 코드(예: 倉 → 人口竹口)를 표시해 분해를 익히고 확인하는 데 도움이 됩니다.";
+"keykey.general.appearance" = "모양";
+"keykey.general.candidateFontSize" = "후보 글자 크기";
+"keykey.general.inputMethod" = "입력 방식";
+"keykey.general.cangjieVersion" = "창힐 버전";
+"keykey.general.cangjieV5" = "5세대 창힐";
+"keykey.general.cangjieV3" = "3세대 창힐(Yahoo KeyKey 호환)";
+"keykey.general.cangjieVersionHint" = "「3세대 창힐」은 원래 Yahoo! KeyKey의 코드표와 후보 순서를 사용합니다(창힐과 속성 모두에 적용). 즉시 적용됩니다.";
+"keykey.general.strokeConfirmation" = "스페이스로 코드 확정";
+"keykey.general.strokeConfirmationHint" = "속성, 그리고 * 와일드카드를 사용하는 창힐에서는 코드를 다 입력하기 전에 후보가 나타나므로, 스페이스가 입력한 코드를 확정하지 않고 다음 페이지로 넘어갑니다. 이 옵션을 켜면 첫 번째 스페이스는 코드만 확정하고 1페이지에 머무릅니다. 페이지를 넘기려면 스페이스를 한 번 더 누르거나 1~9로 바로 선택하세요. 일반 창힐은 영향을 받지 않습니다.";
+"keykey.general.language" = "언어";
+
+/* What's New pane (2.12.0) */
+"keykey.whatsNew.summary" = "Yahoo! KeyKey 2가 「언어」 메뉴에 있는 7개 언어 모두로 번역되었습니다. 입력 동작은 전혀 바뀌지 않습니다.";
+"keykey.whatsNew.allLanguages" = "Yahoo! KeyKey 2는 English와 繁體中文에 더해 Español, Français, 日本語, 한국어, 简体中文를 말합니다. 2.11.5에서는 이 다섯 언어를 「언어」 메뉴에서 빼냈습니다. 그것은 Dragon App 공용 코드의 언어이지 Yahoo! KeyKey 2의 언어가 아니어서, 하나를 고르면 공용 설정 패널만 번역되고 나머지 모든 단어는 영어로 남았기 때문입니다. 이제 그 언어들이 돌아왔고, 이번에는 메뉴 뒤에 있는 모든 단어까지 번역되어 있습니다.";
+
+/* Uninstall pane checklist */
+"keykey.uninstall.item.inputSources" = "입력 소스에서 창힐과 속성 사용 중지";
+"keykey.uninstall.item.learningAndSettings" = "사용자 학습 데이터와 환경설정 삭제";
+"keykey.uninstall.item.trash" = "Yahoo! KeyKey 2를 휴지통으로 이동";

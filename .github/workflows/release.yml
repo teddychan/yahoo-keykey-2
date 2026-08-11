@@ -42,15 +42,26 @@ jobs:
       #
       # These are the real files, not the symlinks under Packages/KeyKeyApp/Sources/KeyKeyApp/ —
       # the gate stats each path and diffs it, so it must name what git tracks.
+      #
+      # ALL SEVEN locales, not just en and zh-Hant. 2.12.0 added the other five, and a list naming
+      # only two would have let a release rewrite the notes in those two and ship the previous
+      # version's text to Spanish, French, Japanese, Korean and Simplified Chinese readers — the
+      # exact staleness this gate exists to catch, narrowed to the languages nobody on the release
+      # would be reading. Add a line here with every new .lproj.
       whats_new_path: >-
         App/WhatsNewConfig.swift
         App/en.lproj/Localizable.strings
+        App/es.lproj/Localizable.strings
+        App/fr.lproj/Localizable.strings
+        App/ja.lproj/Localizable.strings
+        App/ko.lproj/Localizable.strings
+        App/zh-Hans.lproj/Localizable.strings
         App/zh-Hant.lproj/Localizable.strings
       build_kind: script
       # Yahoo KeyKey 2 now targets the macOS 26 SDK, so build on the macos-26 image.
       swiftpm_runner: macos-26
       app_slug: yahoo-keykey-2
-      # Moving the appcast off the marketing site. Steps 1 and 2 are done; the mirror stays.
+      # Moving the appcast off the marketing site. DONE as of 2.12.0 — all three steps.
       #
       # MAC-APP-RELEASE-LIFECYCLE.md: "Sparkle appcasts are update infrastructure, not marketing
       # content. Each app should host its production appcast in its own repository so an outage,
@@ -71,31 +82,36 @@ jobs:
       #                    and was current. Both copies verified byte-identical after.
       #   step 2  v2.11.4  SUFeedURL moved to
       #                    https://raw.githubusercontent.com/teddychan/yahoo-keykey-2/main/docs/yahoo-keykey-2/appcast.xml
-      #   step 3  v2.12.0  drop appcast_mirror_repo. The NEXT MINOR RELEASE retires the mirror.
+      #   step 3  v2.12.0  appcast_mirror_repo dropped — THIS release. The trigger was "the next
+      #                    minor release retires the mirror", chosen on 2026-08-11, and 2.12.0 is
+      #                    it. Nothing publishes to teddychan/www.dragonapp.com from here now.
       #
-      # That trigger was chosen on 2026-08-11, replacing "when no supported version still reads
-      # the site" — which read like a rule but named no measurable condition, so it would have
-      # stayed "later" indefinitely. The site is GitHub Pages and exposes no per-path traffic, so
-      # there is no way to observe when the last reader stops reading. A minor release is instead a
-      # real, deliberate event that already opens a PR here, so the removal rides one rather than
-      # needing its own; and Sparkle checks daily by default, so anyone who launches Yahoo! KeyKey 2
-      # even once between 2.11.4 and that release has already moved to the app-owned feed.
+      # That trigger replaced "when no supported version still reads the site" — which read like a
+      # rule but named no measurable condition, so it would have stayed "later" indefinitely. The
+      # site is GitHub Pages and exposes no per-path traffic, so there is no way to observe when the
+      # last reader stops reading. A minor release is instead a real, deliberate event that already
+      # opens a PR here, so the removal rode one rather than needing its own; and Sparkle checks
+      # daily by default, so anyone who launched Yahoo! KeyKey 2 even once between 2.11.4 and this
+      # release has already moved to the app-owned feed.
       #
-      # Do not drop the mirror before then. Every copy still at 2.11.3 or older reads the site and
-      # only the site; the mirror is the whole reason flipping SUFeedURL did not strand them.
-      # The accepted cost is the other direction: shipping no minor for a long time keeps the
-      # mirror that long. That is the safe way to be wrong — an unnecessary mirror costs one extra
-      # publish per release, while a premature drop silently strands installs that cannot tell the
-      # difference between "no update" and "feed gone".
+      # The residual risk, stated plainly rather than left implied: a copy still at 2.11.3 or older
+      # reads the site and only the site, and the site's copy stops being updated after this
+      # release. Such a copy has not launched since 2.11.4 shipped, so it was already choosing not
+      # to update; it sees "no update available" rather than an error, and reinstalling from the
+      # GitHub release recovers it. The site's existing appcast.xml is deliberately NOT deleted —
+      # it goes stale, which is a silent no-op for those copies, where a 404 would be a visible
+      # Sparkle failure.
       #
-      # Needs dragon-release-ci >= v6.3.0. The appcast is generated once and copied to both, so
-      # the two cannot disagree — including the minimumSystemVersion/hardwareRequirements that
-      # appcast_inject_keykey_requirements adds below, which are injected before the copy.
-      # Publishing here uses the built-in GITHUB_TOKEN (contents: write is granted above); the
-      # mirror needs PUBLIC_RELEASE_TOKEN, which `secrets: inherit` already supplies — the same
-      # token that publishes to the site today. A missing mirror token is a hard error.
+      # Omitting appcast_mirror_repo is not a workaround — empty is its documented default, which
+      # release-macos.yml calls "every app's steady state". Keep the dragon-release-ci >= v6.3.0
+      # floor anyway: re-adding a mirror later must not silently do nothing on an older pin.
+      #
+      # appcast_repo is THIS repository, so the appcast publish can use the built-in GITHUB_TOKEN
+      # (contents: write is granted above) — the mirror was the only cross-repo appcast destination,
+      # and cross-repo is what needed PUBLIC_RELEASE_TOKEN. That secret is still required, just not
+      # for the appcast: dragon-release-ci uses it for the Homebrew cask bump and the site-changelog
+      # dispatch, and skips both with a warning when it is unset. So keep inheriting it.
       appcast_repo: teddychan/yahoo-keykey-2
-      appcast_mirror_repo: teddychan/www.dragonapp.com
       release_title_prefix: Yahoo KeyKey 2
       bot_name: KeyKey Release Bot
       assert_tag_matches_plist: true

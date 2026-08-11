@@ -91,29 +91,31 @@ final class ConfigContentTests: XCTestCase {
         XCTAssertEqual(content.date, "2026-08-11")
     }
 
-    // 2.11.6 is a lone `.changed`: the DragonKit pin moves to 4.0.0, which makes the About pane's
-    // rows the initializer's own signature rather than a convention five apps followed by hand.
-    // No `.fixed`, deliberately — this app's About pane was the correct one, so the migration
-    // changed no behaviour and claiming a fix would invent a defect KeyKey never had. 2.11.5 was
-    // [.fixed, .changed] for a real bug the bump exposed; 2.11.2 was [.improved, .fixed].
+    // 2.12.0 is a single `.added`: the five localizations KeyKey did not have. It closes 2.11.5
+    // from the other side — that release narrowed the Language menu to the two languages KeyKey
+    // actually had, and this one translates the app so the menu can open back up.
+    //
+    // Only one entry, and deliberately no `.changed`. The DragonKit pin does not move — 2.11.6
+    // already took it to 4.0.0 — and the appcast mirror this release retires is invisible, since
+    // installed copies have read the app-owned feed since 2.11.4. 2.11.5 and 2.11.6 each carried a
+    // pin entry because the bump was the substance of those releases; repeating it every time is
+    // the padding those entries avoided. 2.11.2 pinned [.improved, .fixed] for a different pair.
     //
     // Entry KEYS are pinned, not just kinds and counts, because kinds and counts had stopped
     // catching anything: 2.11.3, 2.11.4 and the 2.11.5 draft were all [.changed] with one entry —
     // three in a row — so a release that forgot to touch the notes would have passed unchanged
-    // while shipping its predecessor's text. That is live again here, 2.11.6 being a single
-    // `.changed` reusing the sharedCode key, and the keys alone would not have caught it either:
-    // what makes this assertion bite is that keykey.whatsNew.languagePicker is gone from the list.
-    // Compared against the same L() keys WhatsNewConfig builds the entries from, so this holds in
-    // whatever language the test bundle resolves, exactly as the DragonAppMenu test below compares
-    // titles against the kit's keys. What the text SAYS is the release gate's job — it diffs both
-    // .strings files — so between them a stale pane cannot ship.
+    // while shipping its predecessor's text. Compared against the same L() keys WhatsNewConfig
+    // builds the entries from, so this holds in whatever language the test bundle resolves,
+    // exactly as the DragonAppMenu test below compares titles against the kit's keys. What the
+    // text SAYS is the release gate's job — it diffs every locale's .strings file — so between
+    // them a stale pane cannot ship.
     @MainActor
-    func testWhatsNewIsTheSharedCodeBumpAlone() {
+    func testWhatsNewAnnouncesTheNewLocalizations() {
         let content = WhatsNewConfig.content
-        XCTAssertEqual(content.sections.map(\.kind), [.changed])
+        XCTAssertEqual(content.sections.map(\.kind), [.added])
         XCTAssertEqual(content.sections.map(\.entries.count), [1])
         XCTAssertEqual(content.sections.flatMap(\.entries), [
-            L("keykey.whatsNew.sharedCode"),
+            L("keykey.whatsNew.allLanguages"),
         ])
     }
 
@@ -133,8 +135,16 @@ final class ConfigContentTests: XCTestCase {
     // those from disk is how the sibling engine suites reach Resources/, and comparing source text
     // against the repo is what Scripts/dragon-conformance.py does with these same files.
     //
-    // Fails in every direction that matters: a new App/ja.lproj without widening the picker,
-    // widening the picker without shipping the .lproj, and reverting to a bare LanguagePicker().
+    // A bare call is not itself the bug, and asserting that an explicit `languages:` exists was
+    // the wrong shape of test: as of 2.12.0 KeyKey ships all seven .lproj, so the kit's default IS
+    // the correct list and App/GeneralPane.swift is bare again. What matters is only whether the
+    // two sets agree, so this resolves a bare call to DragonLanguage.selectable and compares that,
+    // exactly as DragonKit CONFORMANCE §R13 now does for all five Dragon apps.
+    //
+    // Fails in every direction that matters: dropping a locale without narrowing the picker,
+    // narrowing the picker while the .lproj is still shipped, a hand-written list that disagrees
+    // with disk, and deleting the picker altogether. The one thing it can no longer fail on is the
+    // shape of the call — which is right, because both shapes are correct for some app.
     @MainActor
     func testLanguagePickerOffersExactlyTheShippedLocalizations() throws {
         var dir = URL(fileURLWithPath: #filePath)
@@ -154,31 +164,75 @@ final class ConfigContentTests: XCTestCase {
             .filter { !$0.trimmingCharacters(in: .whitespaces).hasPrefix("//") }
             .joined(separator: "\n")
 
-        guard let call = code.range(of: "LanguagePicker(languages:"),
-              let open = code.range(of: "[", range: call.upperBound..<code.endIndex),
-              let close = code.range(of: "]", range: open.upperBound..<code.endIndex) else {
-            return XCTFail("""
-                App/GeneralPane.swift passes no explicit `languages:` to LanguagePicker, so it takes \
-                the kit's default of DragonLanguage.selectable — all seven locales DragonKit ships, \
-                against the \(shippedLocalizations(in: appDir).count) KeyKey is translated into.
-                """)
+        // Deleting the picker would otherwise leave nothing to compare, and a comparison with no
+        // subject passes.
+        guard code.range(of: "LanguagePicker(") != nil else {
+            return XCTFail("App/GeneralPane.swift no longer constructs a LanguagePicker")
         }
 
-        let tokens = code[open.upperBound..<close.lowerBound]
-            .split(separator: ",")
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines).trimmingCharacters(in: CharacterSet(charactersIn: ".")) }
-            .filter { !$0.isEmpty }
-        // Case names in source ("zhHant") to locale codes ("zh-Hant"), which is what an .lproj is
-        // named. Asserting the count survives the mapping stops an unrecognized token from being
-        // dropped and letting both sides agree by being equally short.
-        let offered = Set(tokens.compactMap { token in
-            DragonLanguage.allCases.first { String(describing: $0) == token }?.rawValue
-        })
-        XCTAssertEqual(offered.count, tokens.count,
-                       "a language in the picker's list matches no DragonLanguage case: \(tokens)")
+        let offered: Set<String>
+        if let call = code.range(of: "LanguagePicker(languages:"),
+           let open = code.range(of: "[", range: call.upperBound..<code.endIndex),
+           let close = code.range(of: "]", range: open.upperBound..<code.endIndex) {
+            let tokens = code[open.upperBound..<close.lowerBound]
+                .split(separator: ",")
+                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines).trimmingCharacters(in: CharacterSet(charactersIn: ".")) }
+                .filter { !$0.isEmpty }
+            // Case names in source ("zhHant") to locale codes ("zh-Hant"), which is what an .lproj
+            // is named. Asserting the count survives the mapping stops an unrecognized token from
+            // being dropped and letting both sides agree by being equally short.
+            offered = Set(tokens.compactMap { token in
+                DragonLanguage.allCases.first { String(describing: $0) == token }?.rawValue
+            })
+            XCTAssertEqual(offered.count, tokens.count,
+                           "a language in the picker's list matches no DragonLanguage case: \(tokens)")
+        } else {
+            // No argument means the kit's default. Read from DragonLanguage rather than written out
+            // as seven codes, so the day the kit adds an eighth this fails against App/*.lproj
+            // instead of comparing against a list that stopped describing the picker.
+            offered = Set(DragonLanguage.selectable.map(\.rawValue))
+        }
 
         XCTAssertEqual(offered, shippedLocalizations(in: appDir),
                        "the Language picker and App/*.lproj disagree")
+    }
+
+    // Every locale must define the same keys. A key present in en.lproj and missing from ko.lproj
+    // falls back to English silently — no crash, no warning, just one English row in an otherwise
+    // Korean pane — and going from two locales to seven multiplies the places that can happen.
+    // DragonKit pins its own seven the same way (LocalizationTests.allLanguagesDefineTheSameKeys);
+    // nothing pinned KeyKey's until now, which was survivable at two files and is not at seven.
+    func testEveryLocalizationDefinesTheSameKeys() throws {
+        var dir = URL(fileURLWithPath: #filePath)
+        var found: URL?
+        for _ in 0..<8 {
+            dir = dir.deletingLastPathComponent()
+            if FileManager.default.fileExists(atPath: dir.appendingPathComponent("App/GeneralPane.swift").path) {
+                found = dir.appendingPathComponent("App")
+                break
+            }
+        }
+        guard let appDir = found else { throw XCTSkip("App/ not present above this package") }
+
+        let locales = shippedLocalizations(in: appDir).sorted()
+        XCTAssertTrue(locales.contains("en"), "no en.lproj to compare the others against")
+
+        func keys(_ locale: String) throws -> Set<String> {
+            let url = appDir.appendingPathComponent("\(locale).lproj/Localizable.strings")
+            let table = try XCTUnwrap(NSDictionary(contentsOf: url) as? [String: String],
+                                      "\(locale).lproj/Localizable.strings is missing or malformed")
+            // An empty value resolves to "" and renders as a blank row, which reads as a layout bug
+            // rather than a missing translation, so it is caught here and not left to a screenshot.
+            XCTAssertEqual(table.filter { $0.value.isEmpty }.map(\.key), [],
+                           "\(locale) has empty values")
+            return Set(table.keys)
+        }
+
+        let english = try keys("en")
+        XCTAssertFalse(english.isEmpty)
+        for locale in locales where locale != "en" {
+            XCTAssertEqual(try keys(locale), english, "\(locale) key set differs from en")
+        }
     }
 
     /// The locale codes KeyKey ships its own strings in, read from the `.lproj` directories.
