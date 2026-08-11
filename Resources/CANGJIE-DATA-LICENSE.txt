@@ -77,13 +77,29 @@ Upstream data origin / attribution
 -----------------------------------
 Both tables are the "large character set" builds based on opendesktop.org.tw's
 cj.cin / simplex.cin, merged/extended by yylin and b6s, and shipped inside the
-Yahoo! KeyKey source release (Copyright (c) 2007-2010 Yahoo! Taiwan / Lithoglyph;
-project licensed New BSD).
+Yahoo! KeyKey source release. cj-ext.cin's own header records exactly that:
+"tweaked by b6s for OVIMGeneric(SQLite)", "based on opendesktop.org.tw's cj.cin
+file and merged by yylin and b6s", extended for HKSCS and then CNS11643.
 
 License note / caveat
 ---------------------
-The Yahoo! KeyKey project is released under the New BSD license (see the project's
-COPYING). Unlike the ibus cangjie5 header, the cj-ext.cin / simplex-ext.cin table
-files carry no explicit per-file license line; reuse here relies on the project's
-BSD release and the OpenVanilla-community (opendesktop.org.tw) origin of the tables.
-Only the data tables are reused, with attribution as above.
+The Yahoo! KeyKey project is released under the New BSD (BSD-3-Clause) license.
+The operative notice is the one in the repository's LICENSE:
+
+    Copyright (c) 2012, Yahoo! Inc.  All rights reserved.
+
+It is reproduced IN FULL — notice, three conditions and disclaimer — in
+docs/THIRD-PARTY-NOTICES.md and on https://www.dragonapp.com/yahoo-keykey-2/licenses/,
+because BSD-3-Clause requires binary redistributions to reproduce all three.
+
+This file previously attributed the tables to "Copyright (c) 2007-2010 Yahoo!
+Taiwan / Lithoglyph". That line is real but SCOPED, and not to these files: the
+source release's COPYING says "Refer to individual source code header for
+copyright notices", then limits its Yahoo! Taiwan line to projects under
+PreferenceApplications/ and Utilities/. DataTables/ is neither. It is kept here as
+provenance and no longer presented as these tables' copyright notice.
+
+Unlike the ibus cangjie5 header, cj-ext.cin and simplex-ext.cin carry no explicit
+per-file license line at all; reuse relies on the project's BSD release and the
+OpenVanilla-community (opendesktop.org.tw) origin of the tables. Only the data
+tables are reused — no source code from the project is used.
