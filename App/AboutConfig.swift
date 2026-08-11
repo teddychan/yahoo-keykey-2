@@ -32,8 +32,11 @@ enum AboutConfig {
             // (docs/THIRD-PARTY-NOTICES.md) and disclaims affiliation (README.md) — so claiming a
             // Yahoo copyright over this binary would contradict both. That was this app's own
             // reading until DragonKit 4.0.0 adopted it kit-wide: copyright(original:years:holder:)
-            // is gone and CONFORMANCE §R13 enforces the single holder, so this is no longer a
-            // local decision KeyKey could drift back out of. The lineage is carried by
+            // is gone and CONFORMANCE §R14 enforces the single holder, so this is no longer a
+            // local decision KeyKey could drift back out of. §R14 and not §R13 — this cited R13
+            // for one day, the number the rule was written as before dragon-kit renumbered it to
+            // free R13 for a rule about the language picker. Both are live, so "correcting" this
+            // back points at the wrong rule entirely. The lineage is carried by
             // originalWork below, and the New BSD notice for the Yahoo-derived Cangjie tables
             // lives on the licences page.
             copyright: DragonAbout.copyright(years: "2026", holder: "Teddy Chan"),
