@@ -28,9 +28,9 @@
 "keykey.general.strokeConfirmationHint" = "在速成、以及使用萬用字元（*）的倉頡中，字根還沒打完就會出現候選字，此時空白鍵會直接翻到下一頁，而不是確認你打的字根。開啟後，第一次按空白鍵只會確認字根並停留在第 1 頁；再按一次空白鍵才翻頁，或直接按 1–9 選字。一般倉頡不受影響。";
 "keykey.general.language" = "語言";
 
-/* What's New pane (2.11.3) */
-"keykey.whatsNew.summary" = "這是一次維護性更新。打字的部分完全沒有改變，你看得到的地方也都一樣——這次調整的是更新送到你手上的方式。";
-"keykey.whatsNew.updateFeed" = "Yahoo! KeyKey 2 現在會把檢查更新用的檔案同時發布到自己的位置與網站，網站若出問題，就不會再耽誤更新。你已安裝的這一份仍會讀取網站，要等之後的版本才會改過去，所以現在對你來說沒有任何改變。";
+/* What's New pane (2.11.4) */
+"keykey.whatsNew.summary" = "這是一次維護性更新。打字的部分完全沒有改變，你看得到的地方也都一樣——這次是把更新送達方式的調整收尾。";
+"keykey.whatsNew.updateFeed" = "Yahoo! KeyKey 2 現在改成到自己的位置檢查更新，不再經過網站，網站若出問題也不會再耽誤更新。更新仍會照原本的方式送達。";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "從輸入來源中停用倉頡與速成";

@@ -50,29 +50,31 @@ jobs:
       # Yahoo KeyKey 2 now targets the macOS 26 SDK, so build on the macos-26 image.
       swiftpm_runner: macos-26
       app_slug: yahoo-keykey-2
-      # Step 1 of 2 in moving the appcast off the marketing site.
+      # Moving the appcast off the marketing site. Steps 1 and 2 are done; the mirror stays.
       #
       # MAC-APP-RELEASE-LIFECYCLE.md: "Sparkle appcasts are update infrastructure, not marketing
       # content. Each app should host its production appcast in its own repository so an outage,
       # permission problem, or rejected change in the marketing-site repository cannot interfere
-      # with update delivery." This caller passed no appcast_repo at all and so took the default,
-      # teddychan/www.dragonapp.com. KeyKey is the last of the five to migrate.
+      # with update delivery." This caller used to pass no appcast_repo at all and so took the default,
+      # teddychan/www.dragonapp.com. KeyKey was the last of the five to migrate.
       #
       # The same spec says to migrate "by mirroring the old and new locations until installed
       # versions have moved to the app-owned URL", which is why this is two releases and not one.
-      # Every ALREADY-INSTALLED KeyKey reads SUFeedURL from the site, so flipping the destination
-      # alone would leave all of them silently unable to see updates. That is not hypothetical
+      # Every KeyKey installed at the time read SUFeedURL from the site, so flipping the destination
+      # alone would have left all of them silently unable to see updates. That is not hypothetical
       # here: the site is GitHub Pages, and an ice-2 mirror commit sat in a QUEUED Pages
       # deployment for minutes after the release finished while the app-owned copy was already
       # serving. A queue is survivable; a 404 is not.
       #
-      #   step 1 (here)  publish to BOTH. App/Info.plist keeps pointing at the site, which is
-      #                  still being written, so nothing changes for anyone — but the app-owned
-      #                  feed now exists and is current.
-      #   step 2 (next)  move SUFeedURL to
-      #                  https://raw.githubusercontent.com/teddychan/yahoo-keykey-2/main/docs/yahoo-keykey-2/appcast.xml
-      #                  once step 1 has actually populated it.
-      #   later          drop appcast_mirror_repo when no supported version still reads the site.
+      #   step 1  v2.11.3  published to BOTH, with App/Info.plist still pointing at the site, so
+      #                    nothing changed for anyone — but the app-owned feed came into existence
+      #                    and was current. Both copies verified byte-identical after.
+      #   step 2  v2.11.4  SUFeedURL moved to
+      #                    https://raw.githubusercontent.com/teddychan/yahoo-keykey-2/main/docs/yahoo-keykey-2/appcast.xml
+      #   later            drop appcast_mirror_repo when no supported version still reads the site.
+      #
+      # Do not drop the mirror early. Every copy still at 2.11.3 or older reads the site and only
+      # the site; the mirror is the whole reason flipping SUFeedURL did not strand them.
       #
       # Needs dragon-release-ci >= v6.3.0. The appcast is generated once and copied to both, so
       # the two cannot disagree — including the minimumSystemVersion/hardwareRequirements that
