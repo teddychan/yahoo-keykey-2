@@ -16,6 +16,21 @@ A plain-language list of changes in each version, newest first.
   removes the default so the mistake cannot be made again. Nothing moves: your counts stay
   exactly where they are.
 
+## 2.11.2
+
+- **The About panel now follows the shared Dragon App layout.** Its rows are fixed and identical
+  across the Dragon apps — Website, Support on GitHub, Original project and Open-source licenses,
+  then Created by, Based on, Built with and the licence — and each piece of bundled data is listed
+  under its own name with its licence (McBopomofo — MIT, ibus-table-chinese — freely
+  redistributable, OpenCC — Apache-2.0) instead of a description of what it is for. This reached
+  you in 2.11.1, which was published as a version-number correction and never described it.
+- **Fixed: a local test build no longer reaches into your installed copy.** When Yahoo! KeyKey 2
+  is built on a developer's Mac it runs alongside the version you use, and the two shared one file
+  of adaptive candidate ordering — so testing changed your real ranking, and running 解除安裝 in
+  the test build deleted it. A test build now keeps its own copy, and it can no longer check for
+  or install updates. None of this affects the version you type with; it is listed so the record
+  is complete.
+
 ## 2.11.1
 
 - **Nothing new — this is a version number fix.** A 2.11.0 was tagged but never released: the
