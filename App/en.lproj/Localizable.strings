@@ -28,10 +28,9 @@
 "keykey.general.strokeConfirmationHint" = "In 速成, and in 倉頡 with the * wildcard, candidates appear before the code is finished, so Space flips to the next page instead of confirming what you typed. With this on, the first Space only confirms the code and keeps page 1 — press Space again to page, or 1–9 to pick. Plain 倉頡 is unaffected.";
 "keykey.general.language" = "Language";
 
-/* What's New pane (2.11.2) */
-"keykey.whatsNew.summary" = "A maintenance release. Nothing about typing changes — this one tidies the About panel and keeps a local test build fully separate from the copy you have installed.";
-"keykey.whatsNew.aboutPane" = "The About panel now follows the shared Dragon App layout. Its rows are fixed and identical across the Dragon apps — Website, Support on GitHub, Original project and Open-source licenses, then Created by, Based on, Built with and the licence — and each piece of bundled data is listed under its own name with its licence (McBopomofo — MIT, ibus-table-chinese — freely redistributable, OpenCC — Apache-2.0) instead of a description of what it is for. This reached you in 2.11.1, which was published as a version-number correction and never described it.";
-"keykey.whatsNew.debugBuildIsolation" = "A local test build no longer reaches into your installed copy. When Yahoo! KeyKey 2 is built on a developer's Mac it runs alongside the version you use, and the two shared one file of adaptive candidate ordering — so testing changed your real ranking, and running 解除安裝 in the test build deleted it. A test build now keeps its own copy, and it can no longer check for or install updates. None of this affects the version you type with; it is listed so the record is complete.";
+/* What's New pane (2.11.3) */
+"keykey.whatsNew.summary" = "A maintenance release. Nothing about typing changes, and nothing you can see behaves differently — this one is about how updates reach you.";
+"keykey.whatsNew.updateFeed" = "Yahoo! KeyKey 2 now publishes the file it checks for updates to its own home as well as the website, so a problem with the website can no longer hold up an update. The copy you have installed keeps reading the website until a later version moves it across, so nothing changes for you now.";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "Disable Cangjie and Simplex from Input Sources";

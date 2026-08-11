@@ -28,10 +28,9 @@
 "keykey.general.strokeConfirmationHint" = "在速成、以及使用萬用字元（*）的倉頡中，字根還沒打完就會出現候選字，此時空白鍵會直接翻到下一頁，而不是確認你打的字根。開啟後，第一次按空白鍵只會確認字根並停留在第 1 頁；再按一次空白鍵才翻頁，或直接按 1–9 選字。一般倉頡不受影響。";
 "keykey.general.language" = "語言";
 
-/* What's New pane (2.11.2) */
-"keykey.whatsNew.summary" = "這是一次維護性更新。打字的部分完全沒有改變——這次整理的是「關於」面板的版面，以及讓本機測試版與你已安裝的那一份徹底分開。";
-"keykey.whatsNew.aboutPane" = "「關於」面板改用 Dragon App 共用的版面。各列的內容與順序現在固定下來，也與其他 Dragon App 一致——網站、GitHub 支援、原始專案、開放原始碼授權，接著是製作者、基於、建置工具與授權條款；每一份內建資料也改成直接列出它自己的名稱與授權（McBopomofo — MIT、ibus-table-chinese — 可自由散布、OpenCC — Apache-2.0），而不是一句用途說明。這項改動其實在 2.11.1 就已經送到你手上，但當時只以「修正版本號」發布，從未說明過。";
-"keykey.whatsNew.debugBuildIsolation" = "本機測試版不會再動到你已安裝的那一份。在開發者的 Mac 上建置 Yahoo! KeyKey 2 時，它會與你平常使用的版本同時存在，而兩者過去共用同一份選字排序的學習檔——測試會改動你真正的排序，在測試版裡執行「解除安裝」更會把它刪掉。現在測試版會使用自己的檔案，也不再能檢查或安裝更新。這些都不影響你平常打字用的那一份，列在這裡只是為了把紀錄補齊。";
+/* What's New pane (2.11.3) */
+"keykey.whatsNew.summary" = "這是一次維護性更新。打字的部分完全沒有改變，你看得到的地方也都一樣——這次調整的是更新送到你手上的方式。";
+"keykey.whatsNew.updateFeed" = "Yahoo! KeyKey 2 現在會把檢查更新用的檔案同時發布到自己的位置與網站，網站若出問題，就不會再耽誤更新。你已安裝的這一份仍會讀取網站，要等之後的版本才會改過去，所以現在對你來說沒有任何改變。";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "從輸入來源中停用倉頡與速成";

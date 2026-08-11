@@ -82,16 +82,23 @@ final class ConfigContentTests: XCTestCase {
         let short = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
         XCTAssertEqual(content.displayVersion, DragonVersion.display(short ?? "1.0.0"))
         XCTAssertTrue(content.displayVersion.hasPrefix("v"))
-        XCTAssertEqual(content.date, "2026-08-10")
+        XCTAssertEqual(content.date, "2026-08-11")
     }
 
-    // 2.11.2 is a maintenance release: one improvement (the About pane, which shipped in 2.11.1
-    // undescribed) and one fix scoped to local test builds. No .added section — nothing was.
+    // 2.11.3 is maintenance only: one `.changed` entry, the update feed now also being published
+    // to this repository. `.changed` and not `.fixed` because nothing was broken, and not
+    // `.improved` because a user gets nothing out of it yet — the installed copy still reads the
+    // website until 2.11.4 moves SUFeedURL.
+    //
+    // Pinned per release alongside the notes themselves. 2.11.2 pinned [.improved, .fixed] for a
+    // different pair of entries; changing what the pane claims has to change this too, which is
+    // the point. The release gate checks the notes CHANGED; this checks they changed to what was
+    // meant.
     @MainActor
-    func testWhatsNewSectionsAreImprovedThenFixed() {
+    func testWhatsNewSectionsAreASingleChanged() {
         let content = WhatsNewConfig.content
-        XCTAssertEqual(content.sections.map(\.kind), [.improved, .fixed])
-        XCTAssertEqual(content.sections.map(\.entries.count), [1, 1])
+        XCTAssertEqual(content.sections.map(\.kind), [.changed])
+        XCTAssertEqual(content.sections.map(\.entries.count), [1])
     }
 
     // MARK: DragonAppMenu contract

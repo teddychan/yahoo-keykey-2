@@ -50,6 +50,38 @@ jobs:
       # Yahoo KeyKey 2 now targets the macOS 26 SDK, so build on the macos-26 image.
       swiftpm_runner: macos-26
       app_slug: yahoo-keykey-2
+      # Step 1 of 2 in moving the appcast off the marketing site.
+      #
+      # MAC-APP-RELEASE-LIFECYCLE.md: "Sparkle appcasts are update infrastructure, not marketing
+      # content. Each app should host its production appcast in its own repository so an outage,
+      # permission problem, or rejected change in the marketing-site repository cannot interfere
+      # with update delivery." This caller passed no appcast_repo at all and so took the default,
+      # teddychan/www.dragonapp.com. KeyKey is the last of the five to migrate.
+      #
+      # The same spec says to migrate "by mirroring the old and new locations until installed
+      # versions have moved to the app-owned URL", which is why this is two releases and not one.
+      # Every ALREADY-INSTALLED KeyKey reads SUFeedURL from the site, so flipping the destination
+      # alone would leave all of them silently unable to see updates. That is not hypothetical
+      # here: the site is GitHub Pages, and an ice-2 mirror commit sat in a QUEUED Pages
+      # deployment for minutes after the release finished while the app-owned copy was already
+      # serving. A queue is survivable; a 404 is not.
+      #
+      #   step 1 (here)  publish to BOTH. App/Info.plist keeps pointing at the site, which is
+      #                  still being written, so nothing changes for anyone — but the app-owned
+      #                  feed now exists and is current.
+      #   step 2 (next)  move SUFeedURL to
+      #                  https://raw.githubusercontent.com/teddychan/yahoo-keykey-2/main/docs/yahoo-keykey-2/appcast.xml
+      #                  once step 1 has actually populated it.
+      #   later          drop appcast_mirror_repo when no supported version still reads the site.
+      #
+      # Needs dragon-release-ci >= v6.3.0. The appcast is generated once and copied to both, so
+      # the two cannot disagree — including the minimumSystemVersion/hardwareRequirements that
+      # appcast_inject_keykey_requirements adds below, which are injected before the copy.
+      # Publishing here uses the built-in GITHUB_TOKEN (contents: write is granted above); the
+      # mirror needs PUBLIC_RELEASE_TOKEN, which `secrets: inherit` already supplies — the same
+      # token that publishes to the site today. A missing mirror token is a hard error.
+      appcast_repo: teddychan/yahoo-keykey-2
+      appcast_mirror_repo: teddychan/www.dragonapp.com
       release_title_prefix: Yahoo KeyKey 2
       bot_name: KeyKey Release Bot
       assert_tag_matches_plist: true
