@@ -2,6 +2,15 @@
 
 A plain-language list of changes in each version, newest first.
 
+## 2.11.4
+
+- **Yahoo! KeyKey 2 now checks for updates at its own home rather than the website.** Update
+  delivery no longer depends on the website being reachable, deployed and up to date. Updates
+  keep arriving exactly as before, signed by the same key. This finishes what 2.11.3 started:
+  that release began publishing the file to both places, and only once it had actually done so
+  was there anything here to point the app at. Doing both at once would have sent every
+  installed copy to a file that did not exist.
+
 ## 2.11.3
 
 - **The file Yahoo! KeyKey 2 checks for updates is now published to its own home as well as

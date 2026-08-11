@@ -85,15 +85,14 @@ final class ConfigContentTests: XCTestCase {
         XCTAssertEqual(content.date, "2026-08-11")
     }
 
-    // 2.11.3 is maintenance only: one `.changed` entry, the update feed now also being published
-    // to this repository. `.changed` and not `.fixed` because nothing was broken, and not
-    // `.improved` because a user gets nothing out of it yet — the installed copy still reads the
-    // website until 2.11.4 moves SUFeedURL.
+    // 2.11.4 is maintenance only: one `.changed` entry, SUFeedURL moving to this repository's
+    // copy of the appcast. `.changed` and not `.fixed` because nothing was broken.
     //
-    // Pinned per release alongside the notes themselves. 2.11.2 pinned [.improved, .fixed] for a
-    // different pair of entries; changing what the pane claims has to change this too, which is
-    // the point. The release gate checks the notes CHANGED; this checks they changed to what was
-    // meant.
+    // Same shape as 2.11.3 by coincidence, not by drift — that release was the other half of the
+    // same migration (publish to both, then point the app at the new one), so both are one
+    // `.changed` entry about update delivery. The entry TEXT differs, which is what the release
+    // gate checks; this pins the shape. 2.11.2 pinned [.improved, .fixed] for a different pair.
+    // Changing what the pane claims has to change this too, which is the point.
     @MainActor
     func testWhatsNewSectionsAreASingleChanged() {
         let content = WhatsNewConfig.content
