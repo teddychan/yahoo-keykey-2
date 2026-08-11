@@ -2,6 +2,20 @@
 
 A plain-language list of changes in each version, newest first.
 
+## 2.11.3
+
+- **The file Yahoo! KeyKey 2 checks for updates is now published to its own home as well as
+  the website.** Update delivery no longer depends on the website being reachable and
+  up to date. Nothing changes for you yet: the copy you have installed keeps reading the
+  website, and a later version moves it across. Doing both at once would have pointed every
+  installed copy at a file that did not exist yet.
+- **Internal: the engine's learning-store folder must now be named by whoever asks for it.**
+  The adaptive candidate-ordering file used to have a default location, and that default was
+  the installed copy's — so any build that simply left the argument out would have opened,
+  trained and rewritten your real ranking. 2.11.2 fixed the code that actually runs; this
+  removes the default so the mistake cannot be made again. Nothing moves: your counts stay
+  exactly where they are.
+
 ## 2.11.1
 
 - **Nothing new — this is a version number fix.** A 2.11.0 was tagged but never released: the
