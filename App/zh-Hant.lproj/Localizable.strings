@@ -28,9 +28,9 @@
 "keykey.general.strokeConfirmationHint" = "在速成、以及使用萬用字元（*）的倉頡中，字根還沒打完就會出現候選字，此時空白鍵會直接翻到下一頁，而不是確認你打的字根。開啟後，第一次按空白鍵只會確認字根並停留在第 1 頁；再按一次空白鍵才翻頁，或直接按 1–9 選字。一般倉頡不受影響。";
 "keykey.general.language" = "語言";
 
-/* What's New pane (2.11.4) */
-"keykey.whatsNew.summary" = "這是一次維護性更新。打字的部分完全沒有改變，你看得到的地方也都一樣——這次是把更新送達方式的調整收尾。";
-"keykey.whatsNew.updateFeed" = "Yahoo! KeyKey 2 現在改成到自己的位置檢查更新，不再經過網站，網站若出問題也不會再耽誤更新。更新仍會照原本的方式送達。";
+/* What's New pane (2.11.5) */
+"keykey.whatsNew.summary" = "這是一次維護性更新。打字的部分完全沒有改變，你看得到的地方也都一樣——這次只是把設定視窗共用的程式碼升上一個版本。";
+"keykey.whatsNew.sharedCode" = "Yahoo! KeyKey 2 現在改用 DragonKit 3.4.0 建構，那是設定視窗中「關於」、「新功能」、「備份與還原」、「更新」與「解除安裝」各面板共用的程式碼。這個版本並沒有改變它提供給 Yahoo! KeyKey 2 的任何功能，因此沒有任何地方的運作方式不同——「關於」面板會顯示新的版本號，僅此而已。";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "從輸入來源中停用倉頡與速成";

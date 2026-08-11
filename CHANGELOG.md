@@ -2,6 +2,16 @@
 
 A plain-language list of changes in each version, newest first.
 
+## 2.11.5
+
+- **Under the hood: updated to DragonKit 3.4.0** (from 3.3.0), the shared code behind the Settings
+  window's About, What's New, Backup & Restore, Updates and Uninstall panes. Nothing it provides to
+  Yahoo! KeyKey 2 changed in this version, so nothing about typing or any window behaves
+  differently — the About pane reports the new number, which is the only difference there is to
+  see. The bump is there to keep the shared code current: every Dragon app is required to sit on
+  the newest published version, so a version behind is a build failure rather than a drift nobody
+  notices.
+
 ## 2.11.4
 
 - **Yahoo! KeyKey 2 now checks for updates at its own home rather than the website.** Update

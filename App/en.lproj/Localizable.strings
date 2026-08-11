@@ -28,9 +28,9 @@
 "keykey.general.strokeConfirmationHint" = "In 速成, and in 倉頡 with the * wildcard, candidates appear before the code is finished, so Space flips to the next page instead of confirming what you typed. With this on, the first Space only confirms the code and keeps page 1 — press Space again to page, or 1–9 to pick. Plain 倉頡 is unaffected.";
 "keykey.general.language" = "Language";
 
-/* What's New pane (2.11.4) */
-"keykey.whatsNew.summary" = "A maintenance release. Nothing about typing changes, and nothing you can see behaves differently — this one finishes the change to how updates reach you.";
-"keykey.whatsNew.updateFeed" = "Yahoo! KeyKey 2 now checks for updates at its own home rather than the website, so a problem with the website can no longer hold one up. Updates keep arriving exactly as before.";
+/* What's New pane (2.11.5) */
+"keykey.whatsNew.summary" = "A maintenance release. Nothing about typing changes, and nothing you can see behaves differently — this one only brings the shared code behind the Settings window up a version.";
+"keykey.whatsNew.sharedCode" = "Yahoo! KeyKey 2 is now built with DragonKit 3.4.0, the shared code behind the Settings window's About, What's New, Backup & Restore, Updates and Uninstall panes. Nothing it gives Yahoo! KeyKey 2 changed in this version, so nothing here works differently — the About pane reports the new number, and that is the whole of it.";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "Disable Cangjie and Simplex from Input Sources";

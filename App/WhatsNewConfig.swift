@@ -6,18 +6,22 @@ import DragonKit
 // binary isn't. That makes the entries and the date the only things to keep in sync with
 // CHANGELOG.md on release.
 //
-// 2.11.4 is maintenance only, and says so. It completes what 2.11.3 began: SUFeedURL now points
-// at this repository's copy of the appcast rather than the website's, so update delivery no
-// longer depends on the marketing site being deployed and current. Not observable — updates keep
-// arriving, from the same signing key, at the same cadence — so `.changed` and not `.fixed`.
+// 2.11.5 is maintenance only, and says so. Exactly two commits separate it from 2.11.4: a comment
+// in .github/workflows/release.yml naming when the appcast mirror retires, and the DragonKit pin
+// moving 3.3.0 -> 3.4.0. Only the second reaches a user at all, and only as the About pane's
+// "Built with · DragonKit v3.4.0" row. 3.4.0 adds LanguagePicker(languages:onChange:) with both
+// parameters defaulted, which this app never calls — the bump is for pin currency, which
+// CONFORMANCE §R10 requires the day the kit tags a release, not to adopt an API. `.changed` and
+// not `.fixed` because nothing was broken; not `.improved` because a user gains nothing, the same
+// reasoning that chose `.changed` for 2.11.3.
 //
-// The order was load-bearing. 2.11.3 published to BOTH while every installed copy still read the
-// website; only once that had actually run did the app-owned feed exist to be pointed at. Doing
-// both in one release would have sent every install to a 404.
+// Shipping no entry at all was the other option and is worse. The pane is the only place a user is
+// told what a version did, so leaving 2.11.4's text in place would claim the update-feed migration
+// a second time, to everyone who already read it. A release that changed nothing a user can use
+// still owes the reader the sentence saying so.
 //
-// 2.11.2's entries are not carried forward. One was a catch-up — the About-pane rework reached
-// users in 2.11.1 as "a version number fix" and was described for the first time in 2.11.2 — and
-// a catch-up that has been shown has done its job.
+// 2.11.4's entry is therefore not carried forward. The feed moved once; the pane describes this
+// version, not the accumulated history — that is CHANGELOG.md's job.
 enum WhatsNewConfig {
     @MainActor
     static var content: WhatsNewContent {
@@ -26,7 +30,7 @@ enum WhatsNewConfig {
             summary: L("keykey.whatsNew.summary"),
             sections: [
                 ChangeSection(kind: .changed, entries: [
-                    L("keykey.whatsNew.updateFeed"),
+                    L("keykey.whatsNew.sharedCode"),
                 ]),
             ]
         )

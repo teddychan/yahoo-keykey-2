@@ -85,19 +85,26 @@ final class ConfigContentTests: XCTestCase {
         XCTAssertEqual(content.date, "2026-08-11")
     }
 
-    // 2.11.4 is maintenance only: one `.changed` entry, SUFeedURL moving to this repository's
-    // copy of the appcast. `.changed` and not `.fixed` because nothing was broken.
+    // 2.11.5 is maintenance only: one `.changed` entry, the DragonKit pin moving to 3.4.0.
+    // `.changed` and not `.fixed` because nothing was broken, and not `.improved` because the bump
+    // is for pin currency rather than to adopt an API. 2.11.2 pinned [.improved, .fixed] for a
+    // different pair; changing what the pane claims has to change this too, which is the point.
     //
-    // Same shape as 2.11.3 by coincidence, not by drift — that release was the other half of the
-    // same migration (publish to both, then point the app at the new one), so both are one
-    // `.changed` entry about update delivery. The entry TEXT differs, which is what the release
-    // gate checks; this pins the shape. 2.11.2 pinned [.improved, .fixed] for a different pair.
-    // Changing what the pane claims has to change this too, which is the point.
+    // The entry's KEY is pinned as of 2.11.5, because kind and count alone had stopped catching
+    // anything. 2.11.3, 2.11.4 and this release are all [.changed] with one entry — three in a
+    // row — so a release that forgot to touch the notes at all would have passed this test
+    // unchanged while shipping its predecessor's text. The key names the subject, and this one
+    // moved from update delivery to the shared code, so it changes when the claim does. Compared
+    // against the same L() key WhatsNewConfig builds the entry from, so it holds in whatever
+    // language the test bundle resolves, exactly as the DragonAppMenu test below compares titles
+    // against the kit's keys. What the text SAYS is the release gate's job — it diffs the two
+    // .strings files — so between them a stale pane cannot ship.
     @MainActor
     func testWhatsNewSectionsAreASingleChanged() {
         let content = WhatsNewConfig.content
         XCTAssertEqual(content.sections.map(\.kind), [.changed])
         XCTAssertEqual(content.sections.map(\.entries.count), [1])
+        XCTAssertEqual(content.sections.first?.entries.first, L("keykey.whatsNew.sharedCode"))
     }
 
     // MARK: DragonAppMenu contract
