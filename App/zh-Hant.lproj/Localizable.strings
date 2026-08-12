@@ -26,11 +26,14 @@
 "keykey.general.cangjieVersionHint" = "「三代倉頡」使用 Yahoo! KeyKey 原版的拆碼與候選字順序（同時套用到倉頡與速成），立即生效。";
 "keykey.general.strokeConfirmation" = "以空白鍵確認字根";
 "keykey.general.strokeConfirmationHint" = "在速成、以及使用萬用字元（*）的倉頡中，字根還沒打完就會出現候選字，此時空白鍵會直接翻到下一頁，而不是確認你打的字根。開啟後，第一次按空白鍵只會確認字根並停留在第 1 頁；再按一次空白鍵才翻頁，或直接按 1–9 選字。一般倉頡不受影響。";
+"keykey.general.adaptiveCandidateOrder" = "依選字習慣調整候選字順序";
+"keykey.general.adaptiveCandidateOrderHint" = "套用於倉頡、速成、拼音與聯想字詞：你常選的字會逐漸往前移。關閉後改用內建順序（五代與拼音使用內建詞頻，三代使用 Yahoo! KeyKey 原版順序），同時暫停學習，但已經學到的紀錄會保留，不會清除。";
 "keykey.general.language" = "語言";
 
-/* What's New pane (2.12.0) */
-"keykey.whatsNew.summary" = "一處小修正：Yahoo! KeyKey 2 現在帶有版權聲明，與「關於」中顯示的一致。打字的部分完全沒有改變。";
-"keykey.whatsNew.copyrightNotice" = "Finder 的「顯示簡介」現在會顯示 Yahoo! KeyKey 2 的版權聲明。先前應用程式完全沒有版權聲明，該行一直是空的。";
+/* What's New pane (2.13.0) */
+"keykey.whatsNew.summary" = "現在可以關閉自動調整候選字順序，候選字不再隨你的選字而移動，永遠停在你記得的位置。";
+"keykey.whatsNew.adaptiveCandidateOrder" = "「一般 ▸ 輸入方式」新增「依選字習慣調整候選字順序」，預設開啟。關閉後，倉頡、速成、拼音與聯想字詞都會維持內建順序不再變動，Yahoo! KeyKey 2 也會停止記錄你選了哪些字；已經學到的紀錄會保留，隨時可以再開啟。";
+"keykey.whatsNew.associationOrderStable" = "分數相同的聯想字詞現在每次都會以相同順序出現。先前這個順序並不固定，重新啟動後可能不同，也會影響哪些聯想詞能出現在清單中。";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "從輸入來源中停用倉頡與速成";

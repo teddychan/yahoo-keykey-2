@@ -2,6 +2,42 @@
 
 A plain-language list of changes in each version, newest first.
 
+## 2.13.0
+
+- **Added: the adaptive candidate order can now be turned off.** A new toggle in **設定… ▸ 一般 ▸
+  輸入方式**, **依選字習慣調整候選字順序**, on by default — so nothing changes unless you want it to.
+  Turn it off and candidates keep their built-in order and stay there: 五代 and 拼音 use their
+  built-in rankings, 三代 the original Yahoo! KeyKey order, and 聯想字詞 the language model's. It
+  covers all three input methods and the associated phrases, not just one of them.
+
+  Yahoo! KeyKey 2 has always counted the characters you commit and ranked candidates by that
+  count, with no way to stop it. [Issue #85](https://github.com/teddychan/yahoo-keykey-2/issues/85)
+  is from a long-time 速成 typist who had memorised the candidate sequence, and for them a list
+  that keeps rearranging itself is worse than one that never moves — the position they reach for
+  is no longer the position the character is in.
+
+  Turning it off **pauses** learning rather than erasing it. Nothing new is counted, and what has
+  already been learned stays on disk, so turning it back on resumes where you left off instead of
+  starting from nothing. (Uninstall still removes that data, as it always has.)
+
+- **Fixed: associated phrases with the same score now always appear in the same order.** They were
+  sorted on score alone, and Swift's sort makes no promise about equally-scoring items, so their
+  order was arbitrary and could differ between launches. Because that same sort decides which 20
+  suggestions per character are kept, it also decided which ones you could see at all. Both the
+  order and the selection are now reproducible. A few phrases may sit in slightly different
+  positions than before, with the new toggle on or off — that is the fix.
+
+  It ships here rather than on its own because making 聯想字詞 respond to what you pick is what
+  moved the ordering from load time to typing time: an order can only be promised not to change
+  with your selections if it is reproducible to begin with.
+
+- **Under the hood: `docs/RELEASE.md` no longer describes the retired appcast mirror.** The
+  release workflow stopped publishing a second copy of the update feed to the website in 2.12.0,
+  but the release instructions still described that mirror as live and said it would be dropped
+  "at the next minor release" — which is this one. Anyone cutting a manual release by that
+  document would have pushed to an unrelated repository for no reason. Nothing about update
+  delivery changes; only the instructions were stale.
+
 ## 2.12.1
 
 - **Fixed: Yahoo! KeyKey 2 now carries a copyright notice.** `App/Info.plist` had no

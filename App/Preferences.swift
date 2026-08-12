@@ -29,6 +29,7 @@ enum Preferences {
         static let codeHintEnabled = "codeHintEnabled"
         static let associationSelectionTrigger = "associationSelectionTrigger"
         static let strokeConfirmationEnabled = "strokeConfirmationEnabled"
+        static let adaptiveCandidateOrderEnabled = "adaptiveCandidateOrderEnabled"
     }
 
     static let minFontSize: CGFloat = 14
@@ -47,6 +48,7 @@ enum Preferences {
             Key.codeHintEnabled: false,
             Key.associationSelectionTrigger: AssociationTrigger.number.rawValue,
             Key.strokeConfirmationEnabled: false,
+            Key.adaptiveCandidateOrderEnabled: true,
         ])
     }
 
@@ -109,5 +111,14 @@ enum Preferences {
     static var strokeConfirmationEnabled: Bool {
         get { UserDefaults.standard.bool(forKey: Key.strokeConfirmationEnabled) }
         set { UserDefaults.standard.set(newValue, forKey: Key.strokeConfirmationEnabled) }
+    }
+
+    // When true (the default), the characters the user commits are counted and that count ranks
+    // the candidates — in 倉頡, 速成, 拼音 and 聯想 alike. Off, the built-in order stands and
+    // nothing is counted; see AdaptiveCandidateOrder, which holds the decision this drives, and
+    // issue #85 for why a typist who has memorised the order wants that.
+    static var adaptiveCandidateOrderEnabled: Bool {
+        get { UserDefaults.standard.bool(forKey: Key.adaptiveCandidateOrderEnabled) }
+        set { UserDefaults.standard.set(newValue, forKey: Key.adaptiveCandidateOrderEnabled) }
     }
 }

@@ -55,6 +55,14 @@ final class SettingsModel {
         set { Preferences.strokeConfirmationEnabled = newValue }
     }
 
+    // 依選字習慣調整候選字順序 (issue #85): whether user learning ranks candidates and 聯想, or the
+    // built-in order stands. Another plain toggle, so a computed forwarder is right — InputController
+    // reads Preferences live on every sort and every commit, so nothing needs rebuilding here.
+    var adaptiveCandidateOrder: Bool {
+        get { Preferences.adaptiveCandidateOrderEnabled }
+        set { Preferences.adaptiveCandidateOrderEnabled = newValue }
+    }
+
     // Candidate text size. Like `cangjieVersion` below, this is a STORED, observation-tracked
     // property (seeded from Preferences at init) — NOT a computed forwarder. An @Observable
     // *computed* property bound to a Slider never registers an observation dependency in its

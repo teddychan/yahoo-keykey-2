@@ -26,11 +26,14 @@
 "keykey.general.cangjieVersionHint" = "「3세대 창힐」은 원래 Yahoo! KeyKey의 코드표와 후보 순서를 사용합니다(창힐과 속성 모두에 적용). 즉시 적용됩니다.";
 "keykey.general.strokeConfirmation" = "스페이스로 코드 확정";
 "keykey.general.strokeConfirmationHint" = "속성, 그리고 * 와일드카드를 사용하는 창힐에서는 코드를 다 입력하기 전에 후보가 나타나므로, 스페이스가 입력한 코드를 확정하지 않고 다음 페이지로 넘어갑니다. 이 옵션을 켜면 첫 번째 스페이스는 코드만 확정하고 1페이지에 머무릅니다. 페이지를 넘기려면 스페이스를 한 번 더 누르거나 1~9로 바로 선택하세요. 일반 창힐은 영향을 받지 않습니다.";
+"keykey.general.adaptiveCandidateOrder" = "선택한 글자에 맞춰 후보 순서 조정";
+"keykey.general.adaptiveCandidateOrderHint" = "倉頡, 速成, 拼音과 연상 어구에 적용됩니다. 자주 선택하는 글자가 점차 앞으로 이동합니다. 끄면 기본 순서가 그대로 유지되고(五代와 拼音은 내장 빈도순, 三代는 Yahoo! KeyKey 원래 순서) 학습도 일시 중지됩니다. 이미 학습한 내용은 지워지지 않고 남습니다.";
 "keykey.general.language" = "언어";
 
-/* What's New pane (2.12.0) */
-"keykey.whatsNew.summary" = "작은 수정입니다. Yahoo! KeyKey 2에 저작권 표시가 추가되어 정보 화면에 표시되는 것과 같아졌습니다. 입력 동작은 전혀 바뀌지 않습니다.";
-"keykey.whatsNew.copyrightNotice" = "Finder의 ‘정보 가져오기’ 창에 Yahoo! KeyKey 2의 저작권 표시가 나옵니다. 앱에 저작권 표시가 전혀 없어 해당 줄이 비어 있었습니다.";
+/* What's New pane (2.13.0) */
+"keykey.whatsNew.summary" = "이제 후보 순서 자동 조정을 끌 수 있습니다. 목록이 더 이상 재배열되지 않고 기억하는 자리에 그대로 있습니다.";
+"keykey.whatsNew.adaptiveCandidateOrder" = "일반 ▸ 입력 방식에 ‘선택한 글자에 맞춰 후보 순서 조정’ 설정이 추가되었습니다. 기본값은 켬입니다. 끄면 倉頡, 速成, 拼音과 연상 어구의 후보가 기본 순서를 유지하며 움직이지 않고, Yahoo! KeyKey 2도 무엇을 선택했는지 기록하지 않습니다. 이미 학습한 내용은 유지되므로 언제든 다시 켤 수 있습니다.";
+"keykey.whatsNew.associationOrderStable" = "점수가 같은 연상 어구가 이제 항상 같은 순서로 표시됩니다. 이전에는 그 순서가 일정하지 않아 실행할 때마다 달라질 수 있었고, 어떤 제안이 목록에 오르는지에도 영향을 주었습니다.";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "입력 소스에서 창힐과 속성 사용 중지";

@@ -26,11 +26,14 @@
 "keykey.general.cangjieVersionHint" = "El «Cangjie de 3.ª generación» usa la tabla de códigos y el orden de candidatos del Yahoo! KeyKey original (se aplica tanto a 倉頡 como a 速成) y surte efecto de inmediato.";
 "keykey.general.strokeConfirmation" = "Pulsar Espacio para confirmar el código";
 "keykey.general.strokeConfirmationHint" = "En 速成, y en 倉頡 con el comodín *, los candidatos aparecen antes de que el código esté terminado, así que Espacio pasa a la página siguiente en lugar de confirmar lo que has escrito. Con esta opción activada, el primer Espacio solo confirma el código y se queda en la página 1: vuelve a pulsar Espacio para cambiar de página, o 1–9 para elegir. El 倉頡 normal no se ve afectado.";
+"keykey.general.adaptiveCandidateOrder" = "Adaptar el orden de los candidatos a tus selecciones";
+"keykey.general.adaptiveCandidateOrderHint" = "Se aplica a 倉頡, 速成, 拼音 y a las frases asociadas: los caracteres que eliges avanzan poco a poco. Desactívalo para conservar el orden incorporado — 五代 y 拼音 usan su clasificación incorporada; 三代, el orden original de Yahoo! KeyKey —, lo que además pausa el aprendizaje sin borrar lo ya aprendido.";
 "keykey.general.language" = "Idioma";
 
-/* What's New pane (2.12.0) */
-"keykey.whatsNew.summary" = "Una pequeña corrección: Yahoo! KeyKey 2 ya incluye un aviso de copyright, el mismo que muestra Acerca de. Nada cambia al escribir.";
-"keykey.whatsNew.copyrightNotice" = "El panel «Obtener información» del Finder ahora muestra el aviso de copyright de Yahoo! KeyKey 2. La app no incluía ninguno, así que esa línea aparecía vacía.";
+/* What's New pane (2.13.0) */
+"keykey.whatsNew.summary" = "Ya puedes desactivar el orden adaptativo de los candidatos, de modo que la lista deje de reordenarse y se quede donde la recuerdas.";
+"keykey.whatsNew.adaptiveCandidateOrder" = "Un nuevo ajuste en General ▸ Método de entrada, «Adaptar el orden de los candidatos a tus selecciones», activado de forma predeterminada. Si lo desactivas, los candidatos de 倉頡, 速成, 拼音 y las frases asociadas conservan su orden incorporado y ya no se mueven, y Yahoo! KeyKey 2 deja de registrar lo que eliges. Lo aprendido hasta ahora se conserva, así que puedes volver a activarlo cuando quieras.";
+"keykey.whatsNew.associationOrderStable" = "Las frases asociadas con la misma puntuación aparecen ahora siempre en el mismo orden. Antes ese orden era arbitrario y podía variar entre arranques, y además decidía qué sugerencias llegaban a la lista.";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "Desactivar 倉頡 y 速成 en Fuentes de entrada";

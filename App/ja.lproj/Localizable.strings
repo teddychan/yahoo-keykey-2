@@ -26,11 +26,14 @@
 "keykey.general.cangjieVersionHint" = "「第3世代倉頡」はオリジナルの Yahoo! KeyKey のコード表と候補順を使います（倉頡と速成の両方に適用）。すぐに反映されます。";
 "keykey.general.strokeConfirmation" = "スペースキーでコードを確定";
 "keykey.general.strokeConfirmationHint" = "速成、および * ワイルドカードを使う倉頡では、コードを打ち終わる前に候補が出るため、スペースキーは打ったコードを確定せずに次のページへ送ってしまいます。オンにすると、最初のスペースキーはコードの確定だけを行い 1 ページ目に留まります。もう一度スペースキーを押すとページが進み、1〜9 で直接選べます。通常の倉頡は影響を受けません。";
+"keykey.general.adaptiveCandidateOrder" = "選んだ字に合わせて候補の順序を調整";
+"keykey.general.adaptiveCandidateOrderHint" = "倉頡・速成・拼音と聯想語に適用されます。よく選ぶ字が少しずつ前に移動します。オフにすると内蔵の順序のまま固定され（五代と拼音は内蔵の頻度順、三代は Yahoo! KeyKey 本来の順序）、学習も一時停止します。すでに学習した内容は消えずに残ります。";
 "keykey.general.language" = "言語";
 
-/* What's New pane (2.12.0) */
-"keykey.whatsNew.summary" = "小さな修正です。Yahoo! KeyKey 2 に著作権表示が追加され、「情報」に表示されるものと同じになりました。入力の動作は何も変わりません。";
-"keykey.whatsNew.copyrightNotice" = "Finder の「情報を見る」に Yahoo! KeyKey 2 の著作権表示が表示されるようになりました。これまではアプリが著作権表示を持っておらず、その欄は空のままでした。";
+/* What's New pane (2.13.0) */
+"keykey.whatsNew.summary" = "候補の自動並べ替えをオフにできるようになりました。候補が動かなくなり、覚えた位置のままになります。";
+"keykey.whatsNew.adaptiveCandidateOrder" = "「一般 ▸ 入力方式」に「選んだ字に合わせて候補の順序を調整」を追加しました（初期設定はオン）。オフにすると、倉頡・速成・拼音と聯想語の候補は内蔵の順序のまま動かなくなり、Yahoo! KeyKey 2 は選んだ字の記録も行いません。すでに学習した内容は保持されるので、いつでもオンに戻せます。";
+"keykey.whatsNew.associationOrderStable" = "スコアが同じ聯想語が、常に同じ順序で表示されるようになりました。これまでは順序が一定でなく、起動のたびに変わることがあり、どの候補が一覧に載るかにも影響していました。";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "入力ソースから倉頡と速成を無効にする";

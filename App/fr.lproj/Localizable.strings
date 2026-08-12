@@ -26,11 +26,14 @@
 "keykey.general.cangjieVersionHint" = "Le « Cangjie de 3e génération » utilise la table de codes et l’ordre des candidats du Yahoo! KeyKey d’origine (appliqué à 倉頡 comme à 速成), avec effet immédiat.";
 "keykey.general.strokeConfirmation" = "Appuyer sur Espace pour valider le code";
 "keykey.general.strokeConfirmationHint" = "En 速成, et en 倉頡 avec le joker *, les candidats apparaissent avant que le code soit terminé : Espace passe donc à la page suivante au lieu de valider ce que vous avez tapé. Avec cette option, le premier Espace ne fait que valider le code et reste sur la page 1 — appuyez de nouveau sur Espace pour changer de page, ou sur 1–9 pour choisir. Le 倉頡 normal n’est pas affecté.";
+"keykey.general.adaptiveCandidateOrder" = "Adapter l’ordre des candidats à vos sélections";
+"keykey.general.adaptiveCandidateOrderHint" = "S’applique à 倉頡, 速成, 拼音 et aux phrases associées : les caractères que vous choisissez avancent peu à peu. Désactivez cette option pour conserver l’ordre intégré — 五代 et 拼音 utilisent leur classement intégré, 三代 l’ordre d’origine de Yahoo! KeyKey —, ce qui met aussi l’apprentissage en pause sans effacer ce qui a déjà été appris.";
 "keykey.general.language" = "Langue";
 
-/* What's New pane (2.12.0) */
-"keykey.whatsNew.summary" = "Une petite correction : Yahoo! KeyKey 2 comporte désormais une mention de copyright, la même que celle affichée dans À propos. Rien ne change à la saisie.";
-"keykey.whatsNew.copyrightNotice" = "La fenêtre « Lire les informations » du Finder affiche désormais la mention de copyright de Yahoo! KeyKey 2. L’app n’en comportait aucune, la ligne restait donc vide.";
+/* What's New pane (2.13.0) */
+"keykey.whatsNew.summary" = "Vous pouvez désormais désactiver l’ordre adaptatif des candidats : la liste cesse de se réorganiser et reste là où vous l’avez mémorisée.";
+"keykey.whatsNew.adaptiveCandidateOrder" = "Un nouveau réglage dans Général ▸ Méthode de saisie, « Adapter l’ordre des candidats à vos sélections », activé par défaut. Une fois désactivé, les candidats de 倉頡, 速成, 拼音 et les phrases associées conservent leur ordre intégré et n’en bougent plus, et Yahoo! KeyKey 2 cesse de comptabiliser vos choix. Ce qui a déjà été appris est conservé : vous pouvez le réactiver quand vous voulez.";
+"keykey.whatsNew.associationOrderStable" = "Les phrases associées de score identique apparaissent désormais toujours dans le même ordre. Cet ordre était auparavant arbitraire et pouvait changer d’un lancement à l’autre — il déterminait aussi quelles suggestions figuraient dans la liste.";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "Désactiver 倉頡 et 速成 dans les sources de saisie";
