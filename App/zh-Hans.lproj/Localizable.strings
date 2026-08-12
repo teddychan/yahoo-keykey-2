@@ -26,11 +26,14 @@
 "keykey.general.cangjieVersionHint" = "「三代仓颉」使用 Yahoo! KeyKey 原版的拆码与候选字顺序（同时应用于仓颉与速成），立即生效。";
 "keykey.general.strokeConfirmation" = "以空格键确认字根";
 "keykey.general.strokeConfirmationHint" = "在速成、以及使用通配符（*）的仓颉中，字根还没输完就会出现候选字，此时空格键会直接翻到下一页，而不是确认你输入的字根。开启后，第一次按空格键只确认字根并停留在第 1 页；再按一次空格键才翻页，或直接按 1–9 选字。普通仓颉不受影响。";
+"keykey.general.adaptiveCandidateOrder" = "依选字习惯调整候选字顺序";
+"keykey.general.adaptiveCandidateOrderHint" = "适用于仓颉、速成、拼音与联想词：你常选的字会逐渐往前移。关闭后改用内建顺序（五代与拼音使用内建词频，三代使用 Yahoo! KeyKey 原版顺序），同时暂停学习，但已经学到的记录会保留，不会清除。";
 "keykey.general.language" = "语言";
 
-/* What's New pane (2.12.0) */
-"keykey.whatsNew.summary" = "一处小修复：Yahoo! KeyKey 2 现在带有版权声明，与「关于」中显示的一致。打字的部分完全没有改变。";
-"keykey.whatsNew.copyrightNotice" = "访达的「显示简介」现在会显示 Yahoo! KeyKey 2 的版权声明。此前应用完全没有版权声明，该行一直是空的。";
+/* What's New pane (2.13.0) */
+"keykey.whatsNew.summary" = "现在可以关闭自动调整候选字顺序，候选字不再随你的选字而移动，永远停在你记得的位置。";
+"keykey.whatsNew.adaptiveCandidateOrder" = "「通用 ▸ 输入方式」新增「依选字习惯调整候选字顺序」，默认开启。关闭后，仓颉、速成、拼音与联想词都会维持内建顺序不再变动，Yahoo! KeyKey 2 也会停止记录你选了哪些字；已经学到的记录会保留，随时可以再开启。";
+"keykey.whatsNew.associationOrderStable" = "分数相同的联想词现在每次都会以相同顺序出现。此前这个顺序并不固定，重新启动后可能不同，也会影响哪些联想词能出现在列表中。";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "从输入源中停用仓颉与速成";

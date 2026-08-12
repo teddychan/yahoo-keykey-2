@@ -54,4 +54,62 @@ final class KeyEventPolicyTests: XCTestCase {
         XCTAssertFalse(KeyEventPolicy.isSystemShortcut([.option]))
         XCTAssertFalse(KeyEventPolicy.isSystemShortcut([.shift, .capsLock]))
     }
+
+    // MARK: - AdaptiveCandidateOrder (issue #85)
+
+    func testBonusIsTheLearnedValueWhenEnabled() {
+        XCTAssertEqual(AdaptiveCandidateOrder.bonus(for: "漏", enabled: true,
+                                                    learned: { $0 == "漏" ? 7 : 0 }), 7)
+    }
+
+    func testBonusIsZeroWhenDisabled() {
+        // Zero is the whole mechanism: every consumer adds this to a static score, so zero leaves
+        // the Cangjie/Simplex sorts, the Pinyin walker and the 聯想 sort on that score alone.
+        XCTAssertEqual(AdaptiveCandidateOrder.bonus(for: "漏", enabled: false,
+                                                    learned: { _ in 999 }), 0)
+    }
+
+    func testSingleCharacterCommitIsLearnedWhenEnabled() {
+        XCTAssertEqual(AdaptiveCandidateOrder.characterToLearn(fromCommitted: "漏", enabled: true), "漏")
+    }
+
+    func testNothingIsLearnedFromACommitWhenDisabled() {
+        // The setting pauses learning as well as ignoring it — a user who turned it off is not
+        // still being counted in the background.
+        XCTAssertNil(AdaptiveCandidateOrder.characterToLearn(fromCommitted: "漏", enabled: false))
+    }
+
+    func testMultiCharacterCommitIsNotLearned() {
+        // UserFrequency counts characters, so a multi-character 拼音 commit has no single
+        // character to attribute. Unchanged from the pre-toggle behaviour.
+        XCTAssertNil(AdaptiveCandidateOrder.characterToLearn(fromCommitted: "今天", enabled: true))
+    }
+
+    func testEmptyCommitIsNotLearned() {
+        XCTAssertNil(AdaptiveCandidateOrder.characterToLearn(fromCommitted: "", enabled: true))
+    }
+
+    func testAssociationPickLearnsTheContinuation() {
+        // 關係 inserts the suffix 係, and 係 is what the user chose — the same character
+        // AssociatedPhrases ranks the phrase by.
+        XCTAssertEqual(AdaptiveCandidateOrder.characterToLearn(fromAssociationSuffix: "係",
+                                                               enabled: true), "係")
+    }
+
+    func testLongerAssociationLearnsOnlyTheFirstContinuation() {
+        // No length condition here, unlike a composition commit: a three-character phrase still
+        // turns on the one continuation character it adds first.
+        XCTAssertEqual(AdaptiveCandidateOrder.characterToLearn(fromAssociationSuffix: "係人",
+                                                               enabled: true), "係")
+    }
+
+    func testNothingIsLearnedFromAnAssociationWhenDisabled() {
+        XCTAssertNil(AdaptiveCandidateOrder.characterToLearn(fromAssociationSuffix: "係",
+                                                             enabled: false))
+    }
+
+    func testEmptyAssociationSuffixLearnsNothing() {
+        // A one-character "phrase" inserts nothing, so there is nothing to attribute.
+        XCTAssertNil(AdaptiveCandidateOrder.characterToLearn(fromAssociationSuffix: "", enabled: true))
+    }
 }

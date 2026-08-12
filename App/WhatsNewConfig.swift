@@ -6,36 +6,41 @@ import DragonKit
 // binary isn't. That makes the entries and the date the only things to keep in sync with
 // CHANGELOG.md on release.
 //
-// 2.12.1 claims one fix: `App/Info.plist` had no `NSHumanReadableCopyright`, so Finder's Get Info
-// panel showed no copyright line for Yahoo! KeyKey 2 at all. It now carries `© 2026 Teddy Chan` —
-// byte-for-byte the string the About pane's copyright row renders.
+// 2.13.0 claims one addition and one fix, both from issue #85.
 //
-// Found by auditing the field across all five Dragon apps, where it was in four different states:
-// a tagline in clipmenu-2, two holders in ice-2, and absent here, in spectacle-2 and in the sample
-// app. KeyKey is the app whose About copyright slot once held `倉頡／簡易 輸入法` — the defect
-// DragonKit still cites in `DragonAbout.copyright(years:holder:)` — so having the bundle's own
-// notice missing entirely was the same failure one field over. The key is an optional Apple one
-// that no licence names, so it is presentation, and the rule for presentation is the one About
-// already follows: a single holder, the app's own.
+// `.added` is the 依選字習慣調整候選字順序 toggle. Yahoo! KeyKey 2 has always counted the characters
+// you commit and ranked candidates by that count, with no way to stop it. The issue is from a
+// long-time 速成 typist who had memorised the candidate sequence: for them a list that keeps
+// rearranging itself is worse than one that never moves, because the position they reach for is no
+// longer the position the character is in. On by default, so nobody's existing install changes.
 //
-// `.fixed`, not `.added`. A bundle is expected to carry this field; the app shipped without it.
+// `.fixed` is the 聯想 ordering becoming reproducible. It is a real user-visible change and not
+// merely internal: `AssociatedPhrases` sorted on score alone through Swift's `sorted(by:)`, which
+// is not stable, so equal-scoring phrases sat in an arbitrary order — and because that same sort
+// feeds the 20-per-bucket cap, the arbitrariness decided which suggestions the user could ever see.
+// It is in this release rather than its own because making 聯想 frequency-ranked is what moved the
+// ordering from load time to query time; a promise that the order "does not change based on your
+// selections" is only true if the order is reproducible to begin with.
 //
-// Deliberately NOT in the notes: LICENSE's holder changes from "Lung Sang Chan (teddychan)" to
-// "Teddy Chan", so all five apps name the holder one way. That is the same person either way and
-// nothing a user can observe from inside the app — CHANGELOG.md carries it.
+// Deliberately NOT in the notes: the learning store, the 20-per-bucket cap and the What's New
+// mechanism itself are all unchanged, and the seven .strings files gain the setting's own two
+// strings, which the General pane shows rather than this pane.
 //
-// `keykey.whatsNew.allLanguages` is gone, replaced in place by `keykey.whatsNew.copyrightNotice`
-// in all seven .strings files. 2.12.0's `.added` entry has nothing to say here, and leaving the
-// key behind would strand that release's sentence in seven files waiting to be shown again.
+// `keykey.whatsNew.copyrightNotice` is gone, replaced by the two keys below in all seven .strings
+// files. 2.12.1's entry has nothing to say here, and leaving the key behind would strand that
+// release's sentence in seven files waiting to be shown again.
 enum WhatsNewConfig {
     @MainActor
     static var content: WhatsNewContent {
         WhatsNewContent(
-            date: "2026-08-11",
+            date: "2026-08-12",
             summary: L("keykey.whatsNew.summary"),
             sections: [
+                ChangeSection(kind: .added, entries: [
+                    L("keykey.whatsNew.adaptiveCandidateOrder"),
+                ]),
                 ChangeSection(kind: .fixed, entries: [
-                    L("keykey.whatsNew.copyrightNotice"),
+                    L("keykey.whatsNew.associationOrderStable"),
                 ]),
             ]
         )

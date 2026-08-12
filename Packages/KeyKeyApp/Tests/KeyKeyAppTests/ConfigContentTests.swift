@@ -88,25 +88,26 @@ final class ConfigContentTests: XCTestCase {
         let short = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
         XCTAssertEqual(content.displayVersion, DragonVersion.display(short ?? "1.0.0"))
         XCTAssertTrue(content.displayVersion.hasPrefix("v"))
-        XCTAssertEqual(content.date, "2026-08-11")
+        XCTAssertEqual(content.date, "2026-08-12")
     }
 
-    // 2.12.1 is a single `.fixed`: `App/Info.plist` had no `NSHumanReadableCopyright`, so Finder's
-    // Get Info panel showed no copyright line for the app at all. It now carries
-    // `© 2026 Teddy Chan`, byte-for-byte what About's copyright row renders.
+    // 2.13.0 is an `.added` and a `.fixed`, both from issue #85.
     //
-    // `.fixed`, not `.added` — a bundle is expected to carry that field, and this one shipped
-    // without it. KeyKey is the app whose About copyright slot once held `倉頡／簡易 輸入法`, the
-    // defect DragonKit still cites in `DragonAbout.copyright(years:holder:)`; the bundle's own
-    // notice being absent was the same failure one field over.
+    // `.added` is the 依選字習慣調整候選字順序 toggle. KeyKey has always counted committed characters
+    // and ranked candidates by that count with no way to stop it; the issue is from a long-time 速成
+    // typist who had memorised the sequence, for whom a list that rearranges itself is worse than
+    // one that never moves. On by default, so no existing install changes.
     //
-    // One entry, and no second section. LICENSE's holder also changes here, from "Lung Sang Chan
-    // (teddychan)" to "Teddy Chan" so all five apps name it one way — but that is the same person
-    // either way and nothing observable from inside the app, so claiming it would be padding.
+    // `.fixed` is 聯想 ordering becoming reproducible — user-visible, not internal plumbing.
+    // `AssociatedPhrases` sorted on score alone through `sorted(by:)`, which is not a stable sort,
+    // so equal-scoring phrases sat in an arbitrary order; because that sort also feeds the
+    // 20-per-bucket cap, it decided which suggestions the user could ever see. It ships here
+    // because making 聯想 frequency-ranked is what moved ordering from load time to query time.
     //
-    // 2.12.0 pinned a single `.added` for the five localizations KeyKey did not have. 2.11.5 and
-    // 2.11.6 each carried a DragonKit pin entry because the bump was the substance of those
-    // releases; 2.11.2 pinned [.improved, .fixed] for a different pair.
+    // Two sections, so this is the first release since 2.11.2 ([.improved, .fixed]) to carry more
+    // than one. 2.12.1 was a single `.fixed` for the bundle's missing `NSHumanReadableCopyright`;
+    // 2.12.0 a single `.added` for the five missing localizations; 2.11.5 and 2.11.6 each a
+    // DragonKit pin entry, because the bump was the substance of those releases.
     //
     // Entry KEYS are pinned, not just kinds and counts, because kinds and counts had stopped
     // catching anything: 2.11.3, 2.11.4 and the 2.11.5 draft were all [.changed] with one entry —
@@ -117,12 +118,13 @@ final class ConfigContentTests: XCTestCase {
     // text SAYS is the release gate's job — it diffs every locale's .strings file — so between
     // them a stale pane cannot ship.
     @MainActor
-    func testWhatsNewAnnouncesTheCopyrightNoticeFix() {
+    func testWhatsNewAnnouncesTheAdaptiveOrderToggleAndTheStableAssociationOrder() {
         let content = WhatsNewConfig.content
-        XCTAssertEqual(content.sections.map(\.kind), [.fixed])
-        XCTAssertEqual(content.sections.map(\.entries.count), [1])
+        XCTAssertEqual(content.sections.map(\.kind), [.added, .fixed])
+        XCTAssertEqual(content.sections.map(\.entries.count), [1, 1])
         XCTAssertEqual(content.sections.flatMap(\.entries), [
-            L("keykey.whatsNew.copyrightNotice"),
+            L("keykey.whatsNew.adaptiveCandidateOrder"),
+            L("keykey.whatsNew.associationOrderStable"),
         ])
     }
 

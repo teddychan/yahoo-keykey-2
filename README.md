@@ -93,8 +93,10 @@ Log out and back in after any update so macOS reloads the input method.
   remember every radical.
 - **拼音 (Pinyin) phrase input** — a third mode that composes whole phrases from toneless
   pinyin; `'` splits ambiguous syllables, so `xi'an` gives 西安.
-- **Frequency-ranked &amp; adaptive** — candidates are ordered by how common they are, and
-  the characters you pick rank higher over time.
+- **Frequency-ranked &amp; adaptive, or fixed** — candidates start in a built-in order, and by
+  default the characters you pick rank higher over time. Turn **依選字習慣調整候選字順序** off in
+  Settings and that built-in order stands: nothing moves, and nothing is counted. On or off
+  applies to 倉頡, 速成, 拼音 and 聯想字詞 alike.
 - **Associated phrases (聯想字詞)** — after you commit a character, Yahoo KeyKey 2 suggests
   the words that usually follow, pickable with `1–9` or `Shift + 1–9`, and optionally showing
   only the continuation (聯想只顯示接續字).
@@ -124,10 +126,14 @@ Log out and back in after any update so macOS reloads the input method.
 Choose the decomposition table in **設定… ▸ 輸入方式**. The choice drives both 倉頡 and
 速成 and applies immediately.
 
-| Mode | Table source | Candidate order | Example codes |
+| Mode | Table source | Built-in candidate order | Example codes |
 |---|---|---|---|
-| **五代倉頡** (default) | ibus `cangjie5` (`Resources/cangjie.txt`) | frequency / adaptive ranking | 面 `一田尸中`, 鬼 `竹山戈` |
+| **五代倉頡** (default) | ibus `cangjie5` (`Resources/cangjie.txt`) | corpus frequency ranking | 面 `一田尸中`, 鬼 `竹山戈` |
 | **三代倉頡（Yahoo KeyKey 相容）** | original Yahoo! KeyKey `cj-ext.cin` / `simplex-ext.cin` | Yahoo's original native order | 面 `一田卜中`, 鬼 `竹戈` |
+
+Both built-in orders are static. Adaptive ranking is layered on top of whichever one is in
+effect, and **依選字習慣調整候選字順序** turns that layer off — so 三代 with it off is the
+original Yahoo! KeyKey order and nothing else.
 
 The default is **五代**, so existing users are unaffected until they opt in. Note that
 Yahoo! KeyKey's *associated-phrase (關聯字表) ranking* cannot be reproduced — that data was
@@ -154,6 +160,17 @@ and stays on page 1, a second Space pages, and `1–9` picks.
 **Typing a digit picks an associated phrase instead.** Switch the 聯想 selection key to
 **Shift + 1–9** in **設定… ▸ 一般**; a plain `1–9` then types the digit and dismisses the
 suggestions, so numbers flow naturally right after a character.
+
+**A rare character I keep picking never moves to the front.** Known limitation, and it applies
+only to the candidate list — not to 聯想. Adaptive ranking lifts a character *within* the
+dictionary's own ordering, so a character the bundled language model does not know cannot
+overtake one it does, however many times you pick it. Under `卜月卜尸心`, for example, 龍 is in
+the model and the variant 㡣 is not, so 㡣 stays second permanently. Roughly four in five
+characters in the 五代 table are outside the model, and about two in five codes with more than
+one candidate mix the two kinds. Learning still reorders such characters relative to each other,
+and works normally whenever the characters involved are in the model. See
+[#111](https://github.com/teddychan/yahoo-keykey-2/pull/111) for the measurements and why the
+fix was kept out of that release.
 
 **⌘C / ⌘X / ⌘V don't copy, cut, or paste.** Fixed in **2.7.0** — ⌘ and ⌃ combinations now pass
 through to the app instead of being read as radicals. Update if you are on an older version.

@@ -137,11 +137,15 @@ The appcast became app-owned across 2.11.3 and 2.11.4 — the caller passes `app
 teddychan/yahoo-keykey-2`, where it used to take the default of the marketing-site repo. A
 Sparkle appcast is update infrastructure, not marketing content, so it belongs in the app's
 own repository: an outage, a permission problem, or a rejected change on the marketing site
-then cannot interfere with update delivery. `appcast_mirror_repo:
-teddychan/www.dragonapp.com` keeps publishing the identical file to the old location for
-copies still at 2.11.3 or older, which read the site and only the site; the mirror is
-dropped at the next **minor** release. The three-step migration, and why the mirror cannot
-go sooner, is spelled out in the comments in `.github/workflows/release.yml`.
+then cannot interfere with update delivery.
+
+**The website mirror is gone.** `appcast_mirror_repo: teddychan/www.dragonapp.com` published the
+identical file to the old location for copies still at 2.11.3 or older, which read the site and
+only the site. It was dropped in **2.12.0**, the "next minor release" its own trigger named, so
+the release publishes to this repository and nowhere else. The website's old file is left in
+place, stale, rather than deleted — a stale file is a quiet no-op where a missing one would be a
+visible failure. The three-step migration is spelled out in the comments in
+`.github/workflows/release.yml`; nothing about it is still pending.
 
 1. Bump **only** `CFBundleShortVersionString` in `App/Info.plist`. (The CI build fails if
    the tag doesn't match it.) Leave `CFBundleVersion` alone — the committed value is an
@@ -168,10 +172,8 @@ If running locally instead of CI:
    **in this repo**, commit, and push. That is the file the app reads — `App/Info.plist`'s
    `SUFeedURL` is
    `https://raw.githubusercontent.com/teddychan/yahoo-keykey-2/main/docs/yahoo-keykey-2/appcast.xml`.
-   While the mirror is still in place ([above](#per-release-automated)), copy the same file
-   into the website repo at `docs/yahoo-keykey-2/appcast.xml` as well: GitHub Pages serves
-   it at `https://www.dragonapp.com/yahoo-keykey-2/appcast.xml`, which is the only feed
-   2.11.3 and older know about.
+   This repo is the only destination: do **not** also copy it into the website repo. That
+   mirror was retired in 2.12.0 ([above](#per-release-automated)).
 5. Bump the Homebrew cask `Casks/yahoo-keykey-2.rb` in `teddychan/homebrew-tap`
    (version + the `.zip` sha256; the cask installs the app from the `.zip`).
 

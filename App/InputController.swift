@@ -8,6 +8,10 @@ final class InputController: IMKInputController {
     // User learning: persisted selection-count store providing a live ranking bonus for
     // Cangjie/Simplex candidates, so committed characters surface higher next time.
     private let userFreq: UserFrequency
+    // The gated learning bonus handed to the engines, and read again when ordering 聯想. Stored
+    // rather than local to init because the association path needs the same closure — one gate,
+    // so the setting cannot apply to composition candidates and not to suggestions.
+    private let userRank: (Character) -> Double
     private let associatedPhrases: AssociatedPhrases
     // Traditional→Simplified character converter, applied only when Preferences.outputSimplifiedEnabled.
     private let hanConvertFilter: HanConvertFilter
@@ -40,8 +44,15 @@ final class InputController: IMKInputController {
         self.userFreq = shared.userFreq
 
         // Live user-learning bonus; the closure consults the shared store on every sort, so a
-        // freshly-committed character promotes without rebuilding the engine.
-        let userRank: (Character) -> Double = { shared.userFreq.bonus(for: $0) }
+        // freshly-committed character promotes without rebuilding the engine. It also reads
+        // Preferences on every call, so turning 依選字習慣調整候選字順序 off applies to the next
+        // composition — no engine rebuild and no notification needed (issue #85).
+        let userRank: (Character) -> Double = {
+            AdaptiveCandidateOrder.bonus(for: $0,
+                                         enabled: Preferences.adaptiveCandidateOrderEnabled,
+                                         learned: shared.userFreq.bonus(for:))
+        }
+        self.userRank = userRank
 
         // The input-method registry. Each module's makeEngine reads the shared tables and
         // rank LIVE, so rebuilding an engine after a 倉頡版本 change picks up the new table
@@ -359,6 +370,13 @@ final class InputController: IMKInputController {
                     clearAssociations()
                     if !suffix.isEmpty {
                         client.insertText(applyHanConvert(suffix), replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
+                        // Learn the continuation the user picked (係 from 關係), so it surfaces
+                        // earlier both here and when typed by code. Same store, same gate.
+                        if let ch = AdaptiveCandidateOrder.characterToLearn(
+                            fromAssociationSuffix: suffix,
+                            enabled: Preferences.adaptiveCandidateOrderEnabled) {
+                            userFreq.record(ch)
+                        }
                     }
                     return true
                 }
@@ -564,14 +582,19 @@ final class InputController: IMKInputController {
         if !text.isEmpty {
             client.insertText(applyHanConvert(text), replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
             // User learning: remember single-character selections so they rank higher next time.
-            if text.count == 1, let ch = text.first { userFreq.record(ch) }
+            // Nothing is recorded while adaptive ordering is off — the setting pauses learning as
+            // well as ignoring it, so a user who turned it off is not still being counted.
+            if let ch = AdaptiveCandidateOrder.characterToLearn(
+                fromCommitted: text, enabled: Preferences.adaptiveCandidateOrderEnabled) {
+                userFreq.record(ch)
+            }
         }
         client.setMarkedText("", selectionRange: NSRange(location: 0, length: 0),
                              replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
         // After an explicit user commit of a single character, offer associated phrases (聯想).
         // System-driven commits (focus loss, mode switch) pass offerAssociations: false and stay idle.
         if offerAssociations, Preferences.associatedPhrasesEnabled, text.count == 1, let first = text.first {
-            let phrases = associatedPhrases.associations(for: first)
+            let phrases = associatedPhrases.associations(for: first, userRank: userRank)
             if !phrases.isEmpty {
                 associations = phrases
                 candidatePage = 0

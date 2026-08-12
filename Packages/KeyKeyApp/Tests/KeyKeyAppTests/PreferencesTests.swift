@@ -10,7 +10,8 @@ final class PreferencesTests: XCTestCase {
     override func tearDown() {
         for key in ["candidateFontSize", "associatedPhrasesEnabled", "fullWidthPunctuationEnabled",
                     "outputSimplifiedEnabled", "cangjieVersion", "associationContinuationOnly",
-                    "codeHintEnabled", "associationSelectionTrigger", "strokeConfirmationEnabled"] {
+                    "codeHintEnabled", "associationSelectionTrigger", "strokeConfirmationEnabled",
+                    "adaptiveCandidateOrderEnabled"] {
             defaults.removeObject(forKey: key)
         }
         super.tearDown()
@@ -78,6 +79,11 @@ final class PreferencesTests: XCTestCase {
         XCTAssertTrue(Preferences.strokeConfirmationEnabled)
         Preferences.strokeConfirmationEnabled = false
         XCTAssertFalse(Preferences.strokeConfirmationEnabled)
+
+        Preferences.adaptiveCandidateOrderEnabled = false
+        XCTAssertFalse(Preferences.adaptiveCandidateOrderEnabled)
+        Preferences.adaptiveCandidateOrderEnabled = true
+        XCTAssertTrue(Preferences.adaptiveCandidateOrderEnabled)
     }
 
     // Issue #61: absent (never set) must read false, so an existing install keeps today's
@@ -85,6 +91,18 @@ final class PreferencesTests: XCTestCase {
     func testStrokeConfirmationDefaultsOffWhenAbsent() {
         defaults.removeObject(forKey: "strokeConfirmationEnabled")
         XCTAssertFalse(Preferences.strokeConfirmationEnabled)
+    }
+
+    // Issue #85: this is the one new toggle that defaults ON, so the registered default is what
+    // an existing install relies on. Written explicitly rather than removing the key and reading,
+    // because `bool(forKey:)` on a truly absent key with no registration returns false — the
+    // opposite of the intended default. testRegisterDefaultsSuppliesSensibleFirstLaunchValues
+    // covers the registration itself.
+    func testAdaptiveCandidateOrderRoundTripsBothWays() {
+        defaults.set(false, forKey: "adaptiveCandidateOrderEnabled")
+        XCTAssertFalse(Preferences.adaptiveCandidateOrderEnabled)
+        defaults.set(true, forKey: "adaptiveCandidateOrderEnabled")
+        XCTAssertTrue(Preferences.adaptiveCandidateOrderEnabled)
     }
 
     // MARK: cangjieVersion
@@ -141,7 +159,8 @@ final class PreferencesTests: XCTestCase {
     func testRegisterDefaultsSuppliesSensibleFirstLaunchValues() {
         for key in ["candidateFontSize", "associatedPhrasesEnabled", "fullWidthPunctuationEnabled",
                     "outputSimplifiedEnabled", "cangjieVersion", "associationContinuationOnly",
-                    "codeHintEnabled", "associationSelectionTrigger", "strokeConfirmationEnabled"] {
+                    "codeHintEnabled", "associationSelectionTrigger", "strokeConfirmationEnabled",
+                    "adaptiveCandidateOrderEnabled"] {
             defaults.removeObject(forKey: key)
         }
         Preferences.registerDefaults()
@@ -151,6 +170,11 @@ final class PreferencesTests: XCTestCase {
         XCTAssertFalse(Preferences.associationContinuationOnly)
         XCTAssertFalse(Preferences.codeHintEnabled)
         XCTAssertFalse(Preferences.strokeConfirmationEnabled)
+        // ON by default (issue #85): 2.13.0 must not change how an existing install ranks
+        // candidates. Asserted HERE and not only via tearDown, because a registered default
+        // outlives removeObject — a key missing from the removal list above could otherwise pass
+        // on a value some earlier test left behind.
+        XCTAssertTrue(Preferences.adaptiveCandidateOrderEnabled)
         XCTAssertEqual(Preferences.cangjieVersion, .v5)
         XCTAssertEqual(Preferences.associationSelectionTrigger, .number)
         XCTAssertEqual(Preferences.candidateFontSize, 18)    // defaultFontSize

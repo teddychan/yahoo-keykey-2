@@ -57,6 +57,10 @@ private struct GeneralPaneView: View {
                 .dragonAnnotation(LocalizedStringKey(L("keykey.general.cangjieVersionHint")))
                 Toggle(L("keykey.general.strokeConfirmation"), isOn: $model.strokeConfirmation)
                     .dragonAnnotation(LocalizedStringKey(L("keykey.general.strokeConfirmationHint")))
+                // Governs every input method, not just the 倉頡版本 above it — hence the explicit
+                // 倉頡/速成/拼音 list in the hint rather than a position that implies otherwise.
+                Toggle(L("keykey.general.adaptiveCandidateOrder"), isOn: $model.adaptiveCandidateOrder)
+                    .dragonAnnotation(LocalizedStringKey(L("keykey.general.adaptiveCandidateOrderHint")))
             }
 
             DragonSection(LocalizedStringKey(L("keykey.general.language"))) {
