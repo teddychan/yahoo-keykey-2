@@ -31,6 +31,19 @@ A plain-language list of changes in each version, newest first.
   moved the ordering from load time to typing time: an order can only be promised not to change
   with your selections if it is reproducible to begin with.
 
+- **Known limitation, now written down: a rare character you keep picking may never reach the
+  front.** Adaptive ranking lifts a character *within* the dictionary's own ordering, so a
+  character the bundled language model does not know cannot overtake one it does, however many
+  times you pick it. Under `卜月卜尸心`, 龍 is in the model and the variant 㡣 is not, so 㡣 stays
+  second permanently. Roughly four in five characters in the 五代 table are outside the model, and
+  about two in five codes with more than one candidate mix the two kinds.
+
+  Nothing here changes — this is how ranking has always worked, and it is now described in the
+  README's Troubleshooting section instead of being a surprise. It does not affect 聯想字詞, where
+  every phrase is scored and one selection is enough to reach the top. Fixing it means changing
+  the ranking for everyone who has learning switched on, not only those using the new toggle, so
+  it is deliberately left for a release of its own.
+
 - **Under the hood: `docs/RELEASE.md` no longer describes the retired appcast mirror.** The
   release workflow stopped publishing a second copy of the update feed to the website in 2.12.0,
   but the release instructions still described that mirror as live and said it would be dropped

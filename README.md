@@ -161,6 +161,17 @@ and stays on page 1, a second Space pages, and `1–9` picks.
 **Shift + 1–9** in **設定… ▸ 一般**; a plain `1–9` then types the digit and dismisses the
 suggestions, so numbers flow naturally right after a character.
 
+**A rare character I keep picking never moves to the front.** Known limitation, and it applies
+only to the candidate list — not to 聯想. Adaptive ranking lifts a character *within* the
+dictionary's own ordering, so a character the bundled language model does not know cannot
+overtake one it does, however many times you pick it. Under `卜月卜尸心`, for example, 龍 is in
+the model and the variant 㡣 is not, so 㡣 stays second permanently. Roughly four in five
+characters in the 五代 table are outside the model, and about two in five codes with more than
+one candidate mix the two kinds. Learning still reorders such characters relative to each other,
+and works normally whenever the characters involved are in the model. See
+[#111](https://github.com/teddychan/yahoo-keykey-2/pull/111) for the measurements and why the
+fix was kept out of that release.
+
 **⌘C / ⌘X / ⌘V don't copy, cut, or paste.** Fixed in **2.7.0** — ⌘ and ⌃ combinations now pass
 through to the app instead of being read as radicals. Update if you are on an older version.
 
