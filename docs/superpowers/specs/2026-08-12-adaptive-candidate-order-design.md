@@ -173,6 +173,37 @@ each app file is a single edit.
 `docs/yahoo-keykey-2/appcast.xml` is **not** touched — the release workflow publishes it after the
 tag, and it must keep describing the latest published release until then.
 
+## A limit on what learning can do, left as it is
+
+Found while testing 2.13.0, pre-existing, and **deliberately not fixed here**: a character the
+language model does not know can never be learned above one it does.
+
+`CangjieEngine.score` and `SimplexEngine.score` floor an unranked character at `-1e9`:
+
+```swift
+let base = rank[c] ?? -1e9
+```
+
+The largest bonus `UserFrequency` can ever produce is `log(1 + 100_000) * 10 ≈ 115`, so the floor
+is unbridgeable. Under code `ybysp`, 龍 scores −3.89 and the variant 㡣 is absent from the model
+entirely; picking 㡣 any number of times leaves it second. The comment above that line claims the
+floor leaves "headroom for a finite user bonus to lift an otherwise-unranked character", which the
+value does not deliver — it only lets unranked characters reorder among themselves.
+
+It is not small: **79%** of the 五代 table's 64,544 characters are absent from the model, and
+**41%** of the 8,410 multi-candidate codes mix ranked with unranked characters.
+
+The fix is one constant — real single-character scores span `[-8, 0]`, so a floor of `-20` would
+keep today's no-learning order byte-identical while making ~5 deliberate picks enough to promote a
+variant. It is left out because it changes ranking for **every** user with learning on, not only
+those who touch the new toggle, so it deserves its own release note and review.
+
+**聯想 has no equivalent problem.** Every phrase in `AssociatedPhrases` carries a real model score —
+there is no unranked path, because a phrase only enters the table if its line parsed with a numeric
+score. Bucket spreads are small (median 1.38, 95th percentile 2.71, max 8.00) against a first-pick
+bonus of 6.93, so one pick reaches the top in 99.8% of the 5,319 buckets and two picks in all of
+them.
+
 ## Deliberately out of scope
 
 - **A "reset learned data" button.** Not asked for, and the Uninstall pane already removes the
