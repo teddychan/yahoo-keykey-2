@@ -18,6 +18,15 @@ A plain-language list of changes in each version, newest first.
   exactly as before. Thanks to the reporter of
   [issue #113](https://github.com/teddychan/yahoo-keykey-2/issues/113).
 
+- **Under the hood: updated to DragonKit 4.1.0** (from 4.0.0), the shared code behind the Settings
+  window's About, What's New, Backup & Restore, Updates and Uninstall panes. Nothing was
+  redesigned and no feature changed; this release is almost entirely automatic checks that hold
+  the five Dragon apps to the same shape — an About Website row now has to address the app's own
+  page on the studio site, a language menu can only offer languages the app is actually translated
+  into, and a check that finds nothing to look at now fails instead of quietly reporting success.
+  Yahoo! KeyKey 2 passes all of them unchanged. The About pane reports the new number; that is the
+  whole of what you can see.
+
 ## 2.13.0
 
 - **Added: the adaptive candidate order can now be turned off.** A new toggle in **設定… ▸ 一般 ▸

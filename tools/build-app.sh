@@ -86,7 +86,7 @@ echo "==> Building DragonKit (SwiftPM, release) in pinned checkout"
 # tools/test-resolve-dragon-kit.sh can drive every one of them without a swiftc build.
 # DRAGONKIT_TAG stays HERE: the propagation SOP and .github/workflows/tests.yml both read the pin
 # out of this file.
-DRAGONKIT_TAG="v4.0.0"
+DRAGONKIT_TAG="v4.1.0"
 DRAGONKIT_URL="https://github.com/teddychan/dragon-kit"
 "$ROOT/tools/resolve-dragon-kit.sh" "$KIT_DIR" "$DRAGONKIT_TAG" "$DRAGONKIT_URL"
 ( cd "$KIT_DIR" && swift build -c release )
