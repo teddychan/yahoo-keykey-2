@@ -135,4 +135,43 @@ final class SimplexEngineTests: XCTestCase {
         XCTAssertFalse(e.handleKey("A"))
         XCTAssertEqual(e.composingText, "日")
     }
+
+    // MARK: - A full code ends the composition (issue #113)
+
+    func testRadicalKeyStartsNewCompositionOnlyOnAFullCode() {
+        let e = make()
+        XCTAssertFalse(e.keyStartsNewComposition("c"))   // nothing typed yet
+        _ = e.handleKey("a")
+        XCTAssertFalse(e.keyStartsNewComposition("c"))   // one radical: the code can still grow
+        _ = e.handleKey("b")
+        XCTAssertTrue(e.keyStartsNewComposition("c"))    // two radicals: 速成 codes end here
+    }
+
+    func testNonRadicalKeyNeverStartsNewComposition() {
+        let e = make()
+        _ = e.handleKey("a"); _ = e.handleKey("b")
+        // Keys the engine would not consume anyway: no composition to end.
+        XCTAssertFalse(e.keyStartsNewComposition("1"))
+        XCTAssertFalse(e.keyStartsNewComposition(" "))
+        XCTAssertFalse(e.keyStartsNewComposition("*"))   // 倉頡 wildcard; 速成 rejects it
+    }
+
+    func testCommitClearsTheFullCode() {
+        let e = make()
+        _ = e.handleKey("a"); _ = e.handleKey("b")
+        _ = e.commit()
+        XCTAssertFalse(e.keyStartsNewComposition("c"))
+    }
+
+    func testThirdRadicalCommitsThenStartsTheNextCharacter() {
+        // The controller's sequence: a full code plus another radical commits the character in
+        // progress and begins a new composition with that radical — instead of building the
+        // 3-key code "abc", which no 速成 table contains, so nothing could be selected.
+        let e = make()
+        _ = e.handleKey("a"); _ = e.handleKey("b")
+        XCTAssertTrue(e.keyStartsNewComposition("c"))
+        XCTAssertEqual(e.commit(), "明")
+        XCTAssertTrue(e.handleKey("c"))
+        XCTAssertEqual(e.composingText, "金")
+    }
 }

@@ -529,6 +529,19 @@ final class InputController: IMKInputController {
         }
 
         guard let ch = event.characters?.first else { return false }
+        // 速成: the code is the first + last radical, so a THIRD radical key is not part of it —
+        // it starts the next character. Commit the one in progress (as Space/Return would, taking
+        // the first candidate of the page on screen) and let the key below begin a fresh
+        // composition, the way the original Yahoo! KeyKey does. Without this the key was appended
+        // to a 3-key code no 速成 table contains, so the candidate window emptied and the
+        // character could no longer be selected at all (issue #113). No 聯想 is offered here: the
+        // user is mid-word, and the suggestions would cover the new composition's candidates.
+        if let simplex = engine as? SimplexEngine, simplex.keyStartsNewComposition(ch) {
+            if !engine.candidates.isEmpty {
+                engine.selectCandidate(candidatePage * InputController.pageSize)
+            }
+            _ = commitCurrent(to: client)
+        }
         let consumed = engine.handleKey(ch)
         if consumed {
             // A new radical/key changes the candidate set; restart paging from page 0 and
