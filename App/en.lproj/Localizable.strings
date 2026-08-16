@@ -30,10 +30,9 @@
 "keykey.general.adaptiveCandidateOrderHint" = "Applies to 倉頡, 速成, 拼音 and associated phrases: characters you pick move gradually forward. Turn it off for the built-in order — 五代 and 拼音 use their built-in rankings, 三代 the original Yahoo! KeyKey order — which also pauses learning, without erasing what you have already learned.";
 "keykey.general.language" = "Language";
 
-/* What's New pane (2.13.0) */
-"keykey.whatsNew.summary" = "You can now turn off the adaptive candidate order, so the list stops rearranging itself and stays where you remember it.";
-"keykey.whatsNew.adaptiveCandidateOrder" = "A new setting in General ▸ Input Method, “Adapt candidate order based on your selections”, on by default. Turn it off and candidates in 倉頡, 速成, 拼音 and associated phrases keep their built-in order and stay there, and Yahoo! KeyKey 2 stops counting what you pick. Anything already learned is kept, so you can turn it back on whenever you like.";
-"keykey.whatsNew.associationOrderStable" = "Associated phrases that share the same score now always appear in the same order. That order used to be arbitrary and could differ between launches — and it also decided which suggestions made the list at all.";
+/* What's New pane (2.13.1) */
+"keykey.whatsNew.summary" = "In 速成, typing on past a two-key code now moves to the next character instead of leaving you stuck.";
+"keykey.whatsNew.simplexThirdRadical" = "A 速成 code is two keys — the first and last 倉頡 radical — so once you have typed both, the character is settled. Starting the next character used to add that key to the code you had just finished, making a three-key code that no 速成 table contains: the candidate list emptied and the character could no longer be picked at all. A third key now finishes the character in progress, taking the candidate the space bar would have taken, and begins the next one.";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "Disable Cangjie and Simplex from Input Sources";

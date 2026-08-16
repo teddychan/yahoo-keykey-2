@@ -30,10 +30,9 @@
 "keykey.general.adaptiveCandidateOrderHint" = "套用於倉頡、速成、拼音與聯想字詞：你常選的字會逐漸往前移。關閉後改用內建順序（五代與拼音使用內建詞頻，三代使用 Yahoo! KeyKey 原版順序），同時暫停學習，但已經學到的紀錄會保留，不會清除。";
 "keykey.general.language" = "語言";
 
-/* What's New pane (2.13.0) */
-"keykey.whatsNew.summary" = "現在可以關閉自動調整候選字順序，候選字不再隨你的選字而移動，永遠停在你記得的位置。";
-"keykey.whatsNew.adaptiveCandidateOrder" = "「一般 ▸ 輸入方式」新增「依選字習慣調整候選字順序」，預設開啟。關閉後，倉頡、速成、拼音與聯想字詞都會維持內建順序不再變動，Yahoo! KeyKey 2 也會停止記錄你選了哪些字；已經學到的紀錄會保留，隨時可以再開啟。";
-"keykey.whatsNew.associationOrderStable" = "分數相同的聯想字詞現在每次都會以相同順序出現。先前這個順序並不固定，重新啟動後可能不同，也會影響哪些聯想詞能出現在清單中。";
+/* What's New pane (2.13.1) */
+"keykey.whatsNew.summary" = "速成打完兩碼後再繼續打，現在會直接接到下一個字，不會再卡住。";
+"keykey.whatsNew.simplexThirdRadical" = "速成的字碼只有兩碼（倉頡的首碼與尾碼），兩碼打完，這個字就已經定了。先前接著打下一個字的字根時，那一碼會被接到剛打完的字碼後面變成三碼，而速成沒有三碼的字碼，候選字清單因此清空，原本要選的字再也選不到，只能按倒退鍵。現在第三碼會先送出正在打的字（取空白鍵會取的那一個），再用這一碼開始下一個字。";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "從輸入來源中停用倉頡與速成";

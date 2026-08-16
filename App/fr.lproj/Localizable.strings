@@ -30,10 +30,9 @@
 "keykey.general.adaptiveCandidateOrderHint" = "S’applique à 倉頡, 速成, 拼音 et aux phrases associées : les caractères que vous choisissez avancent peu à peu. Désactivez cette option pour conserver l’ordre intégré — 五代 et 拼音 utilisent leur classement intégré, 三代 l’ordre d’origine de Yahoo! KeyKey —, ce qui met aussi l’apprentissage en pause sans effacer ce qui a déjà été appris.";
 "keykey.general.language" = "Langue";
 
-/* What's New pane (2.13.0) */
-"keykey.whatsNew.summary" = "Vous pouvez désormais désactiver l’ordre adaptatif des candidats : la liste cesse de se réorganiser et reste là où vous l’avez mémorisée.";
-"keykey.whatsNew.adaptiveCandidateOrder" = "Un nouveau réglage dans Général ▸ Méthode de saisie, « Adapter l’ordre des candidats à vos sélections », activé par défaut. Une fois désactivé, les candidats de 倉頡, 速成, 拼音 et les phrases associées conservent leur ordre intégré et n’en bougent plus, et Yahoo! KeyKey 2 cesse de comptabiliser vos choix. Ce qui a déjà été appris est conservé : vous pouvez le réactiver quand vous voulez.";
-"keykey.whatsNew.associationOrderStable" = "Les phrases associées de score identique apparaissent désormais toujours dans le même ordre. Cet ordre était auparavant arbitraire et pouvait changer d’un lancement à l’autre — il déterminait aussi quelles suggestions figuraient dans la liste.";
+/* What's New pane (2.13.1) */
+"keykey.whatsNew.summary" = "En 速成, continuer à taper après un code de deux touches passe désormais au caractère suivant au lieu de vous bloquer.";
+"keykey.whatsNew.simplexThirdRadical" = "Un code 速成 comporte deux touches — le premier et le dernier radical 倉頡 — : une fois les deux saisies, le caractère est déterminé. Auparavant, commencer le caractère suivant ajoutait cette touche au code que vous veniez de terminer et formait un code de trois touches qu’aucune table 速成 ne contient : la liste de candidats se vidait et le caractère ne pouvait plus être choisi. Une troisième touche valide désormais le caractère en cours — celui que la barre d’espace aurait choisi — et commence le suivant.";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "Désactiver 倉頡 et 速成 dans les sources de saisie";

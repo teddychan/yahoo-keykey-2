@@ -30,10 +30,9 @@
 "keykey.general.adaptiveCandidateOrderHint" = "适用于仓颉、速成、拼音与联想词：你常选的字会逐渐往前移。关闭后改用内建顺序（五代与拼音使用内建词频，三代使用 Yahoo! KeyKey 原版顺序），同时暂停学习，但已经学到的记录会保留，不会清除。";
 "keykey.general.language" = "语言";
 
-/* What's New pane (2.13.0) */
-"keykey.whatsNew.summary" = "现在可以关闭自动调整候选字顺序，候选字不再随你的选字而移动，永远停在你记得的位置。";
-"keykey.whatsNew.adaptiveCandidateOrder" = "「通用 ▸ 输入方式」新增「依选字习惯调整候选字顺序」，默认开启。关闭后，仓颉、速成、拼音与联想词都会维持内建顺序不再变动，Yahoo! KeyKey 2 也会停止记录你选了哪些字；已经学到的记录会保留，随时可以再开启。";
-"keykey.whatsNew.associationOrderStable" = "分数相同的联想词现在每次都会以相同顺序出现。此前这个顺序并不固定，重新启动后可能不同，也会影响哪些联想词能出现在列表中。";
+/* What's New pane (2.13.1) */
+"keykey.whatsNew.summary" = "速成打完两码后再继续打，现在会直接接到下一个字，不会再卡住。";
+"keykey.whatsNew.simplexThirdRadical" = "速成的字码只有两码（仓颉的首码与尾码），两码打完，这个字就已经定了。此前接着打下一个字的字根时，那一码会被接到刚打完的字码后面变成三码，而速成没有三码的字码，候选字列表因此清空，原本要选的字再也选不到，只能按退格键。现在第三码会先送出正在打的字（取空格键会取的那一个），再用这一码开始下一个字。";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "从输入源中停用仓颉与速成";

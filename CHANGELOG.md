@@ -2,7 +2,7 @@
 
 A plain-language list of changes in each version, newest first.
 
-## Unreleased
+## 2.13.1
 
 - **Fixed: in 速成, typing on past a two-key code now moves to the next character instead of
   getting stuck.** A 速成 code is two keys — the first and last 倉頡 radical — so once you have

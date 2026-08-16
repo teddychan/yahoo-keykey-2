@@ -6,41 +6,34 @@ import DragonKit
 // binary isn't. That makes the entries and the date the only things to keep in sync with
 // CHANGELOG.md on release.
 //
-// 2.13.0 claims one addition and one fix, both from issue #85.
+// 2.13.1 claims one fix, from issue #113.
 //
-// `.added` is the 依選字習慣調整候選字順序 toggle. Yahoo! KeyKey 2 has always counted the characters
-// you commit and ranked candidates by that count, with no way to stop it. The issue is from a
-// long-time 速成 typist who had memorised the candidate sequence: for them a list that keeps
-// rearranging itself is worse than one that never moves, because the position they reach for is no
-// longer the position the character is in. On by default, so nobody's existing install changes.
+// `.fixed` is 速成 no longer building a code it cannot resolve. A 速成 code is the 倉頡 first + last
+// radical, so it is two keys at most — but SimplexEngine.handleKey had no length limit, and the key
+// that starts the NEXT character was appended to the code just finished. The resulting 3-key code
+// is in no 速成 table, so the candidate list emptied and the character the user had already
+// finished could not be selected at all; Backspace was the only way out. A third radical now
+// commits the character in progress and begins the next one with that key, which is what the
+// original Yahoo! KeyKey does.
 //
-// `.fixed` is the 聯想 ordering becoming reproducible. It is a real user-visible change and not
-// merely internal: `AssociatedPhrases` sorted on score alone through Swift's `sorted(by:)`, which
-// is not stable, so equal-scoring phrases sat in an arbitrary order — and because that same sort
-// feeds the 20-per-bucket cap, the arbitrariness decided which suggestions the user could ever see.
-// It is in this release rather than its own because making 聯想 frequency-ranked is what moved the
-// ordering from load time to query time; a promise that the order "does not change based on your
-// selections" is only true if the order is reproducible to begin with.
+// Deliberately NOT in the notes: the DragonKit pin moving to 4.1.0. 2.11.5 and 2.11.6 each carried
+// a pin entry because the bump WAS the substance of those releases; here it is a conformance-driven
+// follow, it needed no App/ change, and the only thing a user could see is the version the About
+// pane reports. CHANGELOG.md records it either way.
 //
-// Deliberately NOT in the notes: the learning store, the 20-per-bucket cap and the What's New
-// mechanism itself are all unchanged, and the seven .strings files gain the setting's own two
-// strings, which the General pane shows rather than this pane.
-//
-// `keykey.whatsNew.copyrightNotice` is gone, replaced by the two keys below in all seven .strings
-// files. 2.12.1's entry has nothing to say here, and leaving the key behind would strand that
-// release's sentence in seven files waiting to be shown again.
+// The 2.13.0 keys (`adaptiveCandidateOrder`, `associationOrderStable`) are gone from all seven
+// .strings files, replaced by the key below — the same treatment `copyrightNotice` got when 2.13.0
+// superseded 2.12.1. Leaving a superseded key behind strands that release's sentence in seven files
+// waiting to be shown again.
 enum WhatsNewConfig {
     @MainActor
     static var content: WhatsNewContent {
         WhatsNewContent(
-            date: "2026-08-12",
+            date: "2026-08-16",
             summary: L("keykey.whatsNew.summary"),
             sections: [
-                ChangeSection(kind: .added, entries: [
-                    L("keykey.whatsNew.adaptiveCandidateOrder"),
-                ]),
                 ChangeSection(kind: .fixed, entries: [
-                    L("keykey.whatsNew.associationOrderStable"),
+                    L("keykey.whatsNew.simplexThirdRadical"),
                 ]),
             ]
         )

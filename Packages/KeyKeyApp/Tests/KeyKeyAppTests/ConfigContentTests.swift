@@ -88,26 +88,22 @@ final class ConfigContentTests: XCTestCase {
         let short = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
         XCTAssertEqual(content.displayVersion, DragonVersion.display(short ?? "1.0.0"))
         XCTAssertTrue(content.displayVersion.hasPrefix("v"))
-        XCTAssertEqual(content.date, "2026-08-12")
+        XCTAssertEqual(content.date, "2026-08-16")
     }
 
-    // 2.13.0 is an `.added` and a `.fixed`, both from issue #85.
+    // 2.13.1 is a single `.fixed`, from issue #113.
     //
-    // `.added` is the 依選字習慣調整候選字順序 toggle. KeyKey has always counted committed characters
-    // and ranked candidates by that count with no way to stop it; the issue is from a long-time 速成
-    // typist who had memorised the sequence, for whom a list that rearranges itself is worse than
-    // one that never moves. On by default, so no existing install changes.
+    // A 速成 code is the 倉頡 first + last radical, so it is two keys at most, but SimplexEngine
+    // had no length limit: the key starting the NEXT character was appended to the code just
+    // finished, and the resulting 3-key code is in no 速成 table. The candidate list emptied and
+    // the character the user had already finished could not be selected at all. A third radical
+    // now commits the character in progress and begins the next one with that key.
     //
-    // `.fixed` is 聯想 ordering becoming reproducible — user-visible, not internal plumbing.
-    // `AssociatedPhrases` sorted on score alone through `sorted(by:)`, which is not a stable sort,
-    // so equal-scoring phrases sat in an arbitrary order; because that sort also feeds the
-    // 20-per-bucket cap, it decided which suggestions the user could ever see. It ships here
-    // because making 聯想 frequency-ranked is what moved ordering from load time to query time.
-    //
-    // Two sections, so this is the first release since 2.11.2 ([.improved, .fixed]) to carry more
-    // than one. 2.12.1 was a single `.fixed` for the bundle's missing `NSHumanReadableCopyright`;
-    // 2.12.0 a single `.added` for the five missing localizations; 2.11.5 and 2.11.6 each a
-    // DragonKit pin entry, because the bump was the substance of those releases.
+    // Back to one section, after 2.13.0's [.added, .fixed]. 2.12.1 was a single `.fixed` for the
+    // bundle's missing `NSHumanReadableCopyright`; 2.12.0 a single `.added` for the five missing
+    // localizations; 2.11.5 and 2.11.6 each a DragonKit pin entry, because the bump was the
+    // substance of those releases — unlike 2.13.1's move to 4.1.0, which needed no App/ change and
+    // is recorded in CHANGELOG.md alone.
     //
     // Entry KEYS are pinned, not just kinds and counts, because kinds and counts had stopped
     // catching anything: 2.11.3, 2.11.4 and the 2.11.5 draft were all [.changed] with one entry —
@@ -118,13 +114,12 @@ final class ConfigContentTests: XCTestCase {
     // text SAYS is the release gate's job — it diffs every locale's .strings file — so between
     // them a stale pane cannot ship.
     @MainActor
-    func testWhatsNewAnnouncesTheAdaptiveOrderToggleAndTheStableAssociationOrder() {
+    func testWhatsNewAnnouncesTheSimplexThirdRadicalFix() {
         let content = WhatsNewConfig.content
-        XCTAssertEqual(content.sections.map(\.kind), [.added, .fixed])
-        XCTAssertEqual(content.sections.map(\.entries.count), [1, 1])
+        XCTAssertEqual(content.sections.map(\.kind), [.fixed])
+        XCTAssertEqual(content.sections.map(\.entries.count), [1])
         XCTAssertEqual(content.sections.flatMap(\.entries), [
-            L("keykey.whatsNew.adaptiveCandidateOrder"),
-            L("keykey.whatsNew.associationOrderStable"),
+            L("keykey.whatsNew.simplexThirdRadical"),
         ])
     }
 

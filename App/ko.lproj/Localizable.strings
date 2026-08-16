@@ -30,10 +30,9 @@
 "keykey.general.adaptiveCandidateOrderHint" = "倉頡, 速成, 拼音과 연상 어구에 적용됩니다. 자주 선택하는 글자가 점차 앞으로 이동합니다. 끄면 기본 순서가 그대로 유지되고(五代와 拼音은 내장 빈도순, 三代는 Yahoo! KeyKey 원래 순서) 학습도 일시 중지됩니다. 이미 학습한 내용은 지워지지 않고 남습니다.";
 "keykey.general.language" = "언어";
 
-/* What's New pane (2.13.0) */
-"keykey.whatsNew.summary" = "이제 후보 순서 자동 조정을 끌 수 있습니다. 목록이 더 이상 재배열되지 않고 기억하는 자리에 그대로 있습니다.";
-"keykey.whatsNew.adaptiveCandidateOrder" = "일반 ▸ 입력 방식에 ‘선택한 글자에 맞춰 후보 순서 조정’ 설정이 추가되었습니다. 기본값은 켬입니다. 끄면 倉頡, 速成, 拼音과 연상 어구의 후보가 기본 순서를 유지하며 움직이지 않고, Yahoo! KeyKey 2도 무엇을 선택했는지 기록하지 않습니다. 이미 학습한 내용은 유지되므로 언제든 다시 켤 수 있습니다.";
-"keykey.whatsNew.associationOrderStable" = "점수가 같은 연상 어구가 이제 항상 같은 순서로 표시됩니다. 이전에는 그 순서가 일정하지 않아 실행할 때마다 달라질 수 있었고, 어떤 제안이 목록에 오르는지에도 영향을 주었습니다.";
+/* What's New pane (2.13.1) */
+"keykey.whatsNew.summary" = "速成에서 두 자리 코드를 다 입력한 뒤 계속 입력해도 이제 다음 글자로 넘어가며, 더 이상 막히지 않습니다.";
+"keykey.whatsNew.simplexThirdRadical" = "速成의 코드는 두 자리(倉頡의 첫 자근과 끝 자근)뿐이라, 두 자리를 입력하면 그 글자는 이미 정해진 상태입니다. 이전에는 다음 글자의 자근을 누르면 방금 끝낸 코드에 덧붙어 세 자리 코드가 되었고, 速成에는 그런 코드가 없으므로 후보 목록이 비어 원하던 글자를 더는 선택할 수 없었습니다. 이제 세 번째 자근은 입력 중인 글자를 확정하고(스페이스바가 선택했을 후보로) 그 자근으로 다음 글자를 시작합니다.";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "입력 소스에서 창힐과 속성 사용 중지";

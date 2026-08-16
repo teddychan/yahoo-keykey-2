@@ -30,10 +30,9 @@
 "keykey.general.adaptiveCandidateOrderHint" = "Se aplica a 倉頡, 速成, 拼音 y a las frases asociadas: los caracteres que eliges avanzan poco a poco. Desactívalo para conservar el orden incorporado — 五代 y 拼音 usan su clasificación incorporada; 三代, el orden original de Yahoo! KeyKey —, lo que además pausa el aprendizaje sin borrar lo ya aprendido.";
 "keykey.general.language" = "Idioma";
 
-/* What's New pane (2.13.0) */
-"keykey.whatsNew.summary" = "Ya puedes desactivar el orden adaptativo de los candidatos, de modo que la lista deje de reordenarse y se quede donde la recuerdas.";
-"keykey.whatsNew.adaptiveCandidateOrder" = "Un nuevo ajuste en General ▸ Método de entrada, «Adaptar el orden de los candidatos a tus selecciones», activado de forma predeterminada. Si lo desactivas, los candidatos de 倉頡, 速成, 拼音 y las frases asociadas conservan su orden incorporado y ya no se mueven, y Yahoo! KeyKey 2 deja de registrar lo que eliges. Lo aprendido hasta ahora se conserva, así que puedes volver a activarlo cuando quieras.";
-"keykey.whatsNew.associationOrderStable" = "Las frases asociadas con la misma puntuación aparecen ahora siempre en el mismo orden. Antes ese orden era arbitrario y podía variar entre arranques, y además decidía qué sugerencias llegaban a la lista.";
+/* What's New pane (2.13.1) */
+"keykey.whatsNew.summary" = "En 速成, seguir escribiendo después de un código de dos teclas ahora pasa al siguiente carácter en vez de dejarte atascado.";
+"keykey.whatsNew.simplexThirdRadical" = "Un código 速成 tiene dos teclas —el primer y el último radical de 倉頡—, así que en cuanto escribes ambas el carácter ya está decidido. Antes, empezar el carácter siguiente añadía esa tecla al código que acababas de terminar y formaba un código de tres teclas que no existe en ninguna tabla 速成: la lista de candidatos se vaciaba y el carácter ya no se podía elegir. Ahora una tercera tecla confirma el carácter en curso —el candidato que habría elegido la barra espaciadora— y empieza el siguiente.";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "Desactivar 倉頡 y 速成 en Fuentes de entrada";
