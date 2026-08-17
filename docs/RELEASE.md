@@ -27,10 +27,10 @@ Two scripts still package the app **locally**, outside CI: `tools/package-releas
 
 ## Versioning convention
 
-**The numeric version is the release the code is being developed *toward*, not the last one
-released.** So the moment work starts on a fix for a released `X.Y.Z`, bump
-`CFBundleShortVersionString` in `App/Info.plist` to `X.Y.(Z+1)` — before the fix is finished,
-not at the end. Every debug build from that branch then reports the version it will ship as:
+`CFBundleShortVersionString` holds the **target version** — the release the code is being
+developed *toward*, not the last one released. So the moment work starts on a fix for a
+released `X.Y.Z`, bump it in `App/Info.plist` to `X.Y.(Z+1)` — before the fix is finished, not
+at the end. Every debug build from that branch then reports the version it will ship as:
 
 ```
 v2.13.0          # released production version
@@ -63,12 +63,12 @@ version suffix:
 
 | Field | Where it comes from | Example |
 | --- | --- | --- |
-| `CFBundleShortVersionString` | `App/Info.plist`, the version being developed toward | `2.13.1` |
+| `CFBundleShortVersionString` | the **target version** in `App/Info.plist` | `2.13.1` |
 | `DragonBuildChannel` | `Debug` on a debug build, absent otherwise | `Debug` |
-| `CFBundleVersion` | `git rev-list --count HEAD` at build time | `213` |
-| `DragonCommitDate` | the HEAD commit's date at build time | `2026-Aug-16 05:15:56 UTC` |
+| `CFBundleVersion` | `git rev-list --count HEAD` at build time | `214` |
+| `DragonCommitDate` | the HEAD commit's date at build time | `2026-Aug-17 00:59:01 UTC` |
 
-rendered as `v2.13.1 Debug (213) · 2026-Aug-16 05:15:56 UTC`. Quote that whole line in a bug
+rendered as `v2.13.1 Debug (214) · 2026-Aug-17 00:59:01 UTC`. Quote that whole line in a bug
 report: the version says which release the code targets, and the build number and commit date
 say which build of it you were running. On 2026-08-16 a debug IME reporting build 210 with an
 Aug-13 commit date was traced to another worktree while the branch under test was at build 212
