@@ -3,6 +3,10 @@
 // (handleKey/composingText/candidates/selectCandidate/commit/backspace). Reuses
 // CangjieEngine.radicals for the composing-display glyphs.
 public final class SimplexEngine {
+    // A 速成 code is the 倉頡 first + last radical, so it is never longer than two keys —
+    // see SimplexTable.simplexCode(for:). Used by keyStartsNewComposition(_:).
+    private static let maxRadicals = 2
+
     private let table: SimplexTable
     private let characterRank: [Character: Double]
     // Live per-character bonus added on top of the dict rank (user learning). Consulted on
@@ -29,6 +33,21 @@ public final class SimplexEngine {
         selected = nil
         cachedCandidates = nil
         return true
+    }
+
+    /// Whether typing `key` now must END this composition and begin a new one (issue #113).
+    ///
+    /// A 速成 code is two radicals at most, so a further radical key cannot belong to the code
+    /// being typed — it is the start of the next character, and the original Yahoo! KeyKey
+    /// commits the character in progress and carries on. Appending it instead would build a
+    /// 3-key code that no 速成 table contains, leaving a composition with no candidate to pick
+    /// and no way out but Backspace.
+    ///
+    /// The caller (InputController) commits, then feeds the key to `handleKey` on the fresh
+    /// composition; false for anything `handleKey` would reject, since there is no key to carry
+    /// over. Deliberately not folded into `handleKey`, which cannot commit into the client.
+    public func keyStartsNewComposition(_ key: Character) -> Bool {
+        code.count >= Self.maxRadicals && CangjieEngine.radicals[key] != nil
     }
 
     /// The radical glyphs accumulated so far (selected char once chosen).

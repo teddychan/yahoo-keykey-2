@@ -2,6 +2,31 @@
 
 A plain-language list of changes in each version, newest first.
 
+## 2.13.1
+
+- **Fixed: in 速成, typing on past a two-key code now moves to the next character instead of
+  getting stuck.** A 速成 code is two keys — the first and last 倉頡 radical — so once you have
+  typed both, the character is as narrowed down as it can get. Type 女木 for 好 and then start the
+  next character with 人, and Yahoo KeyKey 2 would add that 人 to the code you had just finished,
+  making a three-key code. No such code exists in 速成, so the candidate list emptied out and 好
+  could no longer be picked at all; the only way forward was Backspace.
+
+  A third key now finishes the character in progress — taking the candidate the space bar would
+  have taken, the first one on the page you are looking at — and begins the next character with
+  that key, the way the original Yahoo! KeyKey behaves. Everything else is unchanged: 倉頡 still
+  takes up to five keys, and in 速成 the space bar, 1–9, the arrow keys and Backspace all work
+  exactly as before. Thanks to the reporter of
+  [issue #113](https://github.com/teddychan/yahoo-keykey-2/issues/113).
+
+- **Under the hood: updated to DragonKit 4.1.0** (from 4.0.0), the shared code behind the Settings
+  window's About, What's New, Backup & Restore, Updates and Uninstall panes. Nothing was
+  redesigned and no feature changed; this release is almost entirely automatic checks that hold
+  the five Dragon apps to the same shape — an About Website row now has to address the app's own
+  page on the studio site, a language menu can only offer languages the app is actually translated
+  into, and a check that finds nothing to look at now fails instead of quietly reporting success.
+  Yahoo! KeyKey 2 passes all of them unchanged. The About pane reports the new number; that is the
+  whole of what you can see.
+
 ## 2.13.0
 
 - **Added: the adaptive candidate order can now be turned off.** A new toggle in **設定… ▸ 一般 ▸
