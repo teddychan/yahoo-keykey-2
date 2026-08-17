@@ -25,50 +25,61 @@ Two scripts still package the app **locally**, outside CI: `tools/package-releas
 
 ---
 
-## When the version number moves
+## Versioning convention
 
-`CFBundleShortVersionString` in `App/Info.plist` is bumped **in the release commit, and
-never before it.** Through development it keeps reading the version that is currently
-public, so a feature branch, a debug build and the shipped app all report the same number
-until the moment the release is cut:
+**The numeric version is the release the code is being developed *toward*, not the last one
+released.** So the moment work starts on a fix for a released `X.Y.Z`, bump
+`CFBundleShortVersionString` in `App/Info.plist` to `X.Y.(Z+1)` — before the fix is finished,
+not at the end. Every debug build from that branch then reports the version it will ship as:
 
 ```
-v2.13.0 (production)  →  v2.13.0 (Debug, while 2.13.1 is being developed)  →  v2.13.1 (production)
+v2.13.0          # released production version
+v2.13.1 Debug    # bug fix under development
+v2.13.1 Debug    # further debug builds still target 2.13.1
+v2.13.1          # final production release
 ```
 
-*(Production is not a label in the UI — it is written here only to show which build is which.
-A debug build renders `v2.13.0 Debug`, and there is no such thing as a `v2.13.1 Debug` before
-2.13.1 is released.)*
+Never do the opposite — leaving modified code on the released number:
 
-**Why not pre-bump to the candidate.** There is only one version number in this project, not
-one per channel: `tools/build-app.sh` regenerates `Contents/Info.plist` from `App/Info.plist`
-on every build and rewrites plenty for the debug identity — bundle id, `TISInputSourceID`,
-connection name, the three mode ids, display name, `CFBundleVersion`, `DragonCommitDate`,
-`DragonBuildChannel`, `SUEnableAutomaticChecks`, `SUFeedURL` — but deliberately never
-`CFBundleShortVersionString`, which it only reads and asserts is numeric. That key is the sole
-value the release tag is checked against, so a debug build cannot be given a version of its
-own without the number in a screenshot ceasing to be the number the tag gate compares.
-Pre-bumping it would therefore mean every build between two releases claims a version that
-has not shipped, for as long as the branch is open.
+```
+v2.13.0          # production
+v2.13.0 Debug    # WRONG: modified code wearing a shipped version
+v2.13.1          # eventual release
+```
 
-**How to tell a debug build from the release, then.** Not by the version — by the three fields
-that are stamped per build:
+**A released version is immutable.** Once `2.13.0` is tagged, no modified code may ever report
+`2.13.0` again. That is the whole point: a version in a bug report has to identify one exact
+set of code, and it cannot if the release and everything developed after it share a number.
+
+**The version stays strictly numeric `X.Y.Z`.** No `-dev.1`, `-beta.2` or `-rc.1` inside it —
+`tools/build-app.sh` asserts the format and fails the build otherwise, because
+`CFBundleShortVersionString` is the sole value the release tag is compared against, and a
+non-numeric value breaks that gate.
+
+`Debug` is therefore a **build-state label, never part of the number**. It is carried by a
+separate key, `DragonBuildChannel = Debug`, which the About pane renders alongside the version.
+To distinguish several debug builds of the same version, use the build identifiers — never a
+version suffix:
 
 | Field | Where it comes from | Example |
 | --- | --- | --- |
-| `DragonBuildChannel` | `Debug` on a debug build, absent otherwise | renders as `v2.13.0 Debug` |
-| `CFBundleVersion` | `git rev-list --count HEAD` at build time | `212` |
+| `CFBundleShortVersionString` | `App/Info.plist`, the version being developed toward | `2.13.1` |
+| `DragonBuildChannel` | `Debug` on a debug build, absent otherwise | `Debug` |
+| `CFBundleVersion` | `git rev-list --count HEAD` at build time | `213` |
 | `DragonCommitDate` | the HEAD commit's date at build time | `2026-Aug-16 05:15:56 UTC` |
 
-The About pane prints all three on one line, which makes them the right thing to quote in a
-bug report and the fastest way to catch a stale build. On 2026-08-16 a debug IME reported
-`v2.13.0 Debug (210) · 2026-Aug-13 07:50:50 UTC` while the branch under test was at build 212
-and a commit dated Aug 16 — the build number and date identified it as another worktree's,
-which no marketing version could have done, since both said 2.13.0.
+rendered as `v2.13.1 Debug (213) · 2026-Aug-16 05:15:56 UTC`. Quote that whole line in a bug
+report: the version says which release the code targets, and the build number and commit date
+say which build of it you were running. On 2026-08-16 a debug IME reporting build 210 with an
+Aug-13 commit date was traced to another worktree while the branch under test was at build 212
+— the version alone could not have caught it, which is exactly why the build identifiers exist
+beside it rather than inside it.
 
-**At release time** the bump is step 1 of *Per release* below, and it lands in the same commit
-as the CHANGELOG section and the What's New notes. All three name the same version, and the
-`vX.Y.Z` tag must match `CFBundleShortVersionString` exactly or CI fails.
+**At release time** nothing about the version needs to change, because it was bumped when the
+work started. The release commit carries the CHANGELOG section and the What's New notes naming
+that same version, and the `vX.Y.Z` tag must match `CFBundleShortVersionString` exactly or CI
+fails. Confirm the plist already reads the version you are tagging — step 1 of *Per release*
+below.
 
 ---
 
@@ -194,9 +205,9 @@ place, stale, rather than deleted — a stale file is a quiet no-op where a miss
 visible failure. The three-step migration is spelled out in the comments in
 `.github/workflows/release.yml`; nothing about it is still pending.
 
-1. Bump **only** `CFBundleShortVersionString` in `App/Info.plist` — **here, in the release
-   commit, not earlier in development**; see [When the version number
-   moves](#when-the-version-number-moves). (The CI build fails if
+1. Confirm `CFBundleShortVersionString` in `App/Info.plist` already reads the version you are
+   tagging — it should have been bumped when work on this fix *started*, not now; see
+   [Versioning convention](#versioning-convention). (The CI build fails if
    the tag doesn't match it.) Leave `CFBundleVersion` alone — the committed value is an
    inert placeholder, `23` since v2.3.0. The real build number is stamped into the bundle
    at build time from `git rev-list --count HEAD` (`tools/build-app.sh` locally, the same

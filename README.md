@@ -193,11 +193,12 @@ cd yahoo-keykey-2
 
 For hands-on testing, `./tools/run-debug.sh` builds and installs a separate
 **Yahoo KeyKey 2 Debug** input method with its own bundle id, so it never collides with an
-installed release copy. It reports the version that is **currently public**, not the one being
-developed — the plist version is bumped in the release commit and never before it — so identify
-a debug build by the `Debug` channel, the build number and the commit date the About pane prints
-beside it, never by the version alone. See [When the version number
-moves](docs/RELEASE.md#when-the-version-number-moves). Signed release builds are produced by
+installed release copy. It reports the version being **developed toward** — the plist version is
+bumped to the next patch as soon as work starts, so a fix for 2.13.0 builds as `v2.13.1 Debug`
+and no modified code ever wears a released number. `Debug` is a build-channel label, never part
+of the numeric version; several debug builds of one version are told apart by the build number
+and commit date printed beside it. See [Versioning
+convention](docs/RELEASE.md#versioning-convention). Signed release builds are produced by
 [`.github/workflows/release.yml`](.github/workflows/release.yml) on a `v*` tag — see
 [docs/RELEASE.md](docs/RELEASE.md).
 
