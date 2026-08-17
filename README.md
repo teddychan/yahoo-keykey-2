@@ -62,9 +62,11 @@ on every release.
 
 ### Update
 
-- **In-app (both channels):** open the input menu from the input-source icon in the menu bar and
-  choose **檢查更新…**. Updates arrive over Sparkle from a signed appcast at
-  `https://www.dragonapp.com/yahoo-keykey-2/appcast.xml`.
+- **In-app (release builds):** open the input menu from the input-source icon in the menu bar and
+  choose **檢查更新…**. The action opens the Updates pane and invokes DragonKit's updater. Updates
+  arrive over Sparkle from the signed appcast in this repository at
+  `https://raw.githubusercontent.com/teddychan/yahoo-keykey-2/main/docs/yahoo-keykey-2/appcast.xml`.
+  Local Debug builds deliberately omit this menu item and disable the production feed.
 - **Homebrew:** `brew upgrade --cask yahoo-keykey-2`
 - **Manual:** download the newest `.zip` and replace the app in `~/Library/Input Methods/`.
 
@@ -72,12 +74,15 @@ Log out and back in after any update so macOS reloads the input method.
 
 ### Uninstall
 
-1. Deactivate the input method: **System Settings ▸ Keyboard ▸ Input Sources**, select
-   Yahoo KeyKey 2, and remove it.
+1. Deactivate the input method manually: **System Settings ▸ Keyboard ▸ Input Sources**, select
+   Yahoo KeyKey 2, and remove it. The built-in Uninstall pane does not unregister input sources.
 2. Remove the app — **Homebrew:** `brew uninstall --cask teddychan/tap/yahoo-keykey-2`;
    **manual:** open **設定…** from the input menu and use the **解除安裝** pane, or delete
-   `~/Library/Input Methods/YahooKeyKey2.app`.
-3. Remove the leftover preferences and caches (what `brew uninstall --zap` deletes):
+   `~/Library/Input Methods/YahooKeyKey2.app`. The built-in pane removes KeyKey's configured
+   defaults, learning-data directory, and cache before moving the running bundle to the Trash;
+   it also clears the Homebrew receipt when the running release bundle came from the cask.
+3. After deleting the app manually, remove leftover preferences and caches if wanted (the same
+   categories covered by `brew uninstall --zap`):
 
    ```sh
    rm -f  ~/Library/Preferences/com.dragonapp.inputmethod.yahoo-keykey.plist
