@@ -88,22 +88,17 @@ final class ConfigContentTests: XCTestCase {
         let short = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
         XCTAssertEqual(content.displayVersion, DragonVersion.display(short ?? "1.0.0"))
         XCTAssertTrue(content.displayVersion.hasPrefix("v"))
-        XCTAssertEqual(content.date, "2026-08-16")
+        XCTAssertEqual(content.date, "2026-08-18")
     }
 
-    // 2.13.1 is a single `.fixed`, from issue #113.
+    // 2.13.2 is a single `.changed`, and it is a maintenance release: nothing under App/ changed.
+    // Between v2.13.1 and this release the repository's diff is three files —
+    // .github/workflows/release.yml, README.md and docs/yahoo-keykey-2/appcast.xml — with no .swift
+    // among them, and the DragonKit pin still reads v4.1.0. The note says that and claims nothing
+    // more; the release gate requires the notes to MOVE, which a truthful maintenance note does.
     //
-    // A 速成 code is the 倉頡 first + last radical, so it is two keys at most, but SimplexEngine
-    // had no length limit: the key starting the NEXT character was appended to the code just
-    // finished, and the resulting 3-key code is in no 速成 table. The candidate list emptied and
-    // the character the user had already finished could not be selected at all. A third radical
-    // now commits the character in progress and begins the next one with that key.
-    //
-    // Back to one section, after 2.13.0's [.added, .fixed]. 2.12.1 was a single `.fixed` for the
-    // bundle's missing `NSHumanReadableCopyright`; 2.12.0 a single `.added` for the five missing
-    // localizations; 2.11.5 and 2.11.6 each a DragonKit pin entry, because the bump was the
-    // substance of those releases — unlike 2.13.1's move to 4.1.0, which needed no App/ change and
-    // is recorded in CHANGELOG.md alone.
+    // `.changed` because the app was neither broken nor improved — what moved sits around it. Still
+    // one section, as 2.13.1 (`.fixed`, issue #113) was, after 2.13.0's [.added, .fixed].
     //
     // Entry KEYS are pinned, not just kinds and counts, because kinds and counts had stopped
     // catching anything: 2.11.3, 2.11.4 and the 2.11.5 draft were all [.changed] with one entry —
@@ -114,12 +109,12 @@ final class ConfigContentTests: XCTestCase {
     // text SAYS is the release gate's job — it diffs every locale's .strings file — so between
     // them a stale pane cannot ship.
     @MainActor
-    func testWhatsNewAnnouncesTheSimplexThirdRadicalFix() {
+    func testWhatsNewAnnouncesTheMaintenanceReleaseOnly() {
         let content = WhatsNewConfig.content
-        XCTAssertEqual(content.sections.map(\.kind), [.fixed])
+        XCTAssertEqual(content.sections.map(\.kind), [.changed])
         XCTAssertEqual(content.sections.map(\.entries.count), [1])
         XCTAssertEqual(content.sections.flatMap(\.entries), [
-            L("keykey.whatsNew.simplexThirdRadical"),
+            L("keykey.whatsNew.maintenanceOnly"),
         ])
     }
 

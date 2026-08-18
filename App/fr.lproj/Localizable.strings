@@ -30,9 +30,9 @@
 "keykey.general.adaptiveCandidateOrderHint" = "S’applique à 倉頡, 速成, 拼音 et aux phrases associées : les caractères que vous choisissez avancent peu à peu. Désactivez cette option pour conserver l’ordre intégré — 五代 et 拼音 utilisent leur classement intégré, 三代 l’ordre d’origine de Yahoo! KeyKey —, ce qui met aussi l’apprentissage en pause sans effacer ce qui a déjà été appris.";
 "keykey.general.language" = "Langue";
 
-/* What's New pane (2.13.1) */
-"keykey.whatsNew.summary" = "En 速成, continuer à taper après un code de deux touches passe désormais au caractère suivant au lieu de vous bloquer.";
-"keykey.whatsNew.simplexThirdRadical" = "Un code 速成 comporte deux touches — le premier et le dernier radical 倉頡 — : une fois les deux saisies, le caractère est déterminé. Auparavant, commencer le caractère suivant ajoutait cette touche au code que vous veniez de terminer et formait un code de trois touches qu’aucune table 速成 ne contient : la liste de candidats se vidait et le caractère ne pouvait plus être choisi. Une troisième touche valide désormais le caractère en cours — celui que la barre d’espace aurait choisi — et commence le suivant.";
+/* What's New pane (2.13.2) */
+"keykey.whatsNew.summary" = "Une version de maintenance : uniquement l’automatisation des publications et la documentation. Rien concernant la saisie n’a changé.";
+"keykey.whatsNew.maintenanceOnly" = "Aucune partie du code de Yahoo! KeyKey 2 n’a changé dans cette version. Ce qui a bougé se situe autour : l’automatisation qui compile, signe et publie chaque version, et la documentation qui décrit la préparation d’une publication. 倉頡, 速成 et 拼音, la liste de candidats, vos réglages et vos données d’apprentissage se comportent exactement comme dans la 2.13.1 — la seule différence visible est le numéro de version affiché par ce volet et par le volet « À propos ».";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "Désactiver 倉頡 et 速成 dans les sources de saisie";
