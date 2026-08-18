@@ -21,6 +21,7 @@ on:
 # depend on this repo's default workflow-token setting being read/write.
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   release:
