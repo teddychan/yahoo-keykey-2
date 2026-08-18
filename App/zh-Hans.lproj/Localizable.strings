@@ -30,9 +30,9 @@
 "keykey.general.adaptiveCandidateOrderHint" = "适用于仓颉、速成、拼音与联想词：你常选的字会逐渐往前移。关闭后改用内建顺序（五代与拼音使用内建词频，三代使用 Yahoo! KeyKey 原版顺序），同时暂停学习，但已经学到的记录会保留，不会清除。";
 "keykey.general.language" = "语言";
 
-/* What's New pane (2.13.1) */
-"keykey.whatsNew.summary" = "速成打完两码后再继续打，现在会直接接到下一个字，不会再卡住。";
-"keykey.whatsNew.simplexThirdRadical" = "速成的字码只有两码（仓颉的首码与尾码），两码打完，这个字就已经定了。此前接着打下一个字的字根时，那一码会被接到刚打完的字码后面变成三码，而速成没有三码的字码，候选字列表因此清空，原本要选的字再也选不到，只能按退格键。现在第三码会先送出正在打的字（取空格键会取的那一个），再用这一码开始下一个字。";
+/* What's New pane (2.13.2) */
+"keykey.whatsNew.summary" = "这是一次维护发布，只更新了发布流程的自动化与文档，输入行为没有任何变化。";
+"keykey.whatsNew.maintenanceOnly" = "本次发布没有改动 Yahoo! KeyKey 2 自身的任何代码，改动的是它周边的部分：负责构建、签名并发布每个版本的自动化流程，以及说明发布步骤的文档。仓颉、速成、拼音、候选字列表、偏好设置与学习数据的表现都和 2.13.1 完全一样，你唯一能看到的差别，是本面板与「关于」面板显示的版本号。";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "从输入源中停用仓颉与速成";

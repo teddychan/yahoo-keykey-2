@@ -2,6 +2,18 @@
 
 A plain-language list of changes in each version, newest first.
 
+## 2.13.2
+
+- **A maintenance release: nothing in the app itself changed.** No Swift file, no setting, no code
+  table and no resource moved between 2.13.1 and this version. What changed sits around the app: the
+  automation that builds, signs, notarizes and publishes each release, and the documentation
+  describing how that is done. 倉頡, 速成 and 拼音, the candidate list, your preferences and your
+  learning data all behave exactly as they did in 2.13.1.
+
+  The only difference you can see is the version number the About and What's New panes report. If
+  you are looking for a reason to update, there isn't one beyond keeping the number in step — 2.13.1
+  is not missing a fix.
+
 ## 2.13.1
 
 - **Fixed: in 速成, typing on past a two-key code now moves to the next character instead of
