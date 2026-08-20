@@ -22,7 +22,7 @@
 "keykey.general.inputMethod" = "入力方式";
 "keykey.general.cangjieVersion" = "倉頡のバージョン";
 "keykey.general.cangjieV5" = "第5世代倉頡";
-"keykey.general.cangjieV3" = "第3世代倉頡（Yahoo KeyKey 互換）";
+"keykey.general.cangjieV3" = "第3世代倉頡（Yahoo! KeyKey 互換）";
 "keykey.general.cangjieVersionHint" = "「第3世代倉頡」はオリジナルの Yahoo! KeyKey のコード表と候補順を使います（倉頡と速成の両方に適用）。すぐに反映されます。";
 "keykey.general.strokeConfirmation" = "スペースキーでコードを確定";
 "keykey.general.strokeConfirmationHint" = "速成、および * ワイルドカードを使う倉頡では、コードを打ち終わる前に候補が出るため、スペースキーは打ったコードを確定せずに次のページへ送ってしまいます。オンにすると、最初のスペースキーはコードの確定だけを行い 1 ページ目に留まります。もう一度スペースキーを押すとページが進み、1〜9 で直接選べます。通常の倉頡は影響を受けません。";

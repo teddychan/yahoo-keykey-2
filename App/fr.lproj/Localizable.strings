@@ -22,7 +22,7 @@
 "keykey.general.inputMethod" = "Méthode de saisie";
 "keykey.general.cangjieVersion" = "Version de Cangjie";
 "keykey.general.cangjieV5" = "Cangjie de 5e génération";
-"keykey.general.cangjieV3" = "Cangjie de 3e génération (compatible Yahoo KeyKey)";
+"keykey.general.cangjieV3" = "Cangjie de 3e génération (compatible Yahoo! KeyKey)";
 "keykey.general.cangjieVersionHint" = "Le « Cangjie de 3e génération » utilise la table de codes et l’ordre des candidats du Yahoo! KeyKey d’origine (appliqué à 倉頡 comme à 速成), avec effet immédiat.";
 "keykey.general.strokeConfirmation" = "Appuyer sur Espace pour valider le code";
 "keykey.general.strokeConfirmationHint" = "En 速成, et en 倉頡 avec le joker *, les candidats apparaissent avant que le code soit terminé : Espace passe donc à la page suivante au lieu de valider ce que vous avez tapé. Avec cette option, le premier Espace ne fait que valider le code et reste sur la page 1 — appuyez de nouveau sur Espace pour changer de page, ou sur 1–9 pour choisir. Le 倉頡 normal n’est pas affecté.";
