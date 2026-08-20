@@ -35,7 +35,7 @@ jobs:
       # omitting it on v6 fails the gate.
       #
       # The config file FIRST — the version and section checks read that one — then every
-      # translation. KeyKey's entries are abstract `L()` keys ("keykey.whatsNew.summary"), so the
+      # translation. KeyKey's entries are abstract `L()` keys ("app.whatsNew.summary"), so the
       # text a user actually reads lives in these .strings and the .swift can sit still through a
       # complete rewrite of the notes. Watching only the .swift would reject that real rewrite and
       # wave through a release whose notes never changed. Needs dragon-release-ci >= v6.2.0, which

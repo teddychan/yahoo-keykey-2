@@ -2,6 +2,29 @@
 
 A plain-language list of changes in each version, newest first.
 
+## 2.13.3
+
+- **Fixed: Uninstall now stops if it finds more than one copy of Yahoo! KeyKey 2 on your Mac.**
+  Moving the copy you are running to the Trash was always safe, but your settings, login item and
+  support files are stored under the app's identity rather than its location — so two copies share
+  all of them, and there is no way to tell whose is whose. Uninstalling a spare copy could remove
+  the settings belonging to the copy you actually use. It now stops before removing anything and
+  lists where the copies are, so you can trash the ones you do not want and try again. If you have
+  one copy, which is nearly everyone, nothing changes.
+
+- **Under the hood: updated to DragonKit 4.1.1** (from 4.1.0), the shared framework behind
+  Settings, About, What's New and software updates. The fix above comes from it; none of those
+  panes look or behave differently. DragonKit 4.1.1 also fixes a raw developer error that could
+  appear in Settings ▸ Updates, but only in local debug builds — no released build of Yahoo!
+  KeyKey 2 could reach it, so nothing changes for anyone running a downloaded copy.
+
+- **Under the hood: the README was slimmed to an index, with Troubleshooting moved to
+  `known_issues.md`.** The README had grown to 271 lines and buried the install steps a new user
+  needs under nine sections of developer detail. Along the way: a note on the secure-input
+  grey-out was added to Troubleshooting, the last stale reference to the retired appcast mirror
+  was dropped, and the README's missing Screenshots section is now tracked as a known issue
+  instead of going unrecorded. No app behavior changes; documentation only.
+
 ## 2.13.2
 
 - **A maintenance release: nothing in the app itself changed.** No Swift file, no setting, no code

@@ -30,9 +30,10 @@
 "keykey.general.adaptiveCandidateOrderHint" = "S’applique à 倉頡, 速成, 拼音 et aux phrases associées : les caractères que vous choisissez avancent peu à peu. Désactivez cette option pour conserver l’ordre intégré — 五代 et 拼音 utilisent leur classement intégré, 三代 l’ordre d’origine de Yahoo! KeyKey —, ce qui met aussi l’apprentissage en pause sans effacer ce qui a déjà été appris.";
 "keykey.general.language" = "Langue";
 
-/* What's New pane (2.13.2) */
-"keykey.whatsNew.summary" = "Une version de maintenance : uniquement l’automatisation des publications et la documentation. Rien concernant la saisie n’a changé.";
-"keykey.whatsNew.maintenanceOnly" = "Aucune partie du code de Yahoo! KeyKey 2 n’a changé dans cette version. Ce qui a bougé se situe autour : l’automatisation qui compile, signe et publie chaque version, et la documentation qui décrit la préparation d’une publication. 倉頡, 速成 et 拼音, la liste de candidats, vos réglages et vos données d’apprentissage se comportent exactement comme dans la 2.13.1 — la seule différence visible est le numéro de version affiché par ce volet et par le volet « À propos ».";
+/* What's New pane (2.13.3) */
+"app.whatsNew.summary" = "Un correctif de sécurité dans Désinstaller, hérité du framework partagé sur lequel repose Yahoo! KeyKey 2. La saisie en 倉頡 et 速成 ne change pas.";
+"app.whatsNew.fixed1" = "Désinstaller s’arrête désormais s’il trouve plus d’une copie de Yahoo! KeyKey 2 sur votre Mac. Mettre à la corbeille la copie que vous utilisez a toujours été sûr, mais vos réglages, l’élément d’ouverture et les fichiers de support sont stockés selon l’identité de l’app plutôt que son emplacement — donc deux copies partagent tout cela, et il n’y a aucun moyen de savoir laquelle est laquelle. Désinstaller une copie superflue pourrait supprimer les réglages de la copie que vous utilisez réellement. Elle s’arrête désormais avant de supprimer quoi que ce soit et indique où se trouvent les copies, afin que vous puissiez mettre à la corbeille celles que vous ne voulez pas et réessayer. Si vous n’avez qu’une seule copie, ce qui est le cas de presque tout le monde, rien ne change.";
+"app.whatsNew.changed1" = "Mise à jour vers DragonKit 4.1.1, le framework partagé derrière Réglages, À propos, Nouveautés et les mises à jour logicielles. Le correctif ci-dessus en provient ; aucun de ces volets ne paraît ni ne se comporte différemment.";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "Désactiver 倉頡 et 速成 dans les sources de saisie";

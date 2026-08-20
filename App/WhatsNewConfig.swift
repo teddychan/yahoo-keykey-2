@@ -6,33 +6,34 @@ import DragonKit
 // binary isn't. That makes the entries and the date the only things to keep in sync with
 // CHANGELOG.md on release.
 //
-// 2.13.2 claims one `.changed`, and it is a maintenance release: **no App/ source changed at all**.
-// `git diff v2.13.1..main` over the release is three files — .github/workflows/release.yml,
-// README.md and docs/yahoo-keykey-2/appcast.xml — and not one .swift among them. The DragonKit pin
-// is still v4.1.0. So the honest note says exactly that: release automation and documentation, with
-// typing untouched.
+// 2.13.3 carries one user-facing change, inherited from DragonKit 4.1.1: Uninstall now refuses to
+// run when it finds more than one copy of the app on the Mac. Settings, the login item, support
+// files and the Homebrew record are all keyed to the app's identity rather than its location, so
+// two copies share all of them and there is no way to tell whose is whose — uninstalling a spare
+// copy could remove the settings belonging to the copy you actually use. It now stops before
+// removing anything and lists where the copies are.
 //
-// `.changed` rather than `.fixed` or `.improved` because nothing in the app was broken and nothing
-// in it got better; what moved sits around the app. There is no kind for "nothing you can see", and
-// inventing a user-facing change to fill the slot is the one thing this pane must never do.
+// Deliberately NOT in the notes: DragonKit 4.1.1's other fix, a raw developer error in Settings ▸
+// Updates. It only ever appeared in local debug builds, so no released build of Yahoo! KeyKey 2
+// could hit it — CHANGELOG.md records it, this pane does not, following the fleet's rule against
+// claiming what users cannot see.
 //
-// The notes MOVE because the release gate requires it — it diffs WhatsNewConfig.swift and all seven
-// .strings against the previous tag, so a release cannot ship its predecessor's text. That is a
-// requirement to rewrite the notes, not a licence to claim a change: the gate is satisfied by
-// truthfully describing a maintenance release.
-//
-// 2.13.1's `simplexThirdRadical` key is gone from all seven .strings files, replaced by the key
-// below — the same treatment 2.13.0's keys got when 2.13.1 superseded them. Leaving a superseded key
-// behind strands that release's sentence in seven files waiting to be shown again.
+// Keys are the fleet's stable set (app.whatsNew.summary, .fixed1, .changed1, …), not named after
+// this release's content — a release just overwrites the same keys' text in all seven .strings
+// files rather than adding new ones and stranding the last release's, which is what happened to
+// 2.13.2's `maintenanceOnly` and 2.13.1's `simplexThirdRadical` under the old per-release naming.
 enum WhatsNewConfig {
     @MainActor
     static var content: WhatsNewContent {
         WhatsNewContent(
-            date: "2026-08-18",
-            summary: L("keykey.whatsNew.summary"),
+            date: "2026-08-20",
+            summary: L("app.whatsNew.summary"),
             sections: [
+                ChangeSection(kind: .fixed, entries: [
+                    L("app.whatsNew.fixed1"),
+                ]),
                 ChangeSection(kind: .changed, entries: [
-                    L("keykey.whatsNew.maintenanceOnly"),
+                    L("app.whatsNew.changed1"),
                 ]),
             ]
         )
