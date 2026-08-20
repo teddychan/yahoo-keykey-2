@@ -88,17 +88,22 @@ final class ConfigContentTests: XCTestCase {
         let short = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
         XCTAssertEqual(content.displayVersion, DragonVersion.display(short ?? "1.0.0"))
         XCTAssertTrue(content.displayVersion.hasPrefix("v"))
-        XCTAssertEqual(content.date, "2026-08-18")
+        XCTAssertEqual(content.date, "2026-08-20")
     }
 
-    // 2.13.2 is a single `.changed`, and it is a maintenance release: nothing under App/ changed.
-    // Between v2.13.1 and this release the repository's diff is three files —
-    // .github/workflows/release.yml, README.md and docs/yahoo-keykey-2/appcast.xml — with no .swift
-    // among them, and the DragonKit pin still reads v4.1.0. The note says that and claims nothing
-    // more; the release gate requires the notes to MOVE, which a truthful maintenance note does.
+    // 2.13.3 is [.fixed, .changed], and unlike 2.13.2 it is NOT maintenance-only: the DragonKit pin
+    // moved v4.1.0 -> v4.1.1 and brought a real behaviour change with it. Uninstall now refuses to
+    // run when a second copy of the app is on the Mac, because settings, the login item, support
+    // files and the Homebrew record are all keyed to the app's identity rather than its location,
+    // so uninstalling a spare copy could destroy the real copy's data.
     //
-    // `.changed` because the app was neither broken nor improved — what moved sits around it. Still
-    // one section, as 2.13.1 (`.fixed`, issue #113) was, after 2.13.0's [.added, .fixed].
+    // `.fixed` even though no App/ source changed: what a user MEETS is different, which is the
+    // test 2.13.2 failed and correctly reported as `.changed`. `.fixed` leads, so the version
+    // number never sits above the safety fix it delivered.
+    //
+    // 4.1.1's other fix is deliberately unasserted because it is deliberately unannounced — it
+    // silenced a raw developer error reachable only from a local Debug build, so no shipped copy
+    // could hit it. It lives in CHANGELOG.md.
     //
     // Entry KEYS are pinned, not just kinds and counts, because kinds and counts had stopped
     // catching anything: 2.11.3, 2.11.4 and the 2.11.5 draft were all [.changed] with one entry —
@@ -109,12 +114,13 @@ final class ConfigContentTests: XCTestCase {
     // text SAYS is the release gate's job — it diffs every locale's .strings file — so between
     // them a stale pane cannot ship.
     @MainActor
-    func testWhatsNewAnnouncesTheMaintenanceReleaseOnly() {
+    func testWhatsNewAnnouncesTheUninstallFixAndTheKitBump() {
         let content = WhatsNewConfig.content
-        XCTAssertEqual(content.sections.map(\.kind), [.changed])
-        XCTAssertEqual(content.sections.map(\.entries.count), [1])
+        XCTAssertEqual(content.sections.map(\.kind), [.fixed, .changed])
+        XCTAssertEqual(content.sections.map(\.entries.count), [1, 1])
         XCTAssertEqual(content.sections.flatMap(\.entries), [
-            L("keykey.whatsNew.maintenanceOnly"),
+            L("app.whatsNew.fixed1"),
+            L("app.whatsNew.changed1"),
         ])
     }
 
