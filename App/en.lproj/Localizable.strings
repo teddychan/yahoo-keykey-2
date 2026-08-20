@@ -31,9 +31,10 @@
 "keykey.general.language" = "Language";
 
 /* What's New pane (2.13.3) */
-"app.whatsNew.summary" = "A safety fix in Uninstall, inherited from the shared framework Yahoo! KeyKey 2 is built on. Cangjie and Simplex input is unchanged.";
+"app.whatsNew.summary" = "A safety fix in Uninstall, inherited from the shared framework Yahoo! KeyKey 2 is built on. Cangjie and Simplex input is unchanged. The app also now spells its own name with the exclamation mark the Yahoo! trademark carries.";
 "app.whatsNew.fixed1" = "Uninstall now stops if it finds more than one copy of Yahoo! KeyKey 2 on your Mac. Moving the copy you are running to the Trash was always safe, but your settings, login item and support files are stored under the app's identity rather than its location — so two copies share all of them, and there is no way to tell whose is whose. Uninstalling a spare copy could remove the settings belonging to the copy you actually use. It now stops before removing anything and lists where the copies are, so you can trash the ones you do not want and try again. If you have one copy, which is nearly everyone, nothing changes.";
 "app.whatsNew.changed1" = "Updated to DragonKit 4.1.1, the shared framework behind Settings, About, What's New and software updates. The fix above comes from it; none of those panes look or behave differently.";
+"app.whatsNew.changed2" = "The app now calls itself \"Yahoo! KeyKey 2\", with the exclamation mark. \"Yahoo!\" is trademarked with it, and the name shown in System Settings ▸ Keyboard ▸ Input Sources was missing it while this app's own website carried it. Nothing else moved: the input method, your settings and your learning data are untouched, and the identifier macOS registers the input source under is unchanged. On an existing install macOS may keep showing the old name until you log out and back in.";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "Disable Cangjie and Simplex from Input Sources";

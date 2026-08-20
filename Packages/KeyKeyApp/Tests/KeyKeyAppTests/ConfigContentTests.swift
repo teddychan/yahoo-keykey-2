@@ -117,10 +117,11 @@ final class ConfigContentTests: XCTestCase {
     func testWhatsNewAnnouncesTheUninstallFixAndTheKitBump() {
         let content = WhatsNewConfig.content
         XCTAssertEqual(content.sections.map(\.kind), [.fixed, .changed])
-        XCTAssertEqual(content.sections.map(\.entries.count), [1, 1])
+        XCTAssertEqual(content.sections.map(\.entries.count), [1, 2])
         XCTAssertEqual(content.sections.flatMap(\.entries), [
             L("app.whatsNew.fixed1"),
             L("app.whatsNew.changed1"),
+            L("app.whatsNew.changed2"),
         ])
     }
 
