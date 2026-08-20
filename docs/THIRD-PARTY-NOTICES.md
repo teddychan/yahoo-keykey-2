@@ -1,6 +1,6 @@
 # Third-Party Notices
 
-The MIT license in `LICENSE` covers the original Yahoo KeyKey 2 source code (the
+The MIT license in `LICENSE` covers the original Yahoo! KeyKey 2 source code (the
 Swift engine and the macOS app). Bundled third-party **data** keeps its own
 license — all of them permit redistribution, including commercial use:
 
@@ -12,7 +12,7 @@ license — all of them permit redistribution, including commercial use:
 | Cangjie-5 table | "Freely redistributable without restriction" (upstream table header; see `Resources/CANGJIE-DATA-LICENSE.txt`) |
 | Yahoo! KeyKey 三代 tables (倉頡第三代 / 速成) | New BSD (BSD-3-Clause) |
 
-Yahoo KeyKey 2 is an independent reimplementation and is not affiliated with, or
+Yahoo! KeyKey 2 is an independent reimplementation and is not affiliated with, or
 endorsed by, Yahoo. See `CREDITS.md`.
 
 ## McBopomofo (language model + algorithm reference)
@@ -60,7 +60,7 @@ notices", and its `Copyright (c) 2007-2010 Yahoo! Taiwan` line is scoped to
 `PreferenceApplications/` and `Utilities/` — not to `DataTables/` — so it is
 recorded as provenance rather than presented as these tables' notice.
 
-Only the data tables are reused. Yahoo KeyKey 2 uses no source code from the
+Only the data tables are reused. Yahoo! KeyKey 2 uses no source code from the
 original Yahoo! KeyKey. See `Resources/CANGJIE-DATA-LICENSE.txt` for the exact
 extraction and de-duplication steps.
 
@@ -102,10 +102,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
 The third condition is why the summary at the top of this file states that
-Yahoo KeyKey 2 is not affiliated with, or endorsed by, Yahoo.
+Yahoo! KeyKey 2 is not affiliated with, or endorsed by, Yahoo.
 
 ## Project source code
-The original Yahoo KeyKey 2 source code (Swift engine + macOS app) is released
+The original Yahoo! KeyKey 2 source code (Swift engine + macOS app) is released
 under the MIT License — see `LICENSE`. It is an independent reimplementation and
 uses no source code from the original Yahoo! KeyKey (credited in `CREDITS.md`).
 Its bundled **data** is another matter: the 三代 tables above come from that

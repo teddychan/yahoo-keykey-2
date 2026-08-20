@@ -4,7 +4,7 @@ Common problems and what to do about them. If yours is not here, please
 [open an issue](https://github.com/teddychan/yahoo-keykey-2/issues) — say which macOS version
 you are on and which mode you were typing in.
 
-1. [Yahoo KeyKey 2 does not show up after installing](#1-yahoo-keykey-2-does-not-show-up-after-installing)
+1. [Yahoo! KeyKey 2 does not show up after installing](#1-yahoo-keykey-2-does-not-show-up-after-installing)
 2. [倉頡 is greyed out and will not turn on](#2-倉頡-is-greyed-out-and-will-not-turn-on)
 3. [A character's code is not what I expect](#3-a-characters-code-is-not-what-i-expect)
 4. [Space pages instead of accepting my code](#4-space-pages-instead-of-accepting-my-code)
@@ -15,7 +15,7 @@ you are on and which mode you were typing in.
 Also: [documentation gaps](#documentation-gaps) — things missing from these docs rather than
 problems with the app.
 
-## 1. Yahoo KeyKey 2 does not show up after installing
+## 1. Yahoo! KeyKey 2 does not show up after installing
 
 macOS only looks for new input methods when you log in.
 
@@ -29,7 +29,7 @@ Another app has switched on a macOS privacy feature called **secure input**, the
 used while you type a password. While it is on, macOS blocks every input method that did not
 come from Apple — so 倉頡 goes grey while the U.S. keyboard keeps working.
 
-Nothing is wrong with your installation, and no update to Yahoo KeyKey 2 can change this: only
+Nothing is wrong with your installation, and no update to Yahoo! KeyKey 2 can change this: only
 the app that switched secure input on is able to switch it off again.
 
 Usually that app simply forgot to turn it off after showing a password box. **1Password** is the
@@ -61,7 +61,7 @@ the code and stays on page 1, a second Space pages, and `1–9` picks.
 
 ## 5. Typing a number inserts a word instead
 
-After you commit a character, Yahoo KeyKey 2 suggests words that commonly follow it
+After you commit a character, Yahoo! KeyKey 2 suggests words that commonly follow it
 (**聯想字詞**), and `1–9` picks one of those suggestions.
 
 **Fix:** in **設定… ▸ 一般**, change the 聯想 selection key to **Shift + 1–9**. A plain `1–9`
@@ -104,5 +104,5 @@ forgotten.
   Dragon app a `## Screenshots` section above the badge row, but this repo has no `docs/images/`
   and has never had that heading — `clipmenu-2` is in the same position. Filling it needs real
   captures from an **installed release build**, not a local debug build, which would render as
-  "Yahoo KeyKey 2 Debug" in the menus and About pane. Worth showing: the candidate window mid-code
+  "Yahoo! KeyKey 2 Debug" in the menus and About pane. Worth showing: the candidate window mid-code
   with 反查提示 on, the input menu, and the 設定… 一般 pane.

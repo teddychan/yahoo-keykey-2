@@ -1,4 +1,4 @@
-# What's New in Yahoo KeyKey 2
+# What's New in Yahoo! KeyKey 2
 
 A plain-language list of changes in each version, newest first.
 
@@ -42,7 +42,7 @@ A plain-language list of changes in each version, newest first.
 - **Fixed: in 速成, typing on past a two-key code now moves to the next character instead of
   getting stuck.** A 速成 code is two keys — the first and last 倉頡 radical — so once you have
   typed both, the character is as narrowed down as it can get. Type 女木 for 好 and then start the
-  next character with 人, and Yahoo KeyKey 2 would add that 人 to the code you had just finished,
+  next character with 人, and Yahoo! KeyKey 2 would add that 人 to the code you had just finished,
   making a three-key code. No such code exists in 速成, so the candidate list emptied out and 好
   could no longer be picked at all; the only way forward was Backspace.
 
@@ -318,7 +318,7 @@ A plain-language list of changes in each version, newest first.
   default (**1–9** picks an associated phrase) or switch to **Shift + 1–9** — with that on, a
   plain **1–9** types the digit and dismisses the suggestions, so numbers flow naturally right
   after a character (e.g. `這周有7天。`). Default is unchanged, so existing users see no difference.
-- **Fixed: ⌘ and ⌃ shortcuts now pass through to the app.** With Yahoo KeyKey 2 selected,
+- **Fixed: ⌘ and ⌃ shortcuts now pass through to the app.** With Yahoo! KeyKey 2 selected,
   combinations like **⌘C / ⌘X / ⌘V** were intercepted by the input method (⌘C could turn into the
   倉頡 radical 金) instead of copying, cutting, or pasting. ⌘/⌃ key combinations now reach the app
   as expected.
@@ -337,7 +337,7 @@ A plain-language list of changes in each version, newest first.
 
 ## 2.6.4
 
-- **Starts up even faster and lighter.** At launch, Yahoo KeyKey 2 now reads its dictionary file
+- **Starts up even faster and lighter.** At launch, Yahoo! KeyKey 2 now reads its dictionary file
   in a single pass instead of two, and it builds the **速成 (Simplex)** code table and the
   **反查／拆碼提示** reverse-lookup index only when you actually use them. If you type only 倉頡 or
   拼音, that's less work and less memory every time the app starts. Nothing you type changes.
@@ -348,7 +348,7 @@ A plain-language list of changes in each version, newest first.
 
 ## 2.6.3
 
-- **Faster startup and lower memory use.** At launch, Yahoo KeyKey 2 no longer builds a large
+- **Faster startup and lower memory use.** At launch, Yahoo! KeyKey 2 no longer builds a large
   in-memory copy of its whole dictionary just to work out which characters are most common — it
   now reads only what it needs. The app starts up quicker and uses less memory, and nothing you
   type changes.
@@ -377,9 +377,9 @@ A plain-language list of changes in each version, newest first.
 
 ## 2.6.0
 
-- **New input method: 拼音 (Pinyin).** Alongside **倉頡** and **速成**, Yahoo KeyKey 2 now
+- **New input method: 拼音 (Pinyin).** Alongside **倉頡** and **速成**, Yahoo! KeyKey 2 now
   offers a **拼音** phrase input method. Add it the same way as the others — **System Settings ▸
-  Keyboard ▸ Input Sources ▸ + ▸ Chinese, Traditional ▸ Yahoo KeyKey 2** — then pick **拼音**
+  Keyboard ▸ Input Sources ▸ + ▸ Chinese, Traditional ▸ Yahoo! KeyKey 2** — then pick **拼音**
   from the input menu. Type pinyin (no tone marks needed) and it composes whole phrases, not
   just one character at a time:
     - **Space / Return** commit the whole phrase.
@@ -425,12 +425,12 @@ A plain-language list of changes in each version, newest first.
 
 ## 2.2.0
 
-- **New: z-code punctuation in 三代倉頡.** In the **三代倉頡（Yahoo KeyKey 相容）** mode you can now type punctuation with the classic Yahoo `z` codes — e.g. `zxcd` → 「, `zxce` → 」, `zxab` → ，, `zxbe` → （. These were part of the original Yahoo table and are available again.
+- **New: z-code punctuation in 三代倉頡.** In the **三代倉頡（Yahoo! KeyKey 相容）** mode you can now type punctuation with the classic Yahoo `z` codes — e.g. `zxcd` → 「, `zxce` → 」, `zxab` → ，, `zxbe` → （. These were part of the original Yahoo table and are available again.
 - **New: 聯想只顯示接續字 option.** A new checkbox in **設定… ▸ 一般** makes the associated-phrase (聯想) window show only the continuation after the character you just typed — e.g. after 關 it shows 係／心／於 instead of the full words 關係／關心／關於, like the classic Yahoo! KeyKey. Off by default; what you commit is unchanged either way.
 
 ## 2.1.0
 
-- **New: choose your 倉頡版本 (Cangjie generation).** In **設定… ▸ 輸入方式** you can now switch between **五代倉頡** (the standard 5th-generation table, the default) and **三代倉頡（Yahoo KeyKey 相容）**. The 三代 option uses the original Yahoo! KeyKey code table and its candidate order, so characters like 面 (`一田卜中`), 鬼 (`竹戈`), and 樓 (`木中田女`) take the codes long-time Yahoo users remember instead of the 5th-generation forms (`一田尸中`, `竹山戈`, `木中中女`). The choice applies to both 倉頡 and 速成 and takes effect immediately — no need to re-select the input method. The default stays 五代 so existing users are unaffected until they opt in.
+- **New: choose your 倉頡版本 (Cangjie generation).** In **設定… ▸ 輸入方式** you can now switch between **五代倉頡** (the standard 5th-generation table, the default) and **三代倉頡（Yahoo! KeyKey 相容）**. The 三代 option uses the original Yahoo! KeyKey code table and its candidate order, so characters like 面 (`一田卜中`), 鬼 (`竹戈`), and 樓 (`木中田女`) take the codes long-time Yahoo users remember instead of the 5th-generation forms (`一田尸中`, `竹山戈`, `木中中女`). The choice applies to both 倉頡 and 速成 and takes effect immediately — no need to re-select the input method. The default stays 五代 so existing users are unaffected until they opt in.
 
 ## 2.0.2
 
@@ -438,7 +438,7 @@ A plain-language list of changes in each version, newest first.
 
 ## 2.0.1
 
-- **Fixed: Yahoo KeyKey 2 now appears in System Settings → Keyboard → Input Sources again.** Version 2.0.0 could be installed but never showed up as an input method you could add, because the rebrand accidentally changed the app's identifier to a form macOS does not recognise as an input method. The identifier now includes the required `inputmethod` component, so the input method registers correctly. If you had 2.0.0, install 2.0.1 and add **Yahoo KeyKey 2** under **Chinese, Traditional**.
+- **Fixed: Yahoo! KeyKey 2 now appears in System Settings → Keyboard → Input Sources again.** Version 2.0.0 could be installed but never showed up as an input method you could add, because the rebrand accidentally changed the app's identifier to a form macOS does not recognise as an input method. The identifier now includes the required `inputmethod` component, so the input method registers correctly. If you had 2.0.0, install 2.0.1 and add **Yahoo! KeyKey 2** under **Chinese, Traditional**.
 
 ## 2.0.0
 
@@ -470,7 +470,7 @@ A plain-language list of changes in each version, newest first.
   **「候選字大小」(Candidate Text Size)** option with **小 / 中 / 大 (Small / Medium /
   Large)**. Pick whichever is easiest on your eyes — the candidate list updates the
   next time you type.
-- **Apple Silicon only.** Yahoo KeyKey 2 now runs exclusively on Apple Silicon Macs
+- **Apple Silicon only.** Yahoo! KeyKey 2 now runs exclusively on Apple Silicon Macs
   (M1 and newer). Older Intel Macs are no longer supported. If you're on an Intel
   Mac, stay on version 1.3.4. This keeps the app smaller and lets us focus on the
   Macs people use today.
@@ -486,6 +486,6 @@ A plain-language list of changes in each version, newest first.
 
 ## 1.3.0
 
-- Added automatic updates: from this version on, Yahoo KeyKey 2 can check for and
+- Added automatic updates: from this version on, Yahoo! KeyKey 2 can check for and
   install new versions on its own (for the direct download — Homebrew users update
   through Homebrew).

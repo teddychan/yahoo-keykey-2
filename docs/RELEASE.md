@@ -1,6 +1,6 @@
-# Releasing Yahoo KeyKey 2
+# Releasing Yahoo! KeyKey 2
 
-This describes how to produce a downloadable build of **Yahoo KeyKey 2** (an
+This describes how to produce a downloadable build of **Yahoo! KeyKey 2** (an
 InputMethodKit input method) for distribution **outside the Mac App Store**.
 App Store distribution is **not** used for this version.
 
@@ -255,8 +255,8 @@ If running locally instead of CI:
    (create the folder if it doesn't exist). No admin password needed.
 3. **Log out and log back in** — macOS only scans for input methods at login.
 4. Open **System Settings ▸ Keyboard ▸ Input Sources ▸ `+`**, choose
-   **Traditional Chinese**, and add **Yahoo KeyKey 2 — Cangjie** and/or
-   **Yahoo KeyKey 2 — Simplex**.
+   **Traditional Chinese**, and add **Yahoo! KeyKey 2 — Cangjie** and/or
+   **Yahoo! KeyKey 2 — Simplex**.
 5. Switch input source with **Ctrl-Space** and start typing.
 
 ---
@@ -352,6 +352,6 @@ version, pkg signing status, and notarization status.
 3. At the end, click **Log Out** (then log back in) — required so macOS
    registers the new input method.
 4. Open **System Settings ▸ Keyboard ▸ Input Sources ▸ `+`**, choose
-   **Traditional Chinese**, and add **Yahoo KeyKey 2 — Cangjie** and/or
-   **Yahoo KeyKey 2 — Simplex**.
+   **Traditional Chinese**, and add **Yahoo! KeyKey 2 — Cangjie** and/or
+   **Yahoo! KeyKey 2 — Simplex**.
 5. Switch input source with **Ctrl-Space** and start typing.

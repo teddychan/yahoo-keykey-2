@@ -1,10 +1,10 @@
 <div align="center">
-  <img src="App/AppIcon.png" width="160" height="160" alt="Yahoo KeyKey 2 app icon">
-  <h1>Yahoo KeyKey 2</h1>
+  <img src="App/AppIcon.png" width="160" height="160" alt="Yahoo! KeyKey 2 app icon">
+  <h1>Yahoo! KeyKey 2</h1>
   <p><strong>Cangjie (倉頡) &amp; Simplex (速成) Traditional-Chinese input method for macOS</strong></p>
 </div>
 
-**Yahoo KeyKey 2** is an independent, open-source rebuild — in Swift — of the classic
+**Yahoo! KeyKey 2** is an independent, open-source rebuild — in Swift — of the classic
 **Yahoo! KeyKey (Yahoo!奇摩輸入法)** Traditional-Chinese input method that many Mac users
 loved. It brings the familiar Cangjie (倉頡) and Simplex (速成) typing experience back to
 modern macOS — native, fast, and free.
@@ -59,7 +59,7 @@ updated automatically on every release.
 3. **Log out and back in.**
 4. Add the input source under **System Settings ▸ Keyboard ▸ Input Sources ▸ + ▸
    Traditional Chinese** → **倉頡** and/or **速成**.
-5. Press **⌃Space** to switch to Yahoo KeyKey 2 and start typing. Space or `1–9` picks a
+5. Press **⌃Space** to switch to Yahoo! KeyKey 2 and start typing. Space or `1–9` picks a
    candidate; the arrow keys page through them.
 
 Not showing up? See
@@ -76,7 +76,7 @@ Log out and back in afterwards, so macOS reloads the input method.
 ### Uninstall
 
 1. **Remove the input source first:** **System Settings ▸ Keyboard ▸ Input Sources**, select
-   Yahoo KeyKey 2 and remove it. The app's own Uninstall pane cannot do this part for you.
+   Yahoo! KeyKey 2 and remove it. The app's own Uninstall pane cannot do this part for you.
 2. **Then remove the app** — Homebrew: `brew uninstall --cask teddychan/tap/yahoo-keykey-2`;
    otherwise open **設定… ▸ 解除安裝**, or drag `~/Library/Input Methods/YahooKeyKey2.app` to
    the Trash.
@@ -113,7 +113,7 @@ rm -rf ~/Library/HTTPStorages/com.dragonapp.inputmethod.yahoo-keykey
 - **Free and open source** — MIT licensed, signed and notarized, with in-app updates.
 
 > [!NOTE]
-> Yahoo KeyKey 2 is not affiliated with, or endorsed by, Yahoo. It is an independent project
+> Yahoo! KeyKey 2 is not affiliated with, or endorsed by, Yahoo. It is an independent project
 > that exists to honor the original work and keep a KeyKey-style experience alive on modern
 > macOS.
 
@@ -125,14 +125,14 @@ immediately.
 | Mode | Based on | Candidate order | Example codes |
 |---|---|---|---|
 | **五代倉頡** (default) | ibus `cangjie5` | corpus frequency | 面 `一田尸中`, 鬼 `竹山戈` |
-| **三代倉頡** (Yahoo KeyKey compatible) | original Yahoo! KeyKey tables | Yahoo's original order | 面 `一田卜中`, 鬼 `竹戈` |
+| **三代倉頡** (Yahoo! KeyKey compatible) | original Yahoo! KeyKey tables | Yahoo's original order | 面 `一田卜中`, 鬼 `竹戈` |
 
 **五代** is the default, so existing users are unaffected until they opt in. Both orders are
 fixed; the learning layer sits on top and **依選字習慣調整候選字順序** turns it off — so 三代
 with learning off is the original Yahoo! KeyKey order and nothing else.
 
 Yahoo! KeyKey's *associated-phrase* ranking cannot be reproduced — that data was never
-open-sourced — so associations use Yahoo KeyKey 2's own ordering in both modes.
+open-sourced — so associations use Yahoo! KeyKey 2's own ordering in both modes.
 
 ## Troubleshooting
 
@@ -165,7 +165,7 @@ cd yahoo-keykey-2
 ```
 
 For hands-on testing, `./tools/run-debug.sh` builds and installs a separate
-**Yahoo KeyKey 2 Debug** input method with its own bundle id, so it never collides with an
+**Yahoo! KeyKey 2 Debug** input method with its own bundle id, so it never collides with an
 installed release copy. It reports the **target version** — the release being developed toward —
 so a fix for 2.13.0 builds as `v2.13.1 Debug` and no modified code ever wears a released number.
 See [Versioning convention](docs/RELEASE.md#versioning-convention). Signed release builds come
@@ -208,12 +208,12 @@ Release mechanics are documented in [docs/RELEASE.md](docs/RELEASE.md).
 
 ## Credits
 
-Yahoo KeyKey 2 is built in tribute to the original **Yahoo! KeyKey (Yahoo!奇摩輸入法)**.
+Yahoo! KeyKey 2 is built in tribute to the original **Yahoo! KeyKey (Yahoo!奇摩輸入法)**.
 See [CREDITS.md](CREDITS.md) for the original projects, data sources, and engine
 attributions, and [docs/THIRD-PARTY-NOTICES.md](docs/THIRD-PARTY-NOTICES.md) for full
 third-party license details.
 
 ## License
 
-Yahoo KeyKey 2 is released under the [MIT License](LICENSE). Bundled third-party data keeps
+Yahoo! KeyKey 2 is released under the [MIT License](LICENSE). Bundled third-party data keeps
 its own permissive license — see [docs/THIRD-PARTY-NOTICES.md](docs/THIRD-PARTY-NOTICES.md).
