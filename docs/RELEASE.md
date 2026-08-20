@@ -184,8 +184,7 @@ The recommended path is CI: bump the version (step 1 below), commit, then push a
 `v<version>` tag to `teddychan/yahoo-keykey-2`. `.github/workflows/release.yml`
 (GitHub-hosted macOS runner) builds, Developer ID-signs, notarizes, staples, zips,
 uploads the `.zip` to the GitHub release, publishes the EdDSA-signed appcast to
-`docs/yahoo-keykey-2/appcast.xml` **in this repo**, mirrors that same file to the website
-repo, and bumps the Homebrew cask.
+`docs/yahoo-keykey-2/appcast.xml` **in this repo**, and bumps the Homebrew cask.
 It requires these repository secrets: `DEVELOPER_ID_CERT_P12_BASE64`,
 `DEVELOPER_ID_CERT_PASSWORD`, `NOTARY_KEY_P8_BASE64`, `NOTARY_KEY_ID`,
 `NOTARY_ISSUER_ID`, `PUBLIC_RELEASE_TOKEN`, `SPARKLE_EDDSA_PRIVATE_KEY` (the same
