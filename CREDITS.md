@@ -1,6 +1,6 @@
 # Credits
 
-**Yahoo KeyKey 2** is an independent, open reimplementation of the discontinued
+**Yahoo! KeyKey 2** is an independent, open reimplementation of the discontinued
 **Yahoo! KeyKey** Traditional-Chinese input method. It is not affiliated with or
 endorsed by Yahoo. This project exists to honor the original work and keep a
 KeyKey-style experience alive on modern macOS.
