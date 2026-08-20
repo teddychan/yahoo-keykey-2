@@ -18,21 +18,22 @@ import DragonKit
 // could hit it — CHANGELOG.md records it, this pane does not, following the fleet's rule against
 // claiming what users cannot see.
 //
-// 2.13.2's `maintenanceOnly` key is gone from all seven .strings files, replaced by the two keys
-// below — the same treatment `simplexThirdRadical` got when 2.13.2 superseded it. Leaving a
-// superseded key behind strands that release's sentence in seven files waiting to be shown again.
+// Keys are the fleet's stable set (app.whatsNew.summary, .fixed1, .changed1, …), not named after
+// this release's content — a release just overwrites the same keys' text in all seven .strings
+// files rather than adding new ones and stranding the last release's, which is what happened to
+// 2.13.2's `maintenanceOnly` and 2.13.1's `simplexThirdRadical` under the old per-release naming.
 enum WhatsNewConfig {
     @MainActor
     static var content: WhatsNewContent {
         WhatsNewContent(
             date: "2026-08-20",
-            summary: L("keykey.whatsNew.summary"),
+            summary: L("app.whatsNew.summary"),
             sections: [
                 ChangeSection(kind: .fixed, entries: [
-                    L("keykey.whatsNew.uninstallMultipleCopies"),
+                    L("app.whatsNew.fixed1"),
                 ]),
                 ChangeSection(kind: .changed, entries: [
-                    L("keykey.whatsNew.dragonKit411"),
+                    L("app.whatsNew.changed1"),
                 ]),
             ]
         )

@@ -31,9 +31,9 @@
 "keykey.general.language" = "Idioma";
 
 /* What's New pane (2.13.3) */
-"keykey.whatsNew.summary" = "Una corrección de seguridad en Desinstalar, heredada del framework compartido en el que se basa Yahoo! KeyKey 2. La escritura en 倉頡 y 速成 no cambia.";
-"keykey.whatsNew.uninstallMultipleCopies" = "Desinstalar ahora se detiene si encuentra más de una copia de Yahoo! KeyKey 2 en tu Mac. Mover a la Papelera la copia que estás usando siempre fue seguro, pero tus preferencias, el elemento de inicio de sesión y los archivos de soporte se guardan según la identidad de la app y no según su ubicación — así que dos copias comparten todo eso, y no hay forma de saber cuál es cuál. Desinstalar una copia de más podría eliminar las preferencias de la copia que realmente usas. Ahora se detiene antes de eliminar nada y muestra dónde están las copias, para que puedas mover a la Papelera las que no quieras y volver a intentarlo. Si tienes una sola copia, que es casi todo el mundo, nada cambia.";
-"keykey.whatsNew.dragonKit411" = "Actualizado a DragonKit 4.1.1, el framework compartido detrás de Ajustes, Acerca de, Novedades y las actualizaciones de software. La corrección anterior viene de ahí; ninguno de esos paneles se ve ni se comporta de forma distinta.";
+"app.whatsNew.summary" = "Una corrección de seguridad en Desinstalar, heredada del framework compartido en el que se basa Yahoo! KeyKey 2. La escritura en 倉頡 y 速成 no cambia.";
+"app.whatsNew.fixed1" = "Desinstalar ahora se detiene si encuentra más de una copia de Yahoo! KeyKey 2 en tu Mac. Mover a la Papelera la copia que estás usando siempre fue seguro, pero tus preferencias, el elemento de inicio de sesión y los archivos de soporte se guardan según la identidad de la app y no según su ubicación — así que dos copias comparten todo eso, y no hay forma de saber cuál es cuál. Desinstalar una copia de más podría eliminar las preferencias de la copia que realmente usas. Ahora se detiene antes de eliminar nada y muestra dónde están las copias, para que puedas mover a la Papelera las que no quieras y volver a intentarlo. Si tienes una sola copia, que es casi todo el mundo, nada cambia.";
+"app.whatsNew.changed1" = "Actualizado a DragonKit 4.1.1, el framework compartido detrás de Ajustes, Acerca de, Novedades y las actualizaciones de software. La corrección anterior viene de ahí; ninguno de esos paneles se ve ni se comporta de forma distinta.";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "Desactivar 倉頡 y 速成 en Fuentes de entrada";
