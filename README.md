@@ -151,6 +151,22 @@ never open-sourced — so associations use Yahoo KeyKey 2's own ordering in both
 Then add it under **System Settings ▸ Keyboard ▸ Input Sources ▸ + ▸ Traditional Chinese**;
 until it is added there, **⌃Space** has nothing to switch to.
 
+**倉頡 is greyed out in the input menu while Apple's layouts still work.** Another app is
+holding macOS **secure event input**. macOS blocks every third-party input method while that is
+on and exempts Apple's own layouts, which is why KeyKey alone looks broken. This is a macOS
+restriction, not a fault in the app: the install, the signature and the input-source
+registration are all fine, and no version of KeyKey can switch it off or clear it — the flag is
+counted per process, so only the app holding it can let go.
+
+Chromium- and Electron-based apps take the lock when a password field gains focus and release it
+on blur; if that field, tab or window disappears while still focused, the lock leaks for the
+lifetime of that process. Quitting the holder restores 倉頡 at once — no logout and no reboot.
+**1Password** is the most frequent culprit, a known and still-open bug on its side with no
+setting to disable the behaviour; Google Chrome, Dropbox, WeChat and other Electron apps can do
+the same. If you are unsure which one, quit them one at a time until 倉頡 becomes selectable.
+Do not trust `ioreg | grep kCGSSessionSecureInputPID` to name the holder — it reports whichever
+app was frontmost when the lock was taken, often `loginwindow`.
+
 **A character takes a code I don't recognise.** 三代 and 五代 give different codes for the same
 character — 面 is `一田卜中` in 三代 but `一田尸中` in 五代, and 鬼 is `竹戈` versus `竹山戈`.
 Check which table is selected in **設定… ▸ 輸入方式** (see
