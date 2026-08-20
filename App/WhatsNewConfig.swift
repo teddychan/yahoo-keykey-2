@@ -34,6 +34,11 @@ enum WhatsNewConfig {
                 ]),
                 ChangeSection(kind: .changed, entries: [
                     L("app.whatsNew.changed1"),
+                    // The rename to "Yahoo! KeyKey 2". Announced because it is the name macOS
+                    // shows in the Input Sources picker, so a user meets it — 2.13.3's notes were
+                    // written before the rename landed, which is the only reason it was missing.
+                    // `.changed`, not `.fixed`: nothing was broken, the mark was simply absent.
+                    L("app.whatsNew.changed2"),
                 ]),
             ]
         )
