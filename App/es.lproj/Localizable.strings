@@ -30,9 +30,10 @@
 "keykey.general.adaptiveCandidateOrderHint" = "Se aplica a 倉頡, 速成, 拼音 y a las frases asociadas: los caracteres que eliges avanzan poco a poco. Desactívalo para conservar el orden incorporado — 五代 y 拼音 usan su clasificación incorporada; 三代, el orden original de Yahoo! KeyKey —, lo que además pausa el aprendizaje sin borrar lo ya aprendido.";
 "keykey.general.language" = "Idioma";
 
-/* What's New pane (2.13.2) */
-"keykey.whatsNew.summary" = "Una versión de mantenimiento: solo automatización de las publicaciones y documentación. Nada relacionado con la escritura ha cambiado.";
-"keykey.whatsNew.maintenanceOnly" = "En esta versión no ha cambiado ninguna parte del código de Yahoo! KeyKey 2. Lo que se ha movido está a su alrededor: la automatización que compila, firma y publica cada versión, y la documentación que describe cómo se prepara una publicación. 倉頡, 速成 y 拼音, la lista de candidatos, tus preferencias y tus datos de aprendizaje se comportan exactamente igual que en la 2.13.1; la única diferencia que puedes ver es el número de versión que muestran este panel y el panel «Acerca de».";
+/* What's New pane (2.13.3) */
+"keykey.whatsNew.summary" = "Una corrección de seguridad en Desinstalar, heredada del framework compartido en el que se basa Yahoo! KeyKey 2. La escritura en 倉頡 y 速成 no cambia.";
+"keykey.whatsNew.uninstallMultipleCopies" = "Desinstalar ahora se detiene si encuentra más de una copia de Yahoo! KeyKey 2 en tu Mac. Mover a la Papelera la copia que estás usando siempre fue seguro, pero tus preferencias, el elemento de inicio de sesión y los archivos de soporte se guardan según la identidad de la app y no según su ubicación — así que dos copias comparten todo eso, y no hay forma de saber cuál es cuál. Desinstalar una copia de más podría eliminar las preferencias de la copia que realmente usas. Ahora se detiene antes de eliminar nada y muestra dónde están las copias, para que puedas mover a la Papelera las que no quieras y volver a intentarlo. Si tienes una sola copia, que es casi todo el mundo, nada cambia.";
+"keykey.whatsNew.dragonKit411" = "Actualizado a DragonKit 4.1.1, el framework compartido detrás de Ajustes, Acerca de, Novedades y las actualizaciones de software. La corrección anterior viene de ahí; ninguno de esos paneles se ve ni se comporta de forma distinta.";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "Desactivar 倉頡 y 速成 en Fuentes de entrada";

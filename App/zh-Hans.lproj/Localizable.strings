@@ -30,9 +30,10 @@
 "keykey.general.adaptiveCandidateOrderHint" = "适用于仓颉、速成、拼音与联想词：你常选的字会逐渐往前移。关闭后改用内建顺序（五代与拼音使用内建词频，三代使用 Yahoo! KeyKey 原版顺序），同时暂停学习，但已经学到的记录会保留，不会清除。";
 "keykey.general.language" = "语言";
 
-/* What's New pane (2.13.2) */
-"keykey.whatsNew.summary" = "这是一次维护发布，只更新了发布流程的自动化与文档，输入行为没有任何变化。";
-"keykey.whatsNew.maintenanceOnly" = "本次发布没有改动 Yahoo! KeyKey 2 自身的任何代码，改动的是它周边的部分：负责构建、签名并发布每个版本的自动化流程，以及说明发布步骤的文档。仓颉、速成、拼音、候选字列表、偏好设置与学习数据的表现都和 2.13.1 完全一样，你唯一能看到的差别，是本面板与「关于」面板显示的版本号。";
+/* What's New pane (2.13.3) */
+"keykey.whatsNew.summary" = "卸载功能的一项安全修复，继承自 Yahoo! KeyKey 2 所基于的共享框架。仓颉与速成输入没有变化。";
+"keykey.whatsNew.uninstallMultipleCopies" = "如果在你的 Mac 上发现不止一个 Yahoo! KeyKey 2 副本，卸载现在会停止执行。将正在运行的副本移到废纸篓一直都是安全的，但你的偏好设置、登录项与支持文件都是按应用的身份而非位置存储的——因此两个副本会共用这些内容，也无法分辨哪个是哪个。卸载多余的副本，可能会删除你实际在用的那个副本的设置。现在卸载会在删除任何内容之前停止，并列出各个副本所在的位置，方便你把不需要的副本移到废纸篓后再重试。如果你只有一个副本（几乎所有人都是如此），则不会有任何变化。";
+"keykey.whatsNew.dragonKit411" = "已更新到 DragonKit 4.1.1，这是「偏好设置」「关于」「新功能」与软件更新背后的共享框架。上面的修复正是来自这次更新；这些面板的外观与行为都没有变化。";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "从输入源中停用仓颉与速成";
