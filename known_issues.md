@@ -12,6 +12,9 @@ you are on and which mode you were typing in.
 6. [A rare character never moves to the top](#6-a-rare-character-never-moves-to-the-top)
 7. [Already fixed in earlier versions](#7-already-fixed-in-earlier-versions)
 
+Also: [documentation gaps](#documentation-gaps) — things missing from these docs rather than
+problems with the app.
+
 ## 1. Yahoo KeyKey 2 does not show up after installing
 
 macOS only looks for new input methods when you log in.
@@ -90,3 +93,16 @@ Update if you are on an older release.
   offered 含, which really decomposes as `人戈弓口`. 五代 was never affected.
 - **⌘C / ⌘X / ⌘V did not copy, cut or paste** — fixed in **2.7.0**. ⌘ and ⌃ combinations now
   pass through to the app instead of being read as radicals.
+
+## Documentation gaps
+
+Not problems with the app — things missing from these docs, recorded here so they are not
+forgotten.
+
+- **The README has no screenshots.** The
+  [unified README design](docs/superpowers/specs/2026-07-25-unified-readme-design.md) gives every
+  Dragon app a `## Screenshots` section above the badge row, but this repo has no `docs/images/`
+  and has never had that heading — `clipmenu-2` is in the same position. Filling it needs real
+  captures from an **installed release build**, not a local debug build, which would render as
+  "Yahoo KeyKey 2 Debug" in the menus and About pane. Worth showing: the candidate window mid-code
+  with 反查提示 on, the input menu, and the 設定… 一般 pane.
