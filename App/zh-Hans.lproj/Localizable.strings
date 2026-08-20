@@ -22,7 +22,7 @@
 "keykey.general.inputMethod" = "输入方式";
 "keykey.general.cangjieVersion" = "仓颉版本";
 "keykey.general.cangjieV5" = "五代仓颉";
-"keykey.general.cangjieV3" = "三代仓颉（兼容 Yahoo KeyKey）";
+"keykey.general.cangjieV3" = "三代仓颉（兼容 Yahoo! KeyKey）";
 "keykey.general.cangjieVersionHint" = "「三代仓颉」使用 Yahoo! KeyKey 原版的拆码与候选字顺序（同时应用于仓颉与速成），立即生效。";
 "keykey.general.strokeConfirmation" = "以空格键确认字根";
 "keykey.general.strokeConfirmationHint" = "在速成、以及使用通配符（*）的仓颉中，字根还没输完就会出现候选字，此时空格键会直接翻到下一页，而不是确认你输入的字根。开启后，第一次按空格键只确认字根并停留在第 1 页；再按一次空格键才翻页，或直接按 1–9 选字。普通仓颉不受影响。";

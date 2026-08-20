@@ -22,7 +22,7 @@
 "keykey.general.inputMethod" = "입력 방식";
 "keykey.general.cangjieVersion" = "창힐 버전";
 "keykey.general.cangjieV5" = "5세대 창힐";
-"keykey.general.cangjieV3" = "3세대 창힐(Yahoo KeyKey 호환)";
+"keykey.general.cangjieV3" = "3세대 창힐(Yahoo! KeyKey 호환)";
 "keykey.general.cangjieVersionHint" = "「3세대 창힐」은 원래 Yahoo! KeyKey의 코드표와 후보 순서를 사용합니다(창힐과 속성 모두에 적용). 즉시 적용됩니다.";
 "keykey.general.strokeConfirmation" = "스페이스로 코드 확정";
 "keykey.general.strokeConfirmationHint" = "속성, 그리고 * 와일드카드를 사용하는 창힐에서는 코드를 다 입력하기 전에 후보가 나타나므로, 스페이스가 입력한 코드를 확정하지 않고 다음 페이지로 넘어갑니다. 이 옵션을 켜면 첫 번째 스페이스는 코드만 확정하고 1페이지에 머무릅니다. 페이지를 넘기려면 스페이스를 한 번 더 누르거나 1~9로 바로 선택하세요. 일반 창힐은 영향을 받지 않습니다.";
