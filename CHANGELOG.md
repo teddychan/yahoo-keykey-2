@@ -2,6 +2,35 @@
 
 A plain-language list of changes in each version, newest first.
 
+## 2.13.4
+
+- **Fixed: a character you keep picking now reaches the front of the candidate list, even a rare
+  one.** With **依選字習慣調整候選字順序** on, the characters you choose are supposed to move
+  forward. For a character the built-in dictionary knows, they did. For one it does not know —
+  about half the characters in the 五代 table, including most variant forms — they never could:
+  such a character was ranked so far below the known ones that no amount of picking closed the
+  gap. It would climb past the other unknown characters, stop behind the known ones, and stay
+  there however many times you chose it.
+
+  Under `卜月卜尸心`, 龍 is in the dictionary and the variant 㡣 is not, so 㡣 stayed second
+  permanently; now two picks put it first. In 速成 the same code is `卜心`, where 㡣 is one of 68
+  candidates: it used to move from 39th place to 36th on the first pick and then never again, and
+  now reaches the front on the third. Counting every candidate position in the tables, 55% in 倉頡
+  and 53% in 速成 could not be brought to the front at all. Now none are stuck, and it takes one
+  pick in the ordinary case and at most three.
+
+  **What this changes for you.** If you have learning switched on, characters you have already
+  picked may sit further forward than they did in 2.13.3 — that is the fix, applied to the counts
+  already on your Mac, and nothing was re-learned or reset. If you have it switched off, or have
+  not picked anything yet, the candidate order is **exactly** as before: the value was chosen to
+  keep every untrained list byte-for-byte identical, which was checked across all 27,657 五代 codes
+  the app actually offers. 三代, 拼音 and 聯想字詞 were never affected and are unchanged.
+
+  This is the limitation 2.13.0 measured and wrote down instead of fixing, because the fix moves
+  the order for everyone with learning on rather than only those using the new toggle — so it was
+  held for a release of its own, which is this one. Thanks to the reporter of
+  [issue #130](https://github.com/teddychan/yahoo-keykey-2/issues/130).
+
 ## 2.13.3
 
 - **Fixed: Uninstall now stops if it finds more than one copy of Yahoo! KeyKey 2 on your Mac.**
@@ -95,8 +124,10 @@ A plain-language list of changes in each version, newest first.
   front.** Adaptive ranking lifts a character *within* the dictionary's own ordering, so a
   character the bundled language model does not know cannot overtake one it does, however many
   times you pick it. Under `卜月卜尸心`, 龍 is in the model and the variant 㡣 is not, so 㡣 stays
-  second permanently. Roughly four in five characters in the 五代 table are outside the model, and
-  about two in five codes with more than one candidate mix the two kinds.
+  second permanently. About half the characters the 五代 table offers are outside the model, and
+  around three in five codes with more than one candidate mix the two kinds. *(Corrected in
+  2.13.4: this entry originally said four in five and two in five, counted from the raw code file
+  rather than from the characters the app actually offers.)*
 
   Nothing here changes — this is how ranking has always worked, and it is now described in the
   README's Troubleshooting section instead of being a surprise. It does not affect 聯想字詞, where

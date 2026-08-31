@@ -175,6 +175,21 @@ tag, and it must keep describing the latest published release until then.
 
 ## A limit on what learning can do, left as it is
 
+> **Fixed in 2.13.4** (issue #130), which is the release of its own this section asks for. The
+> floor became `-12` rather than the `-20` proposed below: both keep the untrained order
+> byte-identical, but `-20` needs a median of 4 picks in 速成 and 3 in 倉頡 (7 at worst), and that
+> is close enough to "never" that the report this section predicted arrived anyway. At `-12` it is
+> 2 and 1, 3 at worst.
+>
+> **The figures below count the raw file and are overstated.** `CangjieTable.init` drops
+> supplementary-plane and Private Use characters through `isRenderableCJK` before anything is
+> ranked, so only 30,189 of `Resources/cangjie.txt`'s 68,631 lines ever reach a candidate list.
+> Measured through the engine instead: **52%** of the characters the app offers are absent from the
+> model (not 79%), and the positions that could never reach the front were **55%** in 倉頡 and
+> **53%** in 速成 — the 倉頡 figure is worse than this section implies and the 速成 one is better.
+> The conclusion is unchanged; the arithmetic that supports it is not. The section is otherwise
+> left as written, because it is the measurement that justified the change.
+
 Found while testing 2.13.0, pre-existing, and **deliberately not fixed here**: a character the
 language model does not know can never be learned above one it does.
 

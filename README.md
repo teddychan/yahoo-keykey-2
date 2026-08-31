@@ -146,9 +146,8 @@ Common problems, and what each one turns out to be, are collected in
 | A character's code is not what you expect | [#3](known_issues.md#3-a-characters-code-is-not-what-i-expect) |
 | Space pages instead of accepting your code | [#4](known_issues.md#4-space-pages-instead-of-accepting-my-code) |
 | Typing a number inserts a word | [#5](known_issues.md#5-typing-a-number-inserts-a-word-instead) |
-| A rare character never moves to the top | [#6](known_issues.md#6-a-rare-character-never-moves-to-the-top) |
 
-That file also lists what has **[already been fixed](known_issues.md#7-already-fixed-in-earlier-versions)**,
+That file also lists what has **[already been fixed](known_issues.md#6-already-fixed-in-earlier-versions)**,
 so check your version before reporting a bug. Anything else —
 [open an issue](https://github.com/teddychan/yahoo-keykey-2/issues).
 

@@ -6,17 +6,18 @@ import DragonKit
 // binary isn't. That makes the entries and the date the only things to keep in sync with
 // CHANGELOG.md on release.
 //
-// 2.13.3 carries one user-facing change, inherited from DragonKit 4.1.1: Uninstall now refuses to
-// run when it finds more than one copy of the app on the Mac. Settings, the login item, support
-// files and the Homebrew record are all keyed to the app's identity rather than its location, so
-// two copies share all of them and there is no way to tell whose is whose — uninstalling a spare
-// copy could remove the settings belonging to the copy you actually use. It now stops before
-// removing anything and lists where the copies are.
+// 2.13.4 carries one user-facing change: a character the built-in dictionary does not know can now
+// be learned to the front of the candidate list. It could not before — it climbed past the other
+// unknown characters and then stopped behind the known ones permanently (issue #130).
 //
-// Deliberately NOT in the notes: DragonKit 4.1.1's other fix, a raw developer error in Settings ▸
-// Updates. It only ever appeared in local debug builds, so no released build of Yahoo! KeyKey 2
-// could hit it — CHANGELOG.md records it, this pane does not, following the fleet's rule against
-// claiming what users cannot see.
+// One `.fixed` entry and no `.changed`, which is the whole release. The note has to do two jobs at
+// once: say the thing that was broken now works, and warn that a list someone has already trained
+// may look different today, because that is a visible change nobody asked for. An untrained list
+// is unchanged, so the warning is scoped to people the change can actually reach.
+//
+// Deliberately NOT in the notes: that the fix is a single constant in the two engines' sort score.
+// A user meets the ordering, not the floor — CHANGELOG.md and the 2026-08-12 spec carry the
+// mechanism and the measurements.
 //
 // Keys are the fleet's stable set (app.whatsNew.summary, .fixed1, .changed1, …), not named after
 // this release's content — a release just overwrites the same keys' text in all seven .strings
@@ -26,19 +27,16 @@ enum WhatsNewConfig {
     @MainActor
     static var content: WhatsNewContent {
         WhatsNewContent(
-            date: "2026-08-20",
+            date: "2026-08-31",
             summary: L("app.whatsNew.summary"),
             sections: [
                 ChangeSection(kind: .fixed, entries: [
                     L("app.whatsNew.fixed1"),
-                ]),
-                ChangeSection(kind: .changed, entries: [
-                    L("app.whatsNew.changed1"),
-                    // The rename to "Yahoo! KeyKey 2". Announced because it is the name macOS
-                    // shows in the Input Sources picker, so a user meets it — 2.13.3's notes were
-                    // written before the rename landed, which is the only reason it was missing.
-                    // `.changed`, not `.fixed`: nothing was broken, the mark was simply absent.
-                    L("app.whatsNew.changed2"),
+                    // The trained-list caveat, kept as its own entry rather than folded into the
+                    // one above. It is the only part of this release a user has to act on — and
+                    // only some users — so burying it at the end of a paragraph about a fix would
+                    // hide the sentence that explains why their candidates moved.
+                    L("app.whatsNew.fixed2"),
                 ]),
             ]
         )

@@ -88,22 +88,22 @@ final class ConfigContentTests: XCTestCase {
         let short = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
         XCTAssertEqual(content.displayVersion, DragonVersion.display(short ?? "1.0.0"))
         XCTAssertTrue(content.displayVersion.hasPrefix("v"))
-        XCTAssertEqual(content.date, "2026-08-20")
+        XCTAssertEqual(content.date, "2026-08-31")
     }
 
-    // 2.13.3 is [.fixed, .changed], and unlike 2.13.2 it is NOT maintenance-only: the DragonKit pin
-    // moved v4.1.0 -> v4.1.1 and brought a real behaviour change with it. Uninstall now refuses to
-    // run when a second copy of the app is on the Mac, because settings, the login item, support
-    // files and the Homebrew record are all keyed to the app's identity rather than its location,
-    // so uninstalling a spare copy could destroy the real copy's data.
+    // 2.13.4 is one `.fixed` section with two entries and nothing else: a character the bundled
+    // dictionary does not know can now be learned to the front of the candidate list, where before
+    // it stopped behind the known characters permanently however often it was picked (issue #130).
     //
-    // `.fixed` even though no App/ source changed: what a user MEETS is different, which is the
-    // test 2.13.2 failed and correctly reported as `.changed`. `.fixed` leads, so the version
-    // number never sits above the safety fix it delivered.
+    // The second entry is the caveat, and it is an entry rather than a clause inside the first
+    // because it is the only thing in this release a reader may have to act on — a candidate list
+    // they had already trained can look different today. Folding it into the fix's paragraph would
+    // put the sentence that explains that at the end of ten lines about something else.
     //
-    // 4.1.1's other fix is deliberately unasserted because it is deliberately unannounced — it
-    // silenced a raw developer error reachable only from a local Debug build, so no shipped copy
-    // could hit it. It lives in CHANGELOG.md.
+    // No `.changed` section, so `app.whatsNew.changed1` and `.changed2` are gone from all seven
+    // .strings files rather than left defined and unused. That is the same rule the header comment
+    // in WhatsNewConfig states from the other side: a release overwrites the stable keys it needs
+    // and does not strand the ones it does not.
     //
     // Entry KEYS are pinned, not just kinds and counts, because kinds and counts had stopped
     // catching anything: 2.11.3, 2.11.4 and the 2.11.5 draft were all [.changed] with one entry —
@@ -114,14 +114,13 @@ final class ConfigContentTests: XCTestCase {
     // text SAYS is the release gate's job — it diffs every locale's .strings file — so between
     // them a stale pane cannot ship.
     @MainActor
-    func testWhatsNewAnnouncesTheUninstallFixAndTheKitBump() {
+    func testWhatsNewAnnouncesTheCandidateOrderFixAndItsCaveat() {
         let content = WhatsNewConfig.content
-        XCTAssertEqual(content.sections.map(\.kind), [.fixed, .changed])
-        XCTAssertEqual(content.sections.map(\.entries.count), [1, 2])
+        XCTAssertEqual(content.sections.map(\.kind), [.fixed])
+        XCTAssertEqual(content.sections.map(\.entries.count), [2])
         XCTAssertEqual(content.sections.flatMap(\.entries), [
             L("app.whatsNew.fixed1"),
-            L("app.whatsNew.changed1"),
-            L("app.whatsNew.changed2"),
+            L("app.whatsNew.fixed2"),
         ])
     }
 

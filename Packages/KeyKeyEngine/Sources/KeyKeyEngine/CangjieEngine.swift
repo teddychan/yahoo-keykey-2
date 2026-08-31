@@ -13,6 +13,28 @@ public final class CangjieEngine {
 
     private static let maxRadicals = 5
 
+    // Sort score for a character the language model has no entry for. Shared with SimplexEngine,
+    // which ranks the same characters from the same `characterRank` (as it already shares
+    // `radicals`), so the two cannot drift apart.
+    //
+    // It must sit BELOW every real score, so an untrained list is ordered exactly as the dictionary
+    // says and unranked characters keep the table's own order behind the ranked ones. Real
+    // single-character scores in the bundled model span [-8, 0], so -12 clears that with margin.
+    //
+    // It must also sit WITHIN REACH of a user-learning bonus, which is the half this got wrong
+    // until 2.13.4 (issue #130). The value was -1e9, and the largest bonus UserFrequency can ever
+    // produce is log(1 + 100_000) * 10 ≈ 115 — so an unranked character could never overtake a
+    // ranked one however many times it was picked. It only reordered among the other unranked
+    // characters: 55% of 倉頡 and 53% of 速成 candidate positions could not reach the front at all.
+    // At -12 the first pick (+6.93) already clears most of the ranked span and three picks (+13.86)
+    // clear all of it, while the zero-bonus order is byte-identical to what -1e9 produced.
+    //
+    // Those percentages are over the table as the ENGINE sees it — `CangjieTable.init` drops
+    // supplementary-plane and Private Use characters via `isRenderableCJK`, so roughly half the
+    // lines in Resources/cangjie.txt never reach a candidate list and must not be counted. An
+    // earlier draft of this comment quoted 42%/79% from the raw file and was wrong about both.
+    static let unrankedFloor = -12.0
+
     private let table: CangjieTable
     private let characterRank: [Character: Double]
     // Live per-character bonus added on top of the dict rank (user learning). Consulted on
@@ -71,16 +93,14 @@ public final class CangjieEngine {
         }.map(\.1)
     }
 
-    // Combined sort score: dict rank (or a finite floor for unranked chars, kept below any
+    // Combined sort score: dict rank (or `unrankedFloor` for unranked chars, kept below any
     // real LM score) plus the live user-learning bonus. A zero bonus leaves the dict-only
     // ordering unchanged; with no dict rank and no bonus all scores tie, so the stable sort
     // preserves the table's order.
     private static func score(for candidate: String, rank: [Character: Double],
                               userRank: (Character) -> Double) -> Double {
         guard let c = candidate.first else { return -.greatestFiniteMagnitude }
-        // Finite floor, far below any real LM score (log-probs ~[-12, 0]) yet leaving
-        // headroom for a finite user bonus to lift an otherwise-unranked character.
-        let base = rank[c] ?? -1e9
+        let base = rank[c] ?? Self.unrankedFloor
         return base + userRank(c)
     }
 

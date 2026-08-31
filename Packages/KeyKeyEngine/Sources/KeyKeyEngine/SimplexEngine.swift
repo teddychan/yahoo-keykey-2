@@ -78,16 +78,21 @@ public final class SimplexEngine {
         }.map(\.1)
     }
 
-    // Combined sort score: dict rank (or a finite floor for unranked chars, kept below any
-    // real LM score) plus the live user-learning bonus. A zero bonus leaves the dict-only
+    // Combined sort score: dict rank (or `CangjieEngine.unrankedFloor` for unranked chars, kept
+    // below any real LM score) plus the live user-learning bonus. A zero bonus leaves the dict-only
     // ordering unchanged; with no dict rank and no bonus all scores tie, so the stable sort
     // preserves the table's order.
+    //
+    // The floor is CangjieEngine's rather than a second copy here: 速成 is ranked from the same
+    // `characterRank` as 倉頡, so two constants could only ever disagree by mistake. 速成 is where
+    // the old -1e9 was most visible — a multi-candidate two-key code averages ~46 candidates with
+    // a median of 20 ranked ones, so a picked variant climbed past the unranked ones above it and
+    // then stopped dead behind the ranked block. Under `yp` (68 candidates) 㡣 moved from position
+    // 39 to 36 on its first pick and never moved again, at any count (issue #130).
     private static func score(for candidate: String, rank: [Character: Double],
                               userRank: (Character) -> Double) -> Double {
         guard let c = candidate.first else { return -.greatestFiniteMagnitude }
-        // Finite floor, far below any real LM score (log-probs ~[-12, 0]) yet leaving
-        // headroom for a finite user bonus to lift an otherwise-unranked character.
-        let base = rank[c] ?? -1e9
+        let base = rank[c] ?? CangjieEngine.unrankedFloor
         return base + userRank(c)
     }
 
