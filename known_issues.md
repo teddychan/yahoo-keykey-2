@@ -75,7 +75,9 @@ Update if you are on an older release.
   Learning worked among characters the built-in dictionary knows, but a character it does not know
   — about half the 五代 table — sat too far below them to ever climb past, so under `卜月卜尸心`
   the variant 㡣 stayed behind 龍 permanently. Most visible in 速成, where a two-key code offers a
-  much longer list. Never affected 聯想字詞. One or two picks are now enough, three at most. See
+  much longer list. One pick is now enough, in every candidate list either mode offers — and the
+  same rule in reverse means a character committed by mistake also leads next time, until you pick
+  the one you meant. Never affected 聯想字詞. See
   [#130](https://github.com/teddychan/yahoo-keykey-2/issues/130) for the report and
   [#131](https://github.com/teddychan/yahoo-keykey-2/pull/131) for the measurements.
 - **In 速成, typing past a two-key code got stuck** — fixed in **2.13.1**. The extra key was

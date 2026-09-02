@@ -23,11 +23,16 @@ public final class CangjieEngine {
     //
     // It must also sit WITHIN REACH of a user-learning bonus, which is the half this got wrong
     // until 2.13.4 (issue #130). The value was -1e9, and the largest bonus UserFrequency can ever
-    // produce is log(1 + 100_000) * 10 ≈ 115 — so an unranked character could never overtake a
+    // produce is log(1 + 100_000) * 20 ≈ 230 — so an unranked character could never overtake a
     // ranked one however many times it was picked. It only reordered among the other unranked
     // characters: 55% of 倉頡 and 53% of 速成 candidate positions could not reach the front at all.
-    // At -12 the first pick (+6.93) already clears most of the ranked span and three picks (+13.86)
-    // clear all of it, while the zero-bonus order is byte-identical to what -1e9 produced.
+    //
+    // -12 is therefore paired with `UserFrequency.weight`, and the pair is what has to hold:
+    // `log(2) * weight > 0 - unrankedFloor`, so a SINGLE pick outranks the most common character
+    // the model knows. At 20 that is 13.86 against 12. Lowering this constant without raising the
+    // weight puts characters back out of reach — that inequality is the thing to preserve, not
+    // either number on its own. The zero-bonus order is unaffected either way: it is byte-identical
+    // to what -1e9 produced across every runtime code in the shipped tables.
     //
     // Those percentages are over the table as the ENGINE sees it — `CangjieTable.init` drops
     // supplementary-plane and Private Use characters via `isRenderableCJK`, so roughly half the

@@ -7,8 +7,9 @@ import Foundation
 // `UnrankedCharacterLearningTests` pins the rule with a three-character table and stays fast.
 // This suite pins the case the report was actually about, on the data a user types against: 龍 is
 // in the language model, the variant 㡣 is not, they share the 五代 code `ybysp`, and before 2.13.4
-// no number of picks could put 㡣 first. A synthetic table cannot catch a regression in the
-// relationship between the real LM's score range and `CangjieEngine.unrankedFloor`, because the
+// no number of picks could put 㡣 first, and one pick puts it first now. A synthetic table cannot
+// catch a regression in the relationship between the real LM's score range and the two constants
+// that have to clear it — `CangjieEngine.unrankedFloor` and `UserFrequency.weight` — because the
 // fixture chooses both sides of that comparison.
 //
 // It also guards the measurement, not just the behaviour. The figures quoted in CHANGELOG.md and
@@ -104,16 +105,14 @@ final class RealCandidateOrderLearningTests: XCTestCase {
 
     func testUnrankedVariantOvertakesTheRankedOneInCangjie() throws {
         let f = try loadShippedData()
-        // Pick 0: the dictionary's order. Pick 1: still the dictionary's order — one pick is
-        // +6.93 against a gap of 12 - 3.89, so it is not yet enough, which is the deliberate
-        // "learning must not win instantly" half of the design. Pick 2: +10.99 clears it.
+        // Pick 0 is the dictionary's order. Pick 1 is +13.86 against a gap of 12 - 3.89, so it
+        // already leads — and the second pick is asserted too, because "it leads and stays there"
+        // is the part a user checks. The pair was the report's own example.
         XCTAssertEqual(cangjieCandidates(f), ["龍", "㡣"], "before any pick")
         store.record(Self.unranked)
-        XCTAssertEqual(cangjieCandidates(f), ["龍", "㡣"], "after one pick")
+        XCTAssertEqual(cangjieCandidates(f), ["㡣", "龍"], "after one pick")
         store.record(Self.unranked)
         XCTAssertEqual(cangjieCandidates(f), ["㡣", "龍"], "after two picks")
-        store.record(Self.unranked)
-        XCTAssertEqual(cangjieCandidates(f), ["㡣", "龍"], "after three picks")
     }
 
     // MARK: 速成
@@ -121,9 +120,10 @@ final class RealCandidateOrderLearningTests: XCTestCase {
     func testUnrankedVariantClimbsToTheFrontInSimplex() throws {
         let f = try loadShippedData()
         // 速成 is the case the report was about: `yp` is a long list, and before 2.13.4 㡣 moved
-        // from position 39 to 36 on its first pick and then never moved again at any count.
-        // Positions are asserted as a non-increasing walk to 1 rather than as exact numbers, so a
-        // table or LM rebuild that shifts the list does not fail a test about learning.
+        // from position 39 to 36 on its first pick and then never moved again at any count. The
+        // starting position is asserted as "not first" rather than as 39, so a table or LM rebuild
+        // that shifts the list does not fail a test about learning; the finish is exact, because
+        // one pick reaching the front is the promise and there is nothing softer to assert.
         func position() throws -> Int {
             let candidates = simplexCandidates(f)
             let index = try XCTUnwrap(candidates.firstIndex(of: String(Self.unranked)),
@@ -131,22 +131,18 @@ final class RealCandidateOrderLearningTests: XCTestCase {
             return index + 1
         }
 
-        var previous = try position()
-        XCTAssertGreaterThan(previous, 1, "㡣 should not already lead the untrained list")
-        for pick in 1...3 {
-            store.record(Self.unranked)
-            let current = try position()
-            XCTAssertLessThanOrEqual(current, previous, "position went backwards at pick \(pick)")
-            previous = current
-        }
-        XCTAssertEqual(previous, 1, "㡣 should lead after three picks")
+        XCTAssertGreaterThan(try position(), 1, "㡣 should not already lead the untrained list")
+        store.record(Self.unranked)
+        XCTAssertEqual(try position(), 1, "㡣 should lead after one pick")
+        store.record(Self.unranked)
+        XCTAssertEqual(try position(), 1, "㡣 should still lead after a second pick")
     }
 
     // MARK: The setting, and the store
 
     func testTurningLearningOffRestoresTheDictionaryOrder() throws {
         let f = try loadShippedData()
-        for _ in 0..<5 { store.record(Self.unranked) }
+        store.record(Self.unranked)
         XCTAssertEqual(cangjieCandidates(f), ["㡣", "龍"], "learning on")
 
         // What InputController hands the engines when the toggle is off: a zero bonus, not a
@@ -158,7 +154,7 @@ final class RealCandidateOrderLearningTests: XCTestCase {
 
     func testLearningSurvivesReloadingTheStoreFromDisk() throws {
         let f = try loadShippedData()
-        for _ in 0..<3 { store.record(Self.unranked) }
+        store.record(Self.unranked)
         let bonusBefore = store.bonus(for: Self.unranked)
         XCTAssertGreaterThan(bonusBefore, 0)
         store.flush()

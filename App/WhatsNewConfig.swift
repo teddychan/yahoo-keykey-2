@@ -6,18 +6,25 @@ import DragonKit
 // binary isn't. That makes the entries and the date the only things to keep in sync with
 // CHANGELOG.md on release.
 //
-// 2.13.4 carries one user-facing change: a character the built-in dictionary does not know can now
-// be learned to the front of the candidate list. It could not before — it climbed past the other
-// unknown characters and then stopped behind the known ones permanently (issue #130).
+// 2.13.4 carries one user-facing change: a character the built-in dictionary does not know now
+// reaches the front of the candidate list on the FIRST pick. It could not before at any number of
+// picks — it climbed past the other unknown characters and then stopped behind the known ones
+// permanently (issue #130).
 //
-// One `.fixed` entry and no `.changed`, which is the whole release. The note has to do two jobs at
-// once: say the thing that was broken now works, and warn that a list someone has already trained
-// may look different today, because that is a visible change nobody asked for. An untrained list
-// is unchanged, so the warning is scoped to people the change can actually reach.
+// One `.fixed` section and no `.changed`, which is the whole release. The note has to do two jobs
+// at once: say the thing that was broken now works, and warn that a list someone has already
+// trained may look different today, because that is a visible change nobody asked for. An
+// untrained list is unchanged, so the warning is scoped to people the change can actually reach.
 //
-// Deliberately NOT in the notes: that the fix is a single constant in the two engines' sort score.
-// A user meets the ordering, not the floor — CHANGELOG.md and the 2026-08-12 spec carry the
-// mechanism and the measurements.
+// `fixed1` also carries the cost, in the same breath as the promise: one pick deciding the order
+// means a mistaken commit decides it too. Splitting that into its own entry would read as a second
+// problem rather than as the same rule seen from the other side, and hiding it would leave the
+// first person who commits the wrong character with no explanation for what they are seeing.
+//
+// Deliberately NOT in the notes: that the fix is two constants — the engines' floor for an
+// unranked character and the weight of a learning pick — that only work as a pair. A user meets
+// the ordering, not the arithmetic; CHANGELOG.md and the 2026-08-12 spec carry the mechanism and
+// the measurements.
 //
 // Keys are the fleet's stable set (app.whatsNew.summary, .fixed1, .changed1, …), not named after
 // this release's content — a release just overwrites the same keys' text in all seven .strings

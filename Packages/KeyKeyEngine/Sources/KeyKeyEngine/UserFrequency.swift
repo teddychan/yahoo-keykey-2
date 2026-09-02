@@ -4,10 +4,9 @@ import Foundation
 // single character and turns that into a ranking bonus, so frequently chosen characters
 // surface higher in future candidate lists. Counts persist as JSON across launches.
 //
-// The bonus is `log(1 + count) * weight`: diminishing returns (so one runaway character
-// can't dominate forever) yet a few selections lift a learned character near the top of
-// its code's candidates. `weight` is sized to the LM log-probability span (~12) so the
-// bonus competes with — but does not blindly override — the language model's ordering.
+// The bonus is `log(1 + count) * weight`: diminishing returns, so a character that runs away
+// with the count does not keep pulling further ahead once it already leads. `weight` is sized so
+// the FIRST pick clears the whole ranking span — the invariant is written out on the constant.
 //
 // Designed as a SHARED singleton accessed from multiple IMK threads:
 //   - `bonus(for:)` / `record(_:)` are synchronous and thread-safe (guarded by a lock),
@@ -56,7 +55,25 @@ public final class UserFrequency: @unchecked Sendable {
         directory.appendingPathComponent("user-frequency.json")
     }
 
-    private static let weight = 10.0
+    // Sized by one invariant, which is the entire promise the setting makes: ONE pick puts a
+    // character at the front of its candidate list, whatever the dictionary thinks of it.
+    //
+    //     log(1 + 1) * weight  >  0 - CangjieEngine.unrankedFloor
+    //
+    // The right-hand side is the widest gap learning ever has to close: the most common character
+    // the model knows scores 0, and one it does not know sits on the floor at -12. That needs
+    // weight > 17.31, so 20 clears it with room and stays a round number. The floor and this
+    // constant only make sense together — moving either without re-checking the inequality is how
+    // the promise breaks, which is exactly what happened below.
+    //
+    // It was 10.0 until 2.13.4. One pick was then +6.93 against that 12-point gap, so a picked
+    // character reached the front on the first pick in 83% of 倉頡 candidate positions and 47% of
+    // 速成 ones, and took two or three picks otherwise. That was on purpose — a stray commit was
+    // not meant to reorder the list — but "pick it twice, maybe three times" is not what the
+    // setting says, and issue #130 is what that reads like from the outside. At 20 it is 100% of
+    // positions in both modes, measured across all 2,137 multi-candidate 倉頡 codes and 648 速成
+    // ones in the shipped tables.
+    private static let weight = 20.0
     // Bound the file: cap distinct learned characters (evict least-used past this), and
     // cap any single count so the log-bonus can't grow unbounded.
     private static let maxEntries = 5000

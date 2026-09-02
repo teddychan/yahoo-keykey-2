@@ -2,12 +2,12 @@ import XCTest
 import Foundation
 @testable import KeyKeyEngine
 
-// Issue #130: a character the bundled language model has no entry for must still be able to reach
-// the front of the candidate list by being picked. It could not before 2.13.4 — CangjieEngine and
-// SimplexEngine floored an unranked character at -1e9, while the largest bonus UserFrequency can
-// ever produce is log(1 + 100_000) * 10 ≈ 115, so no number of picks closed the gap. The character
-// climbed past the other unranked candidates and then stopped there permanently, which is what the
-// reporter described as moving "extremely slowly" and then not at all.
+// Issue #130: a character the bundled language model has no entry for must reach the front of the
+// candidate list on the FIRST pick. It could not before 2.13.4 — CangjieEngine and SimplexEngine
+// floored an unranked character at -1e9, while the largest bonus UserFrequency can ever produce is
+// log(1 + 100_000) * 20 ≈ 230, so no number of picks closed the gap. The character climbed past the
+// other unranked candidates and then stopped there permanently, which is what the reporter
+// described as moving "extremely slowly" and then not at all.
 //
 // These cases drive a REAL UserFrequency instead of a hand-written bonus closure, which is the
 // point of the file: neither side was wrong on its own. The engines were self-consistent, the
@@ -16,19 +16,19 @@ import Foundation
 // checking it, and CangjieEngineTests/SimplexEngineTests (which pass a closure) already cover
 // everything that does not depend on the real scale.
 //
-// Both directions are pinned deliberately. Learning must be able to win, and it must not win
-// instantly: a floor just under the model's range would let one stray pick throw a rare variant
-// over characters the user actually types, which is the failure the old floor was overcorrecting
-// for. See `CangjieEngine.unrankedFloor`.
+// One pick, not "a few", is the assertion on purpose. The fix has two halves that only work as a
+// pair — the floor `CangjieEngine.unrankedFloor` moved into reach, and `UserFrequency.weight` grew
+// to 20 so that `log(2) * weight` clears the whole 12-point span in one step. Asserting a handful
+// of picks would pass with either half alone and hide the half that is missing; asserting one pick
+// against a character scored 0, the best score the model gives out, IS the inequality.
+//
+// The cost is deliberate and is written in the release notes: a stray commit now reorders the list
+// too, and is undone by picking the character you meant once.
 final class UnrankedCharacterLearningTests: XCTestCase {
     // The most common character the model knows scores 0; the rarest it knows scores -8. Both
     // appear here because the two ends bound what learning has to climb past.
     private static let commonScore = 0.0
     private static let rareScore = -8.0
-
-    // A handful of deliberate picks. Not the exact count, which would pin the constant rather than
-    // the behaviour — with the shipped floor it takes 3, and the old -1e9 fails at any bound.
-    private static let patience = 5
 
     private var tempDir: URL!
     private var store: UserFrequency!
@@ -75,15 +75,15 @@ final class UnrankedCharacterLearningTests: XCTestCase {
         return e
     }
 
-    // MARK: Learning can win
+    // MARK: One pick wins
 
     func testPickingAnUnrankedCangjieCharacterBringsItToTheFront() {
         let rank: [Character: Double] = ["明": Self.commonScore]
         XCTAssertEqual(cangjie(rank: rank).candidates.first, "明", "untrained list should start ranked")
 
-        for _ in 0..<Self.patience { store.record("昌") }
+        store.record("昌")
         XCTAssertEqual(cangjie(rank: rank).candidates.first, "昌",
-                       "an unranked character stayed behind a ranked one after \(Self.patience) picks")
+                       "one pick must put an unranked character ahead of the model's most common one")
     }
 
     func testPickingAnUnrankedSimplexCharacterBringsItToTheFront() {
@@ -94,17 +94,9 @@ final class UnrankedCharacterLearningTests: XCTestCase {
         let rank: [Character: Double] = ["明": Self.commonScore]
         XCTAssertEqual(simplex(rank: rank).candidates.first, "明", "untrained list should start ranked")
 
-        for _ in 0..<Self.patience { store.record("昌") }
-        XCTAssertEqual(simplex(rank: rank).candidates.first, "昌",
-                       "an unranked character stayed behind a ranked one after \(Self.patience) picks")
-    }
-
-    // MARK: Learning must not win instantly
-
-    func testOnePickDoesNotThrowAnUnrankedCharacterOverACommonOne() {
         store.record("昌")
-        XCTAssertEqual(cangjie(rank: ["明": Self.commonScore]).candidates.first, "明",
-                       "one pick should not overtake the most common character the model knows")
+        XCTAssertEqual(simplex(rank: rank).candidates.first, "昌",
+                       "one pick must put an unranked character ahead of the model's most common one")
     }
 
     // MARK: The untrained order is the dictionary's

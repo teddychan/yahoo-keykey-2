@@ -120,7 +120,7 @@ final class UserFrequencyTests: XCTestCase {
             uf.record("好")
         }
         // Every increment was applied under the lock, so the count is exact.
-        let expected = log(1 + Double(iterations)) * 10.0
+        let expected = log(1 + Double(iterations)) * 20.0   // UserFrequency.weight
         XCTAssertEqual(uf.bonus(for: "好"), expected, accuracy: 1e-9)
     }
 

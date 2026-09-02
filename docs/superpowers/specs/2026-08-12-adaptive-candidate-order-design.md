@@ -176,10 +176,22 @@ tag, and it must keep describing the latest published release until then.
 ## A limit on what learning can do, left as it is
 
 > **Fixed in 2.13.4** (issue #130), which is the release of its own this section asks for. The
-> floor became `-12` rather than the `-20` proposed below: both keep the untrained order
+> floor became `-12` rather than the `-20` proposed below — both keep the untrained order
 > byte-identical, but `-20` needs a median of 4 picks in 速成 and 3 in 倉頡 (7 at worst), and that
-> is close enough to "never" that the report this section predicted arrived anyway. At `-12` it is
-> 2 and 1, 3 at worst.
+> is close enough to "never" that the report this section predicted arrived anyway.
+>
+> **Moving the floor alone was not enough, and that is the correction this section most needs.**
+> At `-12` with the shipped bonus weight of `10`, one pick was worth `log(2) * 10 = 6.93` against a
+> 12-point span, so the first pick brought a character to the front in 83% of 倉頡 candidate
+> positions and 47% of 速成 ones and the rest took two or three. Nothing was stuck any more, which
+> is what this section asked for, but "pick it twice" is not what the setting promises. The weight
+> went to `20` in the same release, and the pair is now an invariant rather than two independent
+> numbers: `log(2) * weight > 0 - unrankedFloor`, i.e. one pick outranks the most common character
+> the model knows. Measured over the shipped tables, that is 100% of candidate positions in both
+> modes. The cost is the one this section worried about, and it is now stated in the release notes
+> rather than defended against: a stray commit reorders the list too, and picking the character you
+> meant undoes it in one pick half the time, two nearly always, three at worst — where at weight
+> `10` recovering could take six.
 >
 > **The figures below count the raw file and are overstated.** `CangjieTable.init` drops
 > supplementary-plane and Private Use characters through `isRenderableCJK` before anything is
