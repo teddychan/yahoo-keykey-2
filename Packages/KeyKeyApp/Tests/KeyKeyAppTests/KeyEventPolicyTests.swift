@@ -1,5 +1,6 @@
 import XCTest
 import AppKit
+import KeyKeyEngine
 @testable import KeyKeyApp
 
 // Locks issue #56: ⌘/⌃ combinations (⌘C copy, ⌘X cut, ⌘V paste, ⌃A …) are app/system
