@@ -22,11 +22,11 @@ if server == nil { NSLog("YahooKeyKey: failed to create IMKServer"); exit(EXIT_F
 // data.txt parse happens before the first controller is created (later inits are instant).
 DispatchQueue.global(qos: .userInitiated).async { _ = SharedResources.shared }
 
-// Flush pending user-learning counts on a clean quit. Best-effort: IMK agents can also be
+// Flush pending adaptive-ordering counts on a clean quit. Best-effort: IMK agents can also be
 // killed without terminating, but this closes the common-quit gap within the save debounce.
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationWillTerminate(_ notification: Notification) {
-        SharedResources.shared.userFreq.flush()
+        SharedResources.shared.candidateUsage.flush()
     }
 }
 let appDelegate = AppDelegate()

@@ -55,61 +55,118 @@ final class KeyEventPolicyTests: XCTestCase {
         XCTAssertFalse(KeyEventPolicy.isSystemShortcut([.shift, .capsLock]))
     }
 
-    // MARK: - AdaptiveCandidateOrder (issue #85)
+    // MARK: - AdaptiveCandidateOrder (issues #85, #130)
 
-    func testBonusIsTheLearnedValueWhenEnabled() {
-        XCTAssertEqual(AdaptiveCandidateOrder.bonus(for: "漏", enabled: true,
-                                                    learned: { $0 == "漏" ? 7 : 0 }), 7)
+    private static let cangjieA = CandidateListKey.cangjie(tableVersion: "5", code: "a")
+
+    func testCountIsTheStoredCountWhenEnabled() {
+        XCTAssertEqual(AdaptiveCandidateOrder.count(of: "漏", in: Self.cangjieA, enabled: true,
+                                                    stored: { c, _ in c == "漏" ? 7 : 0 }), 7)
     }
 
-    func testBonusIsZeroWhenDisabled() {
-        // Zero is the whole mechanism: every consumer adds this to a static score, so zero leaves
-        // the Cangjie/Simplex sorts, the Pinyin walker and the 聯想 sort on that score alone.
-        XCTAssertEqual(AdaptiveCandidateOrder.bonus(for: "漏", enabled: false,
-                                                    learned: { _ in 999 }), 0)
+    func testCountIsAskedForTheGivenCandidateAndList() {
+        // The gate must pass BOTH through untouched, or a count could be read from the wrong list.
+        var seen: (String, CandidateListKey)?
+        _ = AdaptiveCandidateOrder.count(of: "漏", in: Self.cangjieA, enabled: true,
+                                         stored: { c, l in seen = (c, l); return 0 })
+        XCTAssertEqual(seen?.0, "漏")
+        XCTAssertEqual(seen?.1, Self.cangjieA)
     }
 
-    func testSingleCharacterCommitIsLearnedWhenEnabled() {
-        XCTAssertEqual(AdaptiveCandidateOrder.characterToLearn(fromCommitted: "漏", enabled: true), "漏")
+    func testCountIsZeroWhenDisabled() {
+        // Zero is the whole mechanism: every consumer sorts on this count first and falls back to
+        // the built-in order, so zero leaves the 倉頡/速成 sorts, the 拼音 walker's node
+        // candidates and the 聯想 sort with exactly the order they had before any learning.
+        XCTAssertEqual(AdaptiveCandidateOrder.count(of: "漏", in: Self.cangjieA, enabled: false,
+                                                    stored: { _, _ in 999 }), 0)
     }
 
-    func testNothingIsLearnedFromACommitWhenDisabled() {
-        // The setting pauses learning as well as ignoring it — a user who turned it off is not
-        // still being counted in the background.
-        XCTAssertNil(AdaptiveCandidateOrder.characterToLearn(fromCommitted: "漏", enabled: false))
+    func testStoredCountsAreNotEvenConsultedWhenDisabled() {
+        // "Ignore existing usage counts" — the store is not read at all, so a user who turned the
+        // setting off cannot see a list reordered by counts already on disk.
+        var consulted = false
+        _ = AdaptiveCandidateOrder.count(of: "漏", in: Self.cangjieA, enabled: false,
+                                         stored: { _, _ in consulted = true; return 5 })
+        XCTAssertFalse(consulted)
     }
 
-    func testMultiCharacterCommitIsNotLearned() {
-        // UserFrequency counts characters, so a multi-character 拼音 commit has no single
-        // character to attribute. Unchanged from the pre-toggle behaviour.
-        XCTAssertNil(AdaptiveCandidateOrder.characterToLearn(fromCommitted: "今天", enabled: true))
+    // MARK: usage recorded by a composition commit
+
+    func testCommitUsageIsRecordedWhenEnabled() {
+        let pending = [CandidateUsage(list: Self.cangjieA, candidate: "漏")]
+        XCTAssertEqual(AdaptiveCandidateOrder.usageToRecord(pending, enabled: true), pending)
     }
 
-    func testEmptyCommitIsNotLearned() {
-        XCTAssertNil(AdaptiveCandidateOrder.characterToLearn(fromCommitted: "", enabled: true))
+    func testNothingIsRecordedFromACommitWhenDisabled() {
+        // The setting pauses counting as well as ignoring counts — a user who turned it off is
+        // not still being counted in the background.
+        let pending = [CandidateUsage(list: Self.cangjieA, candidate: "漏")]
+        XCTAssertEqual(AdaptiveCandidateOrder.usageToRecord(pending, enabled: false), [])
     }
 
-    func testAssociationPickLearnsTheContinuation() {
-        // 關係 inserts the suffix 係, and 係 is what the user chose — the same character
-        // AssociatedPhrases ranks the phrase by.
-        XCTAssertEqual(AdaptiveCandidateOrder.characterToLearn(fromAssociationSuffix: "係",
-                                                               enabled: true), "係")
+    func testAnEmptyPendingUsageRecordsNothing() {
+        // What an engine reports for a list with nothing to reorder, and for a commit made after
+        // the engine has already reset.
+        XCTAssertEqual(AdaptiveCandidateOrder.usageToRecord([], enabled: true), [])
     }
 
-    func testLongerAssociationLearnsOnlyTheFirstContinuation() {
-        // No length condition here, unlike a composition commit: a three-character phrase still
-        // turns on the one continuation character it adds first.
-        XCTAssertEqual(AdaptiveCandidateOrder.characterToLearn(fromAssociationSuffix: "係人",
-                                                               enabled: true), "係")
+    func testEveryPendingRecordIsKept() {
+        // A 拼音 commit finalizes several nodes at once; all of them count.
+        let pending = [
+            CandidateUsage(list: .pinyin(readingKey: "ㄨㄛ"), candidate: "我"),
+            CandidateUsage(list: .pinyin(readingKey: "ㄋㄧ"), candidate: "你"),
+        ]
+        XCTAssertEqual(AdaptiveCandidateOrder.usageToRecord(pending, enabled: true), pending)
     }
 
-    func testNothingIsLearnedFromAnAssociationWhenDisabled() {
-        XCTAssertNil(AdaptiveCandidateOrder.characterToLearn(fromAssociationSuffix: "係",
-                                                             enabled: false))
+    // MARK: usage recorded by a 聯想 pick
+
+    func testAssociationPickRecordsTheWholePhrase() {
+        // 關係 inserts only the suffix 係, and a continuation-only display shows only 係 — but the
+        // candidate the user picked is the phrase, so the phrase is what is counted.
+        XCTAssertEqual(AdaptiveCandidateOrder.usageToRecord(forAssociationPhrase: "關係", enabled: true),
+                       [CandidateUsage(list: .association(trigger: "關"), candidate: "關係")])
     }
 
-    func testEmptyAssociationSuffixLearnsNothing() {
-        // A one-character "phrase" inserts nothing, so there is nothing to attribute.
-        XCTAssertNil(AdaptiveCandidateOrder.characterToLearn(fromAssociationSuffix: "", enabled: true))
+    func testAssociationKeyIsTheTriggerAloneSoModesShareOneList() {
+        // 倉頡 and 速成 show the same list after the same character, so the record must be keyed
+        // by the trigger and nothing else. The function takes ONLY the phrase — there is no mode
+        // or code argument it could fold in — and the trigger it derives is the phrase's first
+        // character, exactly how AssociatedPhrases buckets its lists. So a pick made after
+        // entering 關 through either mode produces this one same record.
+        let recorded = AdaptiveCandidateOrder.usageToRecord(forAssociationPhrase: "關係", enabled: true)
+        XCTAssertEqual(recorded.first?.list, .association(trigger: "關"))
+        XCTAssertNotEqual(recorded.first?.list, .cangjie(tableVersion: "5", code: "a"))
+        XCTAssertNotEqual(recorded.first?.list, .simplex(tableVersion: "5", code: "a"))
+    }
+
+    func testALongerAssociationPhraseIsCountedWhole() {
+        XCTAssertEqual(AdaptiveCandidateOrder.usageToRecord(forAssociationPhrase: "關係人", enabled: true),
+                       [CandidateUsage(list: .association(trigger: "關"), candidate: "關係人")])
+    }
+
+    func testNothingIsRecordedFromAnAssociationWhenDisabled() {
+        XCTAssertEqual(AdaptiveCandidateOrder.usageToRecord(forAssociationPhrase: "關係", enabled: false), [])
+    }
+
+    func testAnEmptyOrSingleCharacterAssociationRecordsNothing() {
+        // A one-character "phrase" inserts nothing and is not an association candidate.
+        XCTAssertEqual(AdaptiveCandidateOrder.usageToRecord(forAssociationPhrase: "", enabled: true), [])
+        XCTAssertEqual(AdaptiveCandidateOrder.usageToRecord(forAssociationPhrase: "關", enabled: true), [])
+    }
+
+    // Merely showing or dismissing a 聯想 list must count nothing. Reading counts to ORDER a list
+    // goes through `count(of:in:enabled:stored:)`, which takes a read-only `stored` closure and
+    // therefore cannot record: showing a list is a pure read. Recording needs
+    // `usageToRecord(forAssociationPhrase:enabled:)`, and the only place InputController calls it
+    // is the digit-selection branch that commits a suggestion — `clearAssociations()`, Esc and
+    // the any-other-key dismissal have nothing to call.
+    func testOrderingAListIsAPureReadThatCannotRecord() {
+        var reads = 0
+        let count = AdaptiveCandidateOrder.count(of: "關係", in: .association(trigger: "關"),
+                                                 enabled: true,
+                                                 stored: { _, _ in reads += 1; return 3 })
+        XCTAssertEqual(count, 3)
+        XCTAssertEqual(reads, 1, "displaying a list reads its counts once and writes nothing")
     }
 }

@@ -12,7 +12,7 @@ final class CangjieEngineTests: XCTestCase {
     abcdef\t漏
     """)
 
-    private func make() -> CangjieEngine { CangjieEngine(table: Self.table) }
+    private func make() -> CangjieEngine { CangjieEngine(table: Self.table, tableVersion: "5") }
 
     func testAccumulatesRadicalGlyphs() {
         let e = make()
@@ -138,7 +138,7 @@ final class CangjieEngineTests: XCTestCase {
     func testWildcardCandidatesRerankedByCharacterRank() {
         // Rank a normally-late char (漏) highest so it leads the "a*" list.
         let rank: [Character: Double] = ["漏": 0.0, "韻": -1.0]
-        let e = CangjieEngine(table: Self.table, characterRank: rank)
+        let e = CangjieEngine(table: Self.table, characterRank: rank, tableVersion: "5")
         _ = e.handleKey("a"); _ = e.handleKey("*")
         // Default table order is ["明","冒","韻","漏"]; ranked chars move ahead
         // (漏 > 韻), unranked ("明","冒") keep their relative order after.
@@ -146,34 +146,100 @@ final class CangjieEngineTests: XCTestCase {
     }
 
     func testEmptyRankLeavesOrderUnchanged() {
-        let e = CangjieEngine(table: Self.table, characterRank: [:])
+        let e = CangjieEngine(table: Self.table, characterRank: [:], tableVersion: "5")
         _ = e.handleKey("a"); _ = e.handleKey("*")
         XCTAssertEqual(e.candidates, ["明", "冒", "韻", "漏"])
     }
 
-    func testUserRankPromotesLearnedChar() {
-        // No dict rank; a userRank closure boosts an otherwise-last char (漏) to the top.
-        let e = CangjieEngine(table: Self.table, userRank: { $0 == "漏" ? 100 : 0 })
+    // MARK: adaptive ordering (issue #130)
+
+    func testOneCommittedCandidateLeadsEveryUnusedOne() {
+        // No dict rank, so every candidate starts level: one commit of the last one leads.
+        let e = CangjieEngine(table: Self.table, tableVersion: "5",
+                              usageCount: { _, c in c == "漏" ? 1 : 0 })
         _ = e.handleKey("a"); _ = e.handleKey("*")
         XCTAssertEqual(e.candidates, ["漏", "明", "冒", "韻"])
     }
 
-    func testZeroUserRankLeavesOrderUnchanged() {
-        // Default (zero) userRank must not perturb dict-only ordering: existing behaviour.
+    func testZeroCountsLeaveTheBuiltInOrderUnchanged() {
+        // A fresh store answers zero for everything and must not perturb the ranked order.
         let rank: [Character: Double] = ["漏": 0.0, "韻": -1.0]
-        let e = CangjieEngine(table: Self.table, characterRank: rank, userRank: { _ in 0 })
+        let e = CangjieEngine(table: Self.table, characterRank: rank, tableVersion: "5",
+                              usageCount: { _, _ in 0 })
         _ = e.handleKey("a"); _ = e.handleKey("*")
         XCTAssertEqual(e.candidates, ["漏", "韻", "明", "冒"])
     }
 
-    func testUserRankAddsToCharacterRank() {
-        // userRank is added on top of the dict rank, lifting a learned char above a
-        // higher-dict-ranked one.
+    func testACountBeatsAHigherDictionaryRank() {
+        // The count decides on its own — it is not added to the dictionary rank — so a single
+        // commit of the lower-ranked 漏 puts it ahead of the higher-ranked 韻.
         let rank: [Character: Double] = ["韻": 1.0, "漏": 0.0]
-        let e = CangjieEngine(table: Self.table, characterRank: rank, userRank: { $0 == "漏" ? 5 : 0 })
+        let e = CangjieEngine(table: Self.table, characterRank: rank, tableVersion: "5",
+                              usageCount: { _, c in c == "漏" ? 1 : 0 })
         _ = e.handleKey("a"); _ = e.handleKey("*")
-        // 漏: 0+5=5 leads; 韻: 1+0=1; then unranked 明,冒 keep order.
         XCTAssertEqual(e.candidates, ["漏", "韻", "明", "冒"])
+    }
+
+    func testHigherCountLeadsLowerCount() {
+        let counts = ["韻": 2, "漏": 5]
+        let e = CangjieEngine(table: Self.table, tableVersion: "5",
+                              usageCount: { _, c in counts[c] ?? 0 })
+        _ = e.handleKey("a"); _ = e.handleKey("*")
+        XCTAssertEqual(e.candidates, ["漏", "韻", "明", "冒"])
+    }
+
+    func testEqualCountsKeepTheBuiltInOrder() {
+        // Everything committed the same number of times: the table order stands. Which one was
+        // committed most recently is not part of the ordering and cannot change this.
+        let e = CangjieEngine(table: Self.table, tableVersion: "5", usageCount: { _, _ in 4 })
+        _ = e.handleKey("a"); _ = e.handleKey("*")
+        XCTAssertEqual(e.candidates, ["明", "冒", "韻", "漏"])
+    }
+
+    func testExactCodeAndWildcardAreSeparateLists() {
+        // The engine asks about the pattern as typed, so `a*` usage cannot be answered from the
+        // exact code `a` — and both keys carry the table version.
+        var asked: [CandidateListKey] = []
+        let e = CangjieEngine(table: Self.table, tableVersion: "3",
+                              usageCount: { list, _ in asked.append(list); return 0 })
+        _ = e.handleKey("a")
+        _ = e.candidates
+        XCTAssertEqual(e.candidateListKey, .cangjie(tableVersion: "3", code: "a"))
+        _ = e.handleKey("*")
+        _ = e.candidates
+        XCTAssertEqual(e.candidateListKey, .cangjieWildcard(tableVersion: "3", pattern: "a*"))
+        XCTAssertTrue(asked.contains(.cangjie(tableVersion: "3", code: "a")))
+        XCTAssertTrue(asked.contains(.cangjieWildcard(tableVersion: "3", pattern: "a*")))
+        XCTAssertFalse(asked.contains(.cangjie(tableVersion: "5", code: "a")))
+    }
+
+    func testPendingUsageNamesTheCommittedCandidateAndIsGoneAfterCommit() {
+        let e = CangjieEngine(table: Self.table, tableVersion: "5")
+        _ = e.handleKey("a"); _ = e.handleKey("*")
+        e.selectCandidate(2)   // 韻
+        XCTAssertEqual(e.pendingUsage,
+                       [CandidateUsage(list: .cangjieWildcard(tableVersion: "5", pattern: "a*"),
+                                       candidate: "韻")])
+        XCTAssertEqual(e.commit(), "韻")
+        // The code is cleared by commit, so the list identity is gone: it MUST be read first.
+        XCTAssertEqual(e.pendingUsage, [])
+        XCTAssertNil(e.candidateListKey)
+    }
+
+    func testPendingUsageDefaultsToTheFirstCandidateForSpaceAndReturn() {
+        // Space/Return select the first candidate of the page before committing; with nothing
+        // selected at all the engine still commits the first candidate, and credits that one.
+        let e = CangjieEngine(table: Self.table, tableVersion: "5")
+        _ = e.handleKey("a"); _ = e.handleKey("*")
+        XCTAssertEqual(e.pendingUsage.first?.candidate, "明")
+    }
+
+    func testPendingUsageIsEmptyForASingleCandidateList() {
+        // "ab" resolves to one character: nothing to reorder, so nothing worth counting.
+        let e = CangjieEngine(table: Self.table, tableVersion: "5")
+        _ = e.handleKey("a"); _ = e.handleKey("b")
+        XCTAssertEqual(e.candidates.count, 1)
+        XCTAssertEqual(e.pendingUsage, [])
     }
 
     func testCandidatesCacheInvalidatedByBackspace() {

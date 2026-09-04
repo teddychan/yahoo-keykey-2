@@ -128,8 +128,13 @@ immediately.
 | **三代倉頡** (Yahoo! KeyKey compatible) | original Yahoo! KeyKey tables | Yahoo's original order | 面 `一田卜中`, 鬼 `竹戈` |
 
 **五代** is the default, so existing users are unaffected until they opt in. Both orders are
-fixed; the learning layer sits on top and **依選字習慣調整候選字順序** turns it off — so 三代
-with learning off is the original Yahoo! KeyKey order and nothing else.
+fixed, and each is the tie-breaker rather than a score the learning layer adjusts: with
+**依選字習慣調整候選字順序** on, every candidate list is ordered by how often you have committed
+each candidate *in that list*, and the table order decides between candidates you have committed
+equally often. Turning it off shows the table order alone — so 三代 with learning off is the
+original Yahoo! KeyKey order and nothing else. Usage is counted per candidate list, so a 倉頡
+code, a 倉頡 wildcard pattern and a 速成 code each learn separately, while 倉頡 and 速成 share
+what they learn about 聯想字詞.
 
 Yahoo! KeyKey's *associated-phrase* ranking cannot be reproduced — that data was never
 open-sourced — so associations use Yahoo! KeyKey 2's own ordering in both modes.
@@ -146,9 +151,8 @@ Common problems, and what each one turns out to be, are collected in
 | A character's code is not what you expect | [#3](known_issues.md#3-a-characters-code-is-not-what-i-expect) |
 | Space pages instead of accepting your code | [#4](known_issues.md#4-space-pages-instead-of-accepting-my-code) |
 | Typing a number inserts a word | [#5](known_issues.md#5-typing-a-number-inserts-a-word-instead) |
-| A rare character never moves to the top | [#6](known_issues.md#6-a-rare-character-never-moves-to-the-top) |
 
-That file also lists what has **[already been fixed](known_issues.md#7-already-fixed-in-earlier-versions)**,
+That file also lists what has **[already been fixed](known_issues.md#6-already-fixed-in-earlier-versions)**,
 so check your version before reporting a bug. Anything else —
 [open an issue](https://github.com/teddychan/yahoo-keykey-2/issues).
 

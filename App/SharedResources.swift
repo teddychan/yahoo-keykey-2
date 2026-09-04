@@ -6,15 +6,17 @@ import KeyKeyEngine
 // InputController per client (per app), so loading these per instance duplicated
 // ~55–80 MB across every app. This singleton loads each resource exactly once and
 // every controller reads from it; the engine types are value-type structs (and
-// UserFrequency is a shared class), so reads do not copy.
+// CandidateUsageStore is a shared class), so reads do not copy.
 final class SharedResources {
     static let shared = SharedResources()
 
-    // Where KeyKey's own on-disk data lives (today: the user-learning store). A local debug
-    // build gets its OWN directory rather than sharing the installed IME's — the reasoning is
-    // on UserFrequency.supportDirectory(named:). The Uninstall pane removes this exact URL, so
-    // the two must be named in one place (AppMenuController.uninstallConfig reads it here).
-    static let supportDirectory = UserFrequency.supportDirectory(
+    // Where KeyKey's own on-disk data lives (the adaptive-ordering store, plus the retired
+    // per-character one left behind for a downgrade). A local debug build gets its OWN directory
+    // rather than sharing the installed IME's — the reasoning is on
+    // CandidateUsageStore.supportDirectory(named:). The Uninstall pane removes this exact URL,
+    // which is what sweeps up BOTH learning files, so the directory must be named in one place
+    // (AppMenuController.uninstallConfig reads it here).
+    static let supportDirectory = CandidateUsageStore.supportDirectory(
         named: DragonAbout.isDebugBuild() ? "YahooKeyKey2 Debug" : "YahooKeyKey2"
     )
 
@@ -23,8 +25,8 @@ final class SharedResources {
     let characterRank: [Character: Double]
     let associatedPhrases: AssociatedPhrases
     let hanConvertFilter: HanConvertFilter
-    // One shared user-learning store across all controllers.
-    let userFreq: UserFrequency
+    // One shared adaptive-ordering store across all controllers: per-candidate-list commit counts.
+    let candidateUsage: CandidateUsageStore
     // Small pinyin→zhuyin syllable map (eager; ~422 rows, tiny). Backs the Pinyin segmenter.
     let pinyinSyllableTable: PinyinSyllableTable
     // The heavy Pinyin LM index (~55–80 MB), resident ONLY while at least one controller is in
@@ -110,10 +112,11 @@ final class SharedResources {
         }
         hanConvertFilter = HanConvertFilter(direction: .traditionalToSimplified, table: hanConvertTable)
 
-        // Load the persisted user-learning store once (fail-safe to empty if absent/corrupt).
-        // Explicit directory, not the engine's default: a debug build must not read or write
-        // the installed IME's counts.
-        userFreq = UserFrequency(fileURL: UserFrequency.defaultFileURL(directory: Self.supportDirectory))
+        // Load the persisted adaptive-ordering store once (fail-safe to empty if absent/corrupt).
+        // Explicit directory, not a default: a debug build must not read or write the installed
+        // IME's counts.
+        candidateUsage = CandidateUsageStore(
+            fileURL: CandidateUsageStore.defaultFileURL(directory: Self.supportDirectory))
 
         // Pinyin syllable map: small, always loaded; fail-safe to empty if the resource is missing.
         if let url = Bundle.main.url(forResource: "pinyin-zhuyin", withExtension: "txt"),

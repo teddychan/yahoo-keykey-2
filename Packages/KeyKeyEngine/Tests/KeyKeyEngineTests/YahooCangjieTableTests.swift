@@ -44,7 +44,7 @@ final class YahooCangjieTableTests: XCTestCase {
             throw XCTSkip("cangjie-yahoo.txt not present")
         }
         let v3 = try CangjieTable(contentsOf: v3URL)
-        let engine = CangjieEngine(table: v3, characterRank: [:])
+        let engine = CangjieEngine(table: v3, characterRank: [:], tableVersion: "3")
         for key in "hqi" { _ = engine.handleKey(key) }
         XCTAssertEqual(engine.candidates.first, "我")
     }
@@ -60,7 +60,7 @@ final class YahooCangjieTableTests: XCTestCase {
         XCTAssertEqual(v3.characters(forCode: "zxce"), ["」"])
         XCTAssertTrue(v3.characters(forCode: "zxab").contains("，"))
         // And the engine composes it end-to-end (type z,x,c,d → first candidate 「).
-        let engine = CangjieEngine(table: v3, characterRank: [:])
+        let engine = CangjieEngine(table: v3, characterRank: [:], tableVersion: "3")
         for key in "zxcd" { _ = engine.handleKey(key) }
         XCTAssertEqual(engine.candidates.first, "「")
     }

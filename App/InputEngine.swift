@@ -11,6 +11,7 @@ import KeyKeyEngine
 //   - selectCandidate: choose candidates[index] (no-op if out of range).
 //   - backspace: edit/delete within the current composition.
 //   - commit: finalize the composition, returning the text to insert, and reset.
+//   - pendingUsage: the candidate-list usage a commit would credit, valid only BEFORE commit().
 protocol InputEngine: AnyObject {
     func handleKey(_ key: Character) -> Bool
     var composingText: String { get }
@@ -18,6 +19,14 @@ protocol InputEngine: AnyObject {
     func selectCandidate(_ index: Int)
     func backspace()
     func commit() -> String
+    /// What committing right now would credit to the adaptive-ordering store: the candidate about
+    /// to be committed, paired with the identity of the list it is being picked from.
+    ///
+    /// Part of the protocol so no engine can be driven by `handle()` without answering it, and
+    /// read BEFORE `commit()` at the single call site that inserts into the client — `commit()`
+    /// clears the code/nodes this is derived from, so afterwards it is empty. Empty is also the
+    /// honest answer for a list with nothing to reorder.
+    var pendingUsage: [CandidateUsage] { get }
 }
 
 // CangjieEngine matches the protocol surface: selectCandidate sets the chosen glyph and

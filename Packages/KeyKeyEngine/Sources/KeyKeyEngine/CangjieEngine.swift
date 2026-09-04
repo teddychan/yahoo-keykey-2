@@ -15,20 +15,29 @@ public final class CangjieEngine {
 
     private let table: CangjieTable
     private let characterRank: [Character: Double]
-    // Live per-character bonus added on top of the dict rank (user learning). Consulted on
-    // every sort, so newly-learned characters promote without rebuilding the engine.
-    private let userRank: (Character) -> Double
+    // Which 倉頡 table these candidates come from ("5"/"3"). Part of every list identity this
+    // engine reports, because 三代 and 五代 answer the same code with different characters — the
+    // same code is a different candidate list in each, and their counts must not mix.
+    private let tableVersion: String
+    // How many times a candidate has been committed in a given list. Consulted on every sort, so
+    // a freshly-committed candidate leads next time without rebuilding the engine.
+    private let usageCount: (CandidateListKey, String) -> Int
     private var code: String = ""
     private var selected: String?
     // Cached result of the `candidates` computation; invalidated (nil) on any state
     // change to the code. `candidates` is read multiple times per keydown.
     private var cachedCandidates: [String]?
 
+    /// `tableVersion` has no default on purpose: a defaulted one would let a call site put
+    /// 三代 and 五代 counts in the same list by omitting an argument. `usageCount` does default,
+    /// to the no-learning answer — zero everywhere leaves the built-in order untouched.
     public init(table: CangjieTable, characterRank: [Character: Double] = [:],
-                userRank: @escaping (Character) -> Double = { _ in 0 }) {
+                tableVersion: String,
+                usageCount: @escaping (CandidateListKey, String) -> Int = { _, _ in 0 }) {
         self.table = table
         self.characterRank = characterRank
-        self.userRank = userRank
+        self.tableVersion = tableVersion
+        self.usageCount = usageCount
     }
 
     /// Returns true if the key was consumed by the engine.
@@ -49,9 +58,9 @@ public final class CangjieEngine {
         return String(code.map { Self.radicals[$0] ?? $0 })
     }
 
-    /// Characters whose code matches the current radical sequence (supports `*`),
-    /// stable-sorted so common characters (higher rank) come first. With an empty
-    /// rank the table order is preserved unchanged.
+    /// Characters whose code matches the current radical sequence (supports `*`), ordered
+    /// frequency-first over the built-in order (see `CandidateOrdering`). With no committed
+    /// usage the table/rank order is preserved unchanged.
     public var candidates: [String] {
         if let cachedCandidates { return cachedCandidates }
         let result = computeCandidates()
@@ -60,28 +69,34 @@ public final class CangjieEngine {
     }
 
     private func computeCandidates() -> [String] {
-        guard !code.isEmpty else { return [] }
+        guard !code.isEmpty, let list = candidateListKey else { return [] }
         let matches = table.characters(matching: code)
-        // Score each candidate ONCE, then sort the (element, score) pairs.
-        return matches.enumerated().map { offset, element in
-            (offset, element, Self.score(for: element, rank: characterRank, userRank: userRank))
-        }.sorted { lhs, rhs in
-            if lhs.2 != rhs.2 { return lhs.2 > rhs.2 }
-            return lhs.0 < rhs.0
-        }.map(\.1)
+        return CandidateOrdering.ordered(matches, rank: characterRank) { usageCount(list, $0) }
     }
 
-    // Combined sort score: dict rank (or a finite floor for unranked chars, kept below any
-    // real LM score) plus the live user-learning bonus. A zero bonus leaves the dict-only
-    // ordering unchanged; with no dict rank and no bonus all scores tie, so the stable sort
-    // preserves the table's order.
-    private static func score(for candidate: String, rank: [Character: Double],
-                              userRank: (Character) -> Double) -> Double {
-        guard let c = candidate.first else { return -.greatestFiniteMagnitude }
-        // Finite floor, far below any real LM score (log-probs ~[-12, 0]) yet leaving
-        // headroom for a finite user bonus to lift an otherwise-unranked character.
-        let base = rank[c] ?? -1e9
-        return base + userRank(c)
+    /// Which candidate list the current code addresses, or nil when nothing is being composed.
+    ///
+    /// A code carrying `*` is its OWN list, keyed by the pattern as typed: `h*i` matches a
+    /// different set of characters than the exact code `hi` does, and than `h*e` does, so usage
+    /// under one must not move the others.
+    public var candidateListKey: CandidateListKey? {
+        guard !code.isEmpty else { return nil }
+        return code.contains("*")
+            ? .cangjieWildcard(tableVersion: tableVersion, pattern: code)
+            : .cangjie(tableVersion: tableVersion, code: code)
+    }
+
+    /// What a commit right now would credit: the candidate `commit()` is about to return, in the
+    /// list it is being picked from. Empty once `commit()` has run, because the code that
+    /// identifies the list is gone by then — so a caller MUST read this before committing.
+    ///
+    /// Empty too for a single-candidate list: with nothing to reorder there is no order to learn,
+    /// and counting it would fill the store with records that can never change an outcome.
+    public var pendingUsage: [CandidateUsage] {
+        let cands = candidates
+        guard cands.count > 1, let list = candidateListKey,
+              let candidate = selected ?? cands.first else { return [] }
+        return [CandidateUsage(list: list, candidate: candidate)]
     }
 
     public func selectCandidate(_ index: Int) {

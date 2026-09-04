@@ -23,7 +23,7 @@ final class RealCangjieTableTests: XCTestCase {
         XCTAssertTrue(table.characters(forCode: "a").contains("日"))
         XCTAssertTrue(table.characters(forCode: "ab").contains("明"))
 
-        let e = CangjieEngine(table: table)
+        let e = CangjieEngine(table: table, tableVersion: "5")
         _ = e.handleKey("a"); _ = e.handleKey("b")
         XCTAssertEqual(e.composingText, "日月")
         XCTAssertTrue(e.candidates.contains("明"))

@@ -5,13 +5,13 @@ import DragonKit
 
 @objc(InputController)
 final class InputController: IMKInputController {
-    // User learning: persisted selection-count store providing a live ranking bonus for
-    // Cangjie/Simplex candidates, so committed characters surface higher next time.
-    private let userFreq: UserFrequency
-    // The gated learning bonus handed to the engines, and read again when ordering 聯想. Stored
-    // rather than local to init because the association path needs the same closure — one gate,
-    // so the setting cannot apply to composition candidates and not to suggestions.
-    private let userRank: (Character) -> Double
+    // Adaptive ordering: persisted per-candidate-list commit counts, so a candidate the user has
+    // committed more often in a list leads that list next time.
+    private let candidateUsage: CandidateUsageStore
+    // The gated count handed to the engines, and read again when ordering 聯想. Stored rather
+    // than local to init because the association path needs the same closure — one gate, so the
+    // setting cannot apply to composition candidates and not to suggestions.
+    private let usageCount: (CandidateListKey, String) -> Int
     private let associatedPhrases: AssociatedPhrases
     // Traditional→Simplified character converter, applied only when Preferences.outputSimplifiedEnabled.
     private let hanConvertFilter: HanConvertFilter
@@ -37,40 +37,45 @@ final class InputController: IMKInputController {
     override init!(server: IMKServer!, delegate: Any!, client inputClient: Any!) {
         // All heavy resources are loaded ONCE in SharedResources and shared across every
         // controller (IMK creates one InputController per client/app). These reads do not
-        // copy: the engine tables are value-type structs and userFreq is a shared class.
+        // copy: the engine tables are value-type structs and the usage store is a shared class.
         let shared = SharedResources.shared
         self.associatedPhrases = shared.associatedPhrases
         self.hanConvertFilter = shared.hanConvertFilter
-        self.userFreq = shared.userFreq
+        self.candidateUsage = shared.candidateUsage
 
-        // Live user-learning bonus; the closure consults the shared store on every sort, so a
-        // freshly-committed character promotes without rebuilding the engine. It also reads
+        // Live committed-usage count; the closure consults the shared store on every sort, so a
+        // freshly-committed candidate leads without rebuilding the engine. It also reads
         // Preferences on every call, so turning 依選字習慣調整候選字順序 off applies to the next
-        // composition — no engine rebuild and no notification needed (issue #85).
-        let userRank: (Character) -> Double = {
-            AdaptiveCandidateOrder.bonus(for: $0,
+        // composition — no engine rebuild and no notification needed (issues #85, #130).
+        let usageCount: (CandidateListKey, String) -> Int = { list, candidate in
+            AdaptiveCandidateOrder.count(of: candidate, in: list,
                                          enabled: Preferences.adaptiveCandidateOrderEnabled,
-                                         learned: shared.userFreq.bonus(for:))
+                                         stored: shared.candidateUsage.count(of:in:))
         }
-        self.userRank = userRank
+        self.usageCount = usageCount
 
         // The input-method registry. Each module's makeEngine reads the shared tables and
         // rank LIVE, so rebuilding an engine after a 倉頡版本 change picks up the new table
-        // (三代 uses an empty cangjieRank → the table's native order is preserved).
+        // (三代 uses an empty cangjieRank → the table's native order is preserved). The version
+        // is read the same way and becomes part of every list identity the engine reports, so
+        // 三代 and 五代 counts stay in separate lists.
         // To add a method: append a module here and an Info.plist input mode — nothing else.
         let modules = [
             InputMethodModule(modeSuffix: "Cangjie", displayName: "倉頡") {
-                CangjieEngine(table: shared.cangjieTable, characterRank: shared.cangjieRank, userRank: userRank)
+                CangjieEngine(table: shared.cangjieTable, characterRank: shared.cangjieRank,
+                              tableVersion: Preferences.cangjieVersion.rawValue, usageCount: usageCount)
             },
             InputMethodModule(modeSuffix: "Simplex", displayName: "速成") {
-                SimplexEngine(table: shared.simplexTable, characterRank: shared.cangjieRank, userRank: userRank)
+                SimplexEngine(table: shared.simplexTable, characterRank: shared.cangjieRank,
+                              tableVersion: Preferences.cangjieVersion.rawValue, usageCount: usageCount)
             },
             InputMethodModule(modeSuffix: "Pinyin", displayName: "拼音") {
                 // Cheap: reads the currently-acquired index (empty until a controller enters
                 // Pinyin, which acquires in setValue before this closure runs). Registration
                 // alone never builds the index.
                 PinyinEngine(syllableTable: shared.pinyinSyllableTable,
-                             index: shared.pinyinIndexOrEmpty, userRank: userRank)
+                             index: shared.pinyinIndexOrEmpty,
+                             usageCount: { usageCount(.pinyin(readingKey: $0), $1) })
             },
         ]
         self.modules = modules
@@ -366,16 +371,20 @@ final class InputController: IMKInputController {
                     // Associations are full phrases that START with the just-committed
                     // character (already in the document), so insert only the remainder
                     // after it (好 + association "好像" -> insert "像", giving 好像).
-                    let suffix = KeyEventPolicy.associationSuffix(associations[index])
+                    let phrase = associations[index]
+                    let suffix = KeyEventPolicy.associationSuffix(phrase)
                     clearAssociations()
                     if !suffix.isEmpty {
                         client.insertText(applyHanConvert(suffix), replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
-                        // Learn the continuation the user picked (係 from 關係), so it surfaces
-                        // earlier both here and when typed by code. Same store, same gate.
-                        if let ch = AdaptiveCandidateOrder.characterToLearn(
-                            fromAssociationSuffix: suffix,
+                        // Count the WHOLE phrase the user picked (關係, not the 係 that was
+                        // inserted or the 係 a continuation-only display would have shown), in the
+                        // list its trigger character opens. That list is shared by 倉頡 and 速成.
+                        // Same store, same gate. Merely showing or dismissing suggestions counts
+                        // nothing — only this branch, the one that commits a suggestion, records.
+                        for usage in AdaptiveCandidateOrder.usageToRecord(
+                            forAssociationPhrase: phrase,
                             enabled: Preferences.adaptiveCandidateOrderEnabled) {
-                            userFreq.record(ch)
+                            candidateUsage.record(usage.candidate, in: usage.list)
                         }
                     }
                     return true
@@ -591,15 +600,23 @@ final class InputController: IMKInputController {
     @discardableResult
     private func commitCurrent(to client: IMKTextInput, offerAssociations: Bool = false) -> Bool {
         resetCompositionState()
+        // Read the usage to credit BEFORE committing: commit() clears the code (倉頡/速成) or the
+        // nodes (拼音) that identify which candidate list the pick came from, so afterwards there
+        // is nothing left to attribute it to. Every commit path that reaches the client goes
+        // through this one method — Space, Return, 1–9, the 速成 third-radical auto-commit, the
+        // 拼音 cursor-past-the-last-node commit, punctuation, focus loss — so capturing it here
+        // covers all of them, and any future path inherits it for free.
+        let pending = engine.pendingUsage
         let text = engine.commit()
         if !text.isEmpty {
             client.insertText(applyHanConvert(text), replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
-            // User learning: remember single-character selections so they rank higher next time.
-            // Nothing is recorded while adaptive ordering is off — the setting pauses learning as
-            // well as ignoring it, so a user who turned it off is not still being counted.
-            if let ch = AdaptiveCandidateOrder.characterToLearn(
-                fromCommitted: text, enabled: Preferences.adaptiveCandidateOrderEnabled) {
-                userFreq.record(ch)
+            // Adaptive ordering: count this commit within its own candidate list, so a candidate
+            // the user commits more often leads that list next time. Nothing is recorded while
+            // adaptive ordering is off — the setting pauses counting as well as ignoring counts,
+            // so a user who turned it off is not still being counted.
+            for usage in AdaptiveCandidateOrder.usageToRecord(
+                pending, enabled: Preferences.adaptiveCandidateOrderEnabled) {
+                candidateUsage.record(usage.candidate, in: usage.list)
             }
         }
         client.setMarkedText("", selectionRange: NSRange(location: 0, length: 0),
@@ -607,7 +624,9 @@ final class InputController: IMKInputController {
         // After an explicit user commit of a single character, offer associated phrases (聯想).
         // System-driven commits (focus loss, mode switch) pass offerAssociations: false and stay idle.
         if offerAssociations, Preferences.associatedPhrasesEnabled, text.count == 1, let first = text.first {
-            let phrases = associatedPhrases.associations(for: first, userRank: userRank)
+            let phrases = associatedPhrases.associations(for: first) {
+                usageCount(.association(trigger: first), $0)
+            }
             if !phrases.isEmpty {
                 associations = phrases
                 candidatePage = 0

@@ -1,4 +1,5 @@
 import AppKit
+import KeyKeyEngine
 
 // Pure decisions for InputController — key-event routing, input-session lifecycle, and whether
 // user learning shapes the candidate order — kept free of IMK/engine state so they can be
@@ -144,50 +145,51 @@ enum SessionEndPolicy {
     }
 }
 
-// Whether user learning shapes the candidate order, and what gets learned (issue #85).
-// See InputController.init and InputController.commitCurrent(to:offerAssociations:).
+// Whether user learning shapes the candidate order, and what gets counted (issues #85, #130).
 //
-// Adaptive ordering is ON by default — 2.13.0 changes nothing for an existing install. Turned
-// off, candidates keep the static order the selected table and ranking give them (五代 its
-// built-in corpus ranking, 三代 the original Yahoo! KeyKey line order, 拼音 and 聯想 the language
-// model's own), so a typist who has memorised positions can rely on them. Learning is PAUSED, not
-// erased: nothing new is counted, and the counts already on disk are kept, so turning it back on
-// resumes where it left off rather than starting over.
+// Adaptive ordering counts how often each candidate is committed IN ITS OWN candidate list, and
+// orders that list by the count — most-committed first, with the built-in order deciding whenever
+// counts are equal. See CandidateOrdering and CandidateUsageStore for the rule itself; the two
+// decisions here are the ones the setting gates.
+//
+// Adaptive ordering is ON by default. Turned off, candidates keep the static order the selected
+// table and ranking give them (五代 its built-in corpus ranking, 三代 the original Yahoo! KeyKey
+// line order, 拼音 and 聯想 the language model's own), so a typist who has memorised positions can
+// rely on them. Counting is PAUSED, not erased: nothing new is counted, stored counts are ignored
+// rather than deleted, and turning it back on resumes where it left off.
 //
 // InputController itself needs a live IMKServer and cannot be unit-tested, which is why the two
 // decisions live here rather than inline at the call sites.
 enum AdaptiveCandidateOrder {
-    /// The ranking bonus to apply for `char` — the learned bonus while adaptive ordering is on,
-    /// zero when off.
+    /// The count to sort `candidate` by within `list` — the stored count while adaptive ordering
+    /// is on, zero when off.
     ///
-    /// Zero is what makes the fallback work rather than a special case: every consumer adds this
-    /// on top of a static score, so with no bonus the Cangjie/Simplex sorts, the Pinyin walker's
-    /// candidate ordering and the 聯想 sort are each left with that static score alone. The engine
-    /// tests pin exactly that ("Default (zero) userRank must not perturb dict-only ordering").
-    static func bonus(for char: Character, enabled: Bool,
-                      learned: (Character) -> Double) -> Double {
-        enabled ? learned(char) : 0
+    /// Zero is what makes the fallback work rather than a special case: every consumer sorts on
+    /// this count first and falls back to the built-in order, so an all-zero answer leaves the
+    /// 倉頡/速成 lists, the 拼音 walker's node candidates and the 聯想 list each with exactly the
+    /// order they had before any learning. The engine tests pin that ("a fresh store preserves
+    /// every untrained list exactly").
+    static func count(of candidate: String, in list: CandidateListKey, enabled: Bool,
+                      stored: (String, CandidateListKey) -> Int) -> Int {
+        enabled ? stored(candidate, list) : 0
     }
 
-    /// The character to learn from a committed composition, or nil when there is nothing to learn.
-    ///
-    /// Only a commit whose WHOLE text is one character is learned, because UserFrequency counts
-    /// characters — a multi-character 拼音 commit has no single character to attribute.
-    static func characterToLearn(fromCommitted text: String, enabled: Bool) -> Character? {
-        guard enabled, text.count == 1 else { return nil }
-        return text.first
+    /// The usage a commit should credit: what the engine reported it is about to commit while
+    /// adaptive ordering is on, nothing when off — the setting pauses counting as well as
+    /// ignoring counts, so a user who turned it off is not still being counted.
+    static func usageToRecord(_ pending: [CandidateUsage], enabled: Bool) -> [CandidateUsage] {
+        enabled ? pending : []
     }
 
-    /// The character to learn from a picked 聯想 phrase, given the suffix that pick inserts
-    /// (`KeyEventPolicy.associationSuffix`), or nil when there is nothing to learn.
+    /// The usage a picked 聯想 phrase should credit: the WHOLE phrase — 關係, not the continuation
+    /// 係 the 聯想只顯示接續字 option may be displaying — in the list its trigger character opens.
     ///
-    /// The FIRST character of the suffix — 係 for 關係 — whatever the phrase's length. That is the
-    /// character the user chose to add, and it is the same one `AssociatedPhrases` ranks the
-    /// phrase by, so picking a suggestion both surfaces it earlier in 聯想 next time and lifts it
-    /// when typed by code. Unlike a composition commit there is no length condition: a longer
-    /// phrase still turns on that one continuation.
-    static func characterToLearn(fromAssociationSuffix suffix: String, enabled: Bool) -> Character? {
-        guard enabled else { return nil }
-        return suffix.first
+    /// The trigger is the phrase's own first character, which is exactly how `AssociatedPhrases`
+    /// buckets its lists, so the two cannot drift apart. The key carries no input mode and no
+    /// input code on purpose: 倉頡 and 速成 show the same list after the same character and must
+    /// share one set of counts.
+    static func usageToRecord(forAssociationPhrase phrase: String, enabled: Bool) -> [CandidateUsage] {
+        guard enabled, phrase.count >= 2, let trigger = phrase.first else { return [] }
+        return [CandidateUsage(list: .association(trigger: trigger), candidate: phrase)]
     }
 }

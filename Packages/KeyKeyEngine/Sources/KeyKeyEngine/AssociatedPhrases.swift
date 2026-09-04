@@ -6,8 +6,9 @@ public struct AssociatedPhrases {
     private static let maxPerBucket = 20
 
     // A phrase and the LM score it was loaded with. The score is KEPT rather than consumed by a
-    // load-time sort because ordering is decided per query: `associations(for:userRank:)` adds the
-    // live user-learning bonus on top of it (issue #85), and that bonus changes as the user types.
+    // load-time sort because ordering is decided per query: `associations(for:usageCount:)` sorts
+    // the bucket by how often each phrase has been committed first and falls back to this score,
+    // and those counts change as the user types.
     private struct Entry {
         let phrase: String
         let score: Double
@@ -46,7 +47,7 @@ public struct AssociatedPhrases {
                 if seen.insert(entry.phrase).inserted {
                     kept.append(Entry(phrase: entry.phrase, score: entry.score))
                     // Cap at load: it bounds memory, and a phrase below the top 20 by LM score is
-                    // out of reach in the 9-per-page window whatever the user bonus does to it.
+                    // out of reach in the 9-per-page window whatever its committed count does to it.
                     if kept.count == Self.maxPerBucket { break }
                 }
             }
@@ -64,25 +65,27 @@ public struct AssociatedPhrases {
 
     /// The phrases suggested after `first` was committed, best first.
     ///
-    /// Ordered by LM score plus the live user-learning bonus for each phrase's CONTINUATION
-    /// character — 係 in 關係 — which is the character the user is actually choosing to add, and
-    /// what the 聯想只顯示接續字 display option already shows. The phrase's FIRST character would
-    /// be the wrong input: it is this bucket's index key, identical for every phrase in it, so its
-    /// bonus is a constant that reorders nothing.
+    /// Ordered by how many times each phrase has been committed in THIS trigger's list, with the
+    /// LM score (then the bucket's own order) as the tie-breaker — the same frequency-first rule
+    /// the 倉頡/速成 lists follow, and nothing added to or traded against the score.
     ///
-    /// With the default (zero) bonus the static LM order is preserved exactly, so a caller that
-    /// does not opt into user learning sees what it always saw. Ties resolve by the bucket's own
-    /// order, so the result is reproducible.
+    /// `usageCount` is asked about the WHOLE phrase — 關係, not the continuation 係 — because the
+    /// phrase is what this list offers and what a pick commits. That stays true when the
+    /// 聯想只顯示接續字 display option shows only 係: the row displayed is shortened, the candidate
+    /// picked is not.
+    ///
+    /// With the default (zero) counts the static LM order is preserved exactly, so a caller that
+    /// does not opt into learning sees what it always saw.
     public func associations(for first: Character,
-                             userRank: (Character) -> Double = { _ in 0 }) -> [String] {
+                             usageCount: (String) -> Int = { _ in 0 }) -> [String] {
         guard let entries = table[first] else { return [] }
-        // Score each entry ONCE, then sort the (offset, phrase, score) triples — same shape as
-        // CangjieEngine/SimplexEngine.computeCandidates.
+        // Read each count ONCE (it reaches a locked store), then sort the tuples.
         return entries.enumerated().map { offset, entry in
-            (offset, entry.phrase, entry.score + (entry.phrase.dropFirst().first.map(userRank) ?? 0))
+            (offset: offset, phrase: entry.phrase, count: usageCount(entry.phrase), score: entry.score)
         }.sorted { lhs, rhs in
-            if lhs.2 != rhs.2 { return lhs.2 > rhs.2 }
-            return lhs.0 < rhs.0
-        }.map(\.1)
+            if lhs.count != rhs.count { return lhs.count > rhs.count }
+            if lhs.score != rhs.score { return lhs.score > rhs.score }
+            return lhs.offset < rhs.offset
+        }.map(\.phrase)
     }
 }

@@ -6,27 +6,32 @@ import DragonKit
 // binary isn't. That makes the entries and the date the only things to keep in sync with
 // CHANGELOG.md on release.
 //
-// 2.13.3 carries one user-facing change, inherited from DragonKit 4.1.1: Uninstall now refuses to
-// run when it finds more than one copy of the app on the Mac. Settings, the login item, support
-// files and the Homebrew record are all keyed to the app's identity rather than its location, so
-// two copies share all of them and there is no way to tell whose is whose — uninstalling a spare
-// copy could remove the settings belonging to the copy you actually use. It now stops before
-// removing anything and lists where the copies are.
+// 2.13.4 carries one user-facing change: adaptive candidate ordering is now decided by how often
+// you commit each candidate in its own candidate list, so picking a rare character puts it in
+// front of everything you have not picked — including characters the built-in dictionary has
+// never heard of, which it previously could never overtake at any number of picks (issue #130).
 //
-// Deliberately NOT in the notes: DragonKit 4.1.1's other fix, a raw developer error in Settings ▸
-// Updates. It only ever appeared in local debug builds, so no released build of Yahoo! KeyKey 2
-// could hit it — CHANGELOG.md records it, this pane does not, following the fleet's rule against
-// claiming what users cannot see.
+// Announced as `.fixed`, because what a user meets is a behaviour that was reported as broken,
+// with one `.changed` entry for the consequence they will notice on first launch: the learning
+// history starts fresh. The retired store held one count per character with no record of which
+// list it was committed in, and there is no honest way to turn that into per-list history, so it
+// is left on disk untouched rather than reinterpreted.
+//
+// Deliberately NOT in the notes: that the per-list store is a new file, its bounds, and the
+// internals of the ordering rule. A user meets the behaviour, not the storage — CHANGELOG.md
+// records the rest, following the fleet's rule against announcing what users cannot see.
 //
 // Keys are the fleet's stable set (app.whatsNew.summary, .fixed1, .changed1, …), not named after
 // this release's content — a release just overwrites the same keys' text in all seven .strings
 // files rather than adding new ones and stranding the last release's, which is what happened to
 // 2.13.2's `maintenanceOnly` and 2.13.1's `simplexThirdRadical` under the old per-release naming.
+// 2.13.3 used a `.changed2` for the rename to "Yahoo! KeyKey 2"; this release has only one
+// `.changed` to make, so that key is retired from all seven files rather than left stranded.
 enum WhatsNewConfig {
     @MainActor
     static var content: WhatsNewContent {
         WhatsNewContent(
-            date: "2026-08-20",
+            date: "2026-09-03",
             summary: L("app.whatsNew.summary"),
             sections: [
                 ChangeSection(kind: .fixed, entries: [
@@ -34,11 +39,6 @@ enum WhatsNewConfig {
                 ]),
                 ChangeSection(kind: .changed, entries: [
                     L("app.whatsNew.changed1"),
-                    // The rename to "Yahoo! KeyKey 2". Announced because it is the name macOS
-                    // shows in the Input Sources picker, so a user meets it — 2.13.3's notes were
-                    // written before the rename landed, which is the only reason it was missing.
-                    // `.changed`, not `.fixed`: nothing was broken, the mark was simply absent.
-                    L("app.whatsNew.changed2"),
                 ]),
             ]
         )

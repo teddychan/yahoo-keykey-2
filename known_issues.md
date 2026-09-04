@@ -9,8 +9,7 @@ you are on and which mode you were typing in.
 3. [A character's code is not what I expect](#3-a-characters-code-is-not-what-i-expect)
 4. [Space pages instead of accepting my code](#4-space-pages-instead-of-accepting-my-code)
 5. [Typing a number inserts a word instead](#5-typing-a-number-inserts-a-word-instead)
-6. [A rare character never moves to the top](#6-a-rare-character-never-moves-to-the-top)
-7. [Already fixed in earlier versions](#7-already-fixed-in-earlier-versions)
+6. [Already fixed in earlier versions](#6-already-fixed-in-earlier-versions)
 
 Also: [documentation gaps](#documentation-gaps) — things missing from these docs rather than
 problems with the app.
@@ -68,25 +67,17 @@ After you commit a character, Yahoo! KeyKey 2 suggests words that commonly follo
 then types the digit and clears the suggestions, so numbers flow normally right after a
 character.
 
-## 6. A rare character never moves to the top
-
-**Still open.** By default the characters you pick most often move up the candidate list, but
-that only works among characters the built-in dictionary already knows. A rare character the
-dictionary does not know can never overtake one it does, however many times you choose it. Under
-`卜月卜尸心`, for example, 龍 is in the dictionary and the variant 㡣 is not, so 㡣 stays in
-second place permanently.
-
-This affects the candidate list only, not 聯想字詞, and roughly four in five characters in the
-五代 table sit outside the dictionary. Learning still reorders such characters relative to one
-another, and works normally when every character involved is known.
-
-**Workaround:** none at present. See
-[#111](https://github.com/teddychan/yahoo-keykey-2/pull/111) for the measurements.
-
-## 7. Already fixed in earlier versions
+## 6. Already fixed in earlier versions
 
 Update if you are on an older release.
 
+- **A rare character never moved to the top** — fixed in **2.13.4**. Choosing a character used to
+  be mixed with how common the built-in dictionary considers it, so a character the dictionary
+  does not know could never overtake one it does, however many times you chose it: under
+  `卜月卜尸心`, 龍 is in the dictionary and the variant 㡣 is not, so 㡣 stayed second permanently.
+  Each candidate list is now counted on its own and the count decides the order, so picking 㡣
+  once puts it first. Learning starts fresh in 2.13.4 — the previous counts recorded no candidate
+  list and could not be carried over.
 - **In 速成, typing past a two-key code got stuck** — fixed in **2.13.1**. The extra key was
   added to the finished code, emptying the candidate list.
 - **三代 offered a character under the wrong code** — fixed in **2.8.0**. `人一弓口` (何) also

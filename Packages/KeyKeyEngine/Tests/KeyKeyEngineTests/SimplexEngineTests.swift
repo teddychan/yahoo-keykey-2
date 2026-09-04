@@ -15,7 +15,7 @@ final class SimplexEngineTests: XCTestCase {
     abcde\t韻
     """))
 
-    private func make() -> SimplexEngine { SimplexEngine(table: Self.table) }
+    private func make() -> SimplexEngine { SimplexEngine(table: Self.table, tableVersion: "5") }
 
     func testAccumulatesRadicalGlyphs() {
         let e = make()
@@ -103,28 +103,60 @@ final class SimplexEngineTests: XCTestCase {
     func testCandidatesRerankedByCharacterRank() {
         // simplex "ab" -> ["明","昌"]; rank 昌 highest so it leads.
         let rank: [Character: Double] = ["昌": 1.0]
-        let e = SimplexEngine(table: Self.table, characterRank: rank)
+        let e = SimplexEngine(table: Self.table, characterRank: rank, tableVersion: "5")
         _ = e.handleKey("a"); _ = e.handleKey("b")
         XCTAssertEqual(e.candidates, ["昌", "明"])
     }
 
     func testEmptyRankLeavesOrderUnchanged() {
-        let e = SimplexEngine(table: Self.table, characterRank: [:])
+        let e = SimplexEngine(table: Self.table, characterRank: [:], tableVersion: "5")
         _ = e.handleKey("a"); _ = e.handleKey("b")
         XCTAssertEqual(e.candidates, ["明", "昌"])
     }
 
-    func testUserRankPromotesLearnedChar() {
-        // No dict rank; userRank boosts the second char (昌) so it leads.
-        let e = SimplexEngine(table: Self.table, userRank: { $0 == "昌" ? 100 : 0 })
+    // MARK: adaptive ordering (issue #130)
+
+    func testOneCommittedCandidateLeadsEveryUnusedOne() {
+        let e = SimplexEngine(table: Self.table, tableVersion: "5",
+                              usageCount: { _, c in c == "昌" ? 1 : 0 })
         _ = e.handleKey("a"); _ = e.handleKey("b")
         XCTAssertEqual(e.candidates, ["昌", "明"])
     }
 
-    func testZeroUserRankLeavesOrderUnchanged() {
-        let e = SimplexEngine(table: Self.table, userRank: { _ in 0 })
+    func testZeroCountsLeaveTheBuiltInOrderUnchanged() {
+        let e = SimplexEngine(table: Self.table, tableVersion: "5", usageCount: { _, _ in 0 })
         _ = e.handleKey("a"); _ = e.handleKey("b")
         XCTAssertEqual(e.candidates, ["明", "昌"])
+    }
+
+    func testEqualCountsKeepTheBuiltInOrder() {
+        let e = SimplexEngine(table: Self.table, tableVersion: "5", usageCount: { _, _ in 3 })
+        _ = e.handleKey("a"); _ = e.handleKey("b")
+        XCTAssertEqual(e.candidates, ["明", "昌"])
+    }
+
+    func testHistoriesAreIsolatedByTableVersionAndCode() {
+        var asked: [CandidateListKey] = []
+        let e = SimplexEngine(table: Self.table, tableVersion: "3",
+                              usageCount: { list, _ in asked.append(list); return 0 })
+        _ = e.handleKey("a"); _ = e.handleKey("b")
+        _ = e.candidates
+        XCTAssertEqual(e.candidateListKey, .simplex(tableVersion: "3", code: "ab"))
+        XCTAssertTrue(asked.contains(.simplex(tableVersion: "3", code: "ab")))
+        XCTAssertFalse(asked.contains(.simplex(tableVersion: "5", code: "ab")))
+        // Not the 倉頡 list of the same code either.
+        XCTAssertFalse(asked.contains(.cangjie(tableVersion: "3", code: "ab")))
+    }
+
+    func testPendingUsageNamesTheCommittedCandidateAndIsGoneAfterCommit() {
+        let e = SimplexEngine(table: Self.table, tableVersion: "5")
+        _ = e.handleKey("a"); _ = e.handleKey("b")
+        e.selectCandidate(1)   // 昌
+        XCTAssertEqual(e.pendingUsage,
+                       [CandidateUsage(list: .simplex(tableVersion: "5", code: "ab"), candidate: "昌")])
+        XCTAssertEqual(e.commit(), "昌")
+        XCTAssertEqual(e.pendingUsage, [])
+        XCTAssertNil(e.candidateListKey)
     }
 
     func testNonLetterIgnored() {

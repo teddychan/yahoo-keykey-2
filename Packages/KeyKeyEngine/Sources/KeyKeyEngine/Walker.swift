@@ -34,15 +34,26 @@ public struct Walker {
         self.maxSpan = max(1, index.maxSpanLength)
     }
 
+    /// The key the language model indexes a run of readings under — and, because that key is
+    /// what decides which candidates the run is handed, the identity of that node's candidate
+    /// list. Defined here so the DP, the node build below and PinyinEngine all name it one way.
+    static func readingKey(_ readings: some Sequence<String>) -> String {
+        readings.joined(separator: "-")
+    }
+
+    /// `usageCount` answers how many times a candidate has been committed in the node whose
+    /// reading key is passed alongside it. It orders the candidates WITHIN each chosen node and
+    /// deliberately does not reach the path selection above: which spans win stays a pure
+    /// language-model decision, as it always was.
     public func walk(readings: [String], rawSyllables: [String],
-                     userBonus: (Character) -> Double) -> [WalkNode] {
+                     usageCount: (String, String) -> Int) -> [WalkNode] {
         let n = readings.count
         guard n > 0 else { return [] }
         precondition(rawSyllables.count == n, "readings and rawSyllables must align")
 
         // How the winning span at a boundary is rebuilt into a node, deferred until backtracking
-        // so the (userBonus) candidate sort runs only for the ~n chosen spans, not every span the
-        // DP evaluates.
+        // so the candidate sort runs only for the ~n chosen spans, not every span the DP
+        // evaluates.
         enum SpanChoice {
             case fallback(range: Range<Int>, raw: String)
             case phrase(range: Range<Int>, unigrams: [Unigram])
@@ -59,7 +70,7 @@ public struct Walker {
             for L in 1...maxL {
                 let i = j - L
                 if best[i] == -.greatestFiniteMagnitude { continue }
-                let key = readings[i..<j].joined(separator: "-")
+                let key = Self.readingKey(readings[i..<j])
                 let unis = index.unigrams(forKey: key)
                 let spanScore: Double
                 let choice: SpanChoice
@@ -69,7 +80,7 @@ public struct Walker {
                     choice = .fallback(range: i..<j, raw: rawSyllables[i])
                 } else {
                     // `unis` is already sorted by score descending, so `.first` is the span's best
-                    // (pre-userBonus) score used for path selection.
+                    // score, which is what path selection uses.
                     spanScore = unis.first?.score ?? Self.rawFallbackScore
                     choice = .phrase(range: i..<j, unigrams: unis)
                 }
@@ -83,7 +94,8 @@ public struct Walker {
         }
 
         // Backtrack from n to 0, building each chosen node now. Display order for a phrase span is
-        // LM score + user-learning bonus on the leading character.
+        // frequency-first — how often the candidate has been committed in this node's own list —
+        // falling back to the LM score and then the value, which is the order it always had.
         var nodes: [WalkNode] = []
         var j = n
         while j > 0, let choice = back[j] {
@@ -91,11 +103,14 @@ public struct Walker {
             case .fallback(let range, let raw):
                 nodes.append(WalkNode(readingRange: range, candidates: [raw]))
             case .phrase(let range, let unigrams):
-                let ordered = unigrams.sorted { a, b in
-                    let sa = a.score + (a.value.first.map(userBonus) ?? 0)
-                    let sb = b.score + (b.value.first.map(userBonus) ?? 0)
-                    return sa != sb ? sa > sb : a.value < b.value
-                }.map(\.value)
+                let key = Self.readingKey(readings[range])
+                // Count each candidate ONCE (usageCount reaches a locked store), then sort.
+                let ordered = unigrams.map { (unigram: $0, count: usageCount(key, $0.value)) }
+                    .sorted { a, b in
+                        if a.count != b.count { return a.count > b.count }
+                        if a.unigram.score != b.unigram.score { return a.unigram.score > b.unigram.score }
+                        return a.unigram.value < b.unigram.value
+                    }.map(\.unigram.value)
                 nodes.append(WalkNode(readingRange: range, candidates: ordered))
             }
             j = prev[j]
