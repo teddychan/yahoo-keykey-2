@@ -371,7 +371,12 @@ final class CandidateUsageStoreTests: XCTestCase {
         XCTAssertEqual(new.lastPathComponent, "candidate-usage.json")
         XCTAssertEqual(legacy.lastPathComponent, "user-frequency.json")
         XCTAssertNotEqual(new, legacy)
-        XCTAssertEqual(new.deletingLastPathComponent(), dir)
-        XCTAssertEqual(legacy.deletingLastPathComponent(), dir)
+        // Compared as PATHS, not as URLs. `appendingPathComponent` appends a trailing slash only
+        // when the component already exists on disk as a directory, while
+        // `deletingLastPathComponent` always adds one — so a URL comparison here passes on a Mac
+        // that has the support directory and fails on one that does not, which is exactly how it
+        // passed locally and failed on a clean CI runner. `path` normalises the slash away.
+        XCTAssertEqual(new.deletingLastPathComponent().path, dir.path)
+        XCTAssertEqual(legacy.deletingLastPathComponent().path, dir.path)
     }
 }
