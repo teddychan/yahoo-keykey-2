@@ -69,10 +69,10 @@ final class AppMenuController {
     // bundle to the Trash. The bundle here is the IME under ~/Library/Input Methods.
     //
     // The Application Support dir is named as a DIRECTORY, not file by file, which is what makes
-    // it hold BOTH learning stores: today's `candidate-usage.json` and the retired
-    // `user-frequency.json` that 2.13.4 stopped using but deliberately leaves on disk for a
-    // downgrade. A CandidateUsageStore test pins both filenames to this one directory so a future
-    // store cannot be added outside the sweep and survive an uninstall.
+    // it hold BOTH learning stores: `candidate-usage.json`, the per-list counts 倉頡/速成/聯想 use,
+    // and `user-frequency.json`, the per-character counts 拼音 still ranks by. A
+    // CandidateUsageStore test pins both filenames to this one directory so a future store cannot
+    // be added outside the sweep and survive an uninstall.
     //
     // Every path below is derived from the RUNNING bundle, never typed. The support dir used to
     // be the literal "Application Support/YahooKeyKey2", which the release IME and the .debug

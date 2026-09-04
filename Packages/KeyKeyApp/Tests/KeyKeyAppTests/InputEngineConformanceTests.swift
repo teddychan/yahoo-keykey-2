@@ -93,6 +93,20 @@ final class InputEngineConformanceTests: XCTestCase {
         }
     }
 
+    func testPinyinCreditsNothingToThePerListStore() {
+        // 拼音 candidate ranking is out of scope for the per-list change: it keeps ranking off
+        // the per-character store, so it must report no per-list usage at any point — before a
+        // commit, mid-composition, or after. Anything else would start counting it silently.
+        let engine: InputEngine = makePinyin()
+        XCTAssertEqual(engine.pendingUsage, [])
+        for c in "nihao" { _ = engine.handleKey(c) }
+        XCTAssertEqual(engine.composingText, "你好")
+        XCTAssertFalse(engine.candidates.isEmpty)
+        XCTAssertEqual(engine.pendingUsage, [], "拼音 must not report per-list usage")
+        _ = engine.commit()
+        XCTAssertEqual(engine.pendingUsage, [])
+    }
+
     func testDrivingPinyinThroughPhraseComposingProtocol() {
         let engine: PhraseComposingEngine = makePinyin()
         // "woni" segments into two single-char nodes (我 你); there is no 我你 phrase to merge them.

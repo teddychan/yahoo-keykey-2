@@ -113,12 +113,14 @@ enum Preferences {
         set { UserDefaults.standard.set(newValue, forKey: Key.strokeConfirmationEnabled) }
     }
 
-    // When true (the default), each candidate the user commits is counted within its OWN
-    // candidate list, and the list is ordered by that count — most-committed first, built-in
-    // order deciding equal counts — in 倉頡, 速成, 拼音 and 聯想 alike. Off, the built-in order
-    // stands and nothing is counted; see AdaptiveCandidateOrder, which holds the decisions this
-    // drives, issue #85 for why a typist who has memorised the order wants that, and issue #130
-    // for why the count decides the order on its own rather than adjusting a dictionary score.
+    // When true (the default), each candidate the user commits in 倉頡, 速成 or 聯想 is counted
+    // within its OWN candidate list, and the list is ordered by that count — most-committed
+    // first, built-in order deciding equal counts. 拼音 is out of that scheme and keeps ranking by
+    // the per-character count it always used, but the SAME flag gates it, so the toggle still
+    // means one thing to the user. Off, the built-in order stands everywhere and nothing is
+    // counted; see AdaptiveCandidateOrder, which holds the decisions this drives, issue #85 for
+    // why a typist who has memorised the order wants that, and issue #130 for why the count
+    // decides the order on its own rather than adjusting a dictionary score.
     static var adaptiveCandidateOrderEnabled: Bool {
         get { UserDefaults.standard.bool(forKey: Key.adaptiveCandidateOrderEnabled) }
         set { UserDefaults.standard.set(newValue, forKey: Key.adaptiveCandidateOrderEnabled) }

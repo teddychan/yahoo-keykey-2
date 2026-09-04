@@ -4,12 +4,12 @@ A plain-language list of changes in each version, newest first.
 
 ## 2.13.4
 
-- **Fixed: a character you pick now leads its candidate list next time.** Yahoo! KeyKey 2 mixed
-  how often you had chosen a character together with how common the built-in dictionary considers
-  it. Picking a rare character therefore only nudged it forward, and a character the dictionary
-  does not know could never overtake one it does, however many times you chose it. Under
-  `卜月卜尸心`, for example, 龍 is in the dictionary and the variant 㡣 is not, so 㡣 stayed in
-  second place permanently.
+- **Fixed: in 倉頡 and 速成, a character you pick now leads its candidate list next time.**
+  Yahoo! KeyKey 2 mixed how often you had chosen a character together with how common the built-in
+  dictionary considers it. Picking a rare character therefore only nudged it forward, and a
+  character the dictionary does not know could never overtake one it does, however many times you
+  chose it. Under `卜月卜尸心`, for example, 龍 is in the dictionary and the variant 㡣 is not, so
+  㡣 stayed in second place permanently.
 
   Each candidate list is now counted on its own, and the count alone decides the order: the
   candidate you have chosen most often in that list comes first, and the built-in order only
@@ -19,30 +19,36 @@ A plain-language list of changes in each version, newest first.
   most recent pick does not win on its own. Thanks to the reporter of
   [issue #130](https://github.com/teddychan/yahoo-keykey-2/issues/130).
 
-- **Changed: candidate learning starts fresh.** What you pick is now remembered for each candidate
-  list separately — the characters under one 倉頡 code, one 倉頡 wildcard pattern such as `竹*戈`,
-  one 速成 code, one 拼音 reading, or the words suggested after one character — instead of one
-  count per character shared across all of them. So learning 曰 under the 速成 code `a` does not
-  move 曰 anywhere else, and a wildcard code learns separately from a complete one.
+- **Changed: candidate learning for 倉頡, 速成 and 聯想字詞 starts fresh.** What you pick is now
+  remembered for each candidate list separately — the characters under one 倉頡 code, one 倉頡
+  wildcard pattern such as `竹*戈`, one 速成 code, or the words suggested after one character —
+  instead of one count per character shared across all of them. So learning 曰 under the 速成 code
+  `a` does not move 曰 anywhere else, and a wildcard code learns separately from a complete one.
 
   What was stored before was a single count per character with no record of which list you had
   been choosing from, so there is no accurate way to turn it into the new per-list history. Rather
-  than guess, Yahoo! KeyKey 2 starts counting again. The old file is left on your Mac untouched,
-  so nothing is destroyed; Uninstall removes both.
+  than guess, Yahoo! KeyKey 2 starts counting these again.
 
   倉頡 and 速成 share what they learn about 聯想字詞, because both suggest the same words after the
   same character — picking 關係 after typing 關 in one of them affects the suggestions in the
   other. The whole phrase is what counts, even when the candidate window is set to show only the
   continuation.
 
-- **Under the hood: adaptive ordering no longer blends usage with the dictionary score.** The
-  ranking bonus, its weight, and the placeholder score that stood in for "the language model has
-  never seen this character" are all gone; ordering is a count-first sort over the built-in order,
-  and an unranked character is simply compared as unranked. Turning the setting off still shows
-  the built-in order exactly and pauses counting without erasing what is stored. The new per-list
-  store keeps the reliability the old one had: thread-safe reads and increments, immediate
-  in-memory updates, coalesced atomic saves, bounded storage, deterministic contents, and a
-  corrupt or unrecognised file set aside rather than silently overwritten.
+- **拼音 is unchanged.** Its candidate ranking, and the learning behind it, work exactly as they
+  did in 2.13.3 — same algorithm, same stored history, nothing reset. The per-list counting above
+  covers 倉頡, 速成 and 聯想字詞 only, so the file 拼音 learns from is still in use rather than
+  retired. Uninstall removes both learning files, as before.
+
+- **Under the hood: 倉頡/速成/聯想 ordering no longer blends usage with the dictionary score.** For
+  those three, the ranking bonus, its weight, and the placeholder score that stood in for "the
+  language model has never seen this character" are gone; ordering is a count-first sort over the
+  built-in order, and an unranked character is simply compared as unranked. Turning the setting
+  off still shows the built-in order exactly, and pauses counting for 拼音 too, without erasing
+  what is stored. The new per-list store keeps the reliability the existing one has: thread-safe
+  reads and increments, immediate in-memory updates, coalesced atomic saves, bounded storage,
+  deterministic contents, and a corrupt or unrecognised file set aside rather than silently
+  overwritten. Reaching the storage cap costs about a millisecond on the commit that reaches it,
+  rather than re-sorting the whole store.
 
 ## 2.13.3
 

@@ -3,7 +3,7 @@ import Foundation
 @testable import KeyKeyEngine
 
 // The per-candidate-list commit-count store (issue #130). Carries forward every reliability
-// guarantee the retired per-character store had — thread safety, coalesced persistence, bounded
+// guarantee the per-character store has — thread safety, coalesced persistence, bounded
 // storage, corrupt-file quarantine, fail-safe saves — and adds the one this store exists for:
 // counts belong to ONE candidate list and must never be readable from another.
 final class CandidateUsageStoreTests: XCTestCase {
@@ -64,7 +64,6 @@ final class CandidateUsageStoreTests: XCTestCase {
     func testCommittingUnderAnotherModeDoesNotTouchTheExactCangjieList() {
         let s = store()
         s.record("日", in: .simplex(tableVersion: "5", code: "a"))
-        s.record("日", in: .pinyin(readingKey: "ㄖˋ"))
         s.record("日日", in: .association(trigger: "日"))
         XCTAssertEqual(s.count(of: "日", in: .cangjie(tableVersion: "5", code: "a")), 0)
     }
@@ -131,7 +130,6 @@ final class CandidateUsageStoreTests: XCTestCase {
         s.record("曰", in: .simplex(tableVersion: "5", code: "a"))
         s.record("日", in: .cangjie(tableVersion: "3", code: "a"))
         s.record("龍", in: .cangjieWildcard(tableVersion: "5", pattern: "h*i"))
-        s.record("你好", in: .pinyin(readingKey: "ㄋㄧ-ㄏㄠ"))
         s.record("關係", in: .association(trigger: "關"))
         s.flush()   // the save is debounced; force it before reading the file back
 
@@ -139,7 +137,6 @@ final class CandidateUsageStoreTests: XCTestCase {
         XCTAssertEqual(r.count(of: "曰", in: .simplex(tableVersion: "5", code: "a")), 2)
         XCTAssertEqual(r.count(of: "日", in: .cangjie(tableVersion: "3", code: "a")), 1)
         XCTAssertEqual(r.count(of: "龍", in: .cangjieWildcard(tableVersion: "5", pattern: "h*i")), 1)
-        XCTAssertEqual(r.count(of: "你好", in: .pinyin(readingKey: "ㄋㄧ-ㄏㄠ")), 1)
         XCTAssertEqual(r.count(of: "關係", in: .association(trigger: "關")), 1)
         // The identities survive too — a reloaded store still isolates every list.
         XCTAssertEqual(r.count(of: "曰", in: .simplex(tableVersion: "3", code: "a")), 0)
@@ -175,7 +172,7 @@ final class CandidateUsageStoreTests: XCTestCase {
     }
 
     func testAFreshStoreStartsEmptyRatherThanInheritingLegacyCounts() throws {
-        // The retired store's global per-character counts carry no list identity, so they are
+        // The per-character store's global counts carry no list identity, so they are
         // deliberately NOT migrated: a legacy file sitting in the same directory must leave the
         // new store empty rather than being read as though its counts belonged to some list.
         let legacy = CandidateUsageStore.legacyFileURL(directory: tempDir)
@@ -183,7 +180,7 @@ final class CandidateUsageStoreTests: XCTestCase {
         let s = store()
         XCTAssertEqual(s.count(of: "日", in: .simplex(tableVersion: "5", code: "a")), 0)
         XCTAssertEqual(s.count(of: "日", in: .cangjie(tableVersion: "5", code: "a")), 0)
-        // And the legacy file is left alone, so a downgrade still finds its data.
+        // And this store leaves that file completely alone — 拼音 still owns it.
         XCTAssertEqual(try String(contentsOf: legacy, encoding: .utf8), #"{"日":40,"曰":9}"#)
     }
 
@@ -243,7 +240,6 @@ final class CandidateUsageStoreTests: XCTestCase {
         let s = store()
         XCTAssertEqual(s.count(of: "日", in: .cangjie(tableVersion: "5", code: "a")), 0)
         XCTAssertEqual(s.count(of: "日", in: .simplex(tableVersion: "5", code: "a")), 0)
-        XCTAssertEqual(s.count(of: "日", in: .pinyin(readingKey: "a")), 0)
     }
 
     func testARecordMissingARequiredFieldIsDroppedNotMisfiled() throws {
@@ -299,34 +295,81 @@ final class CandidateUsageStoreTests: XCTestCase {
     }
 
     func testDistinctRecordsAreCappedByEviction() {
-        // Record past the cap; the store must stay within it, and a heavily-committed candidate
-        // must survive eviction (it is never the coldest).
-        let s = store()
+        // A small cap, injected, so this exercises eviction in milliseconds. Driving it through
+        // the production 20,000 meant thousands of full-store passes and made the suite take
+        // minutes — the behaviour under test is the cap, not the size of it.
+        let s = CandidateUsageStore(fileURL: fileURL, maxEntries: 10)
         let hot = CandidateListKey.simplex(tableVersion: "5", code: "a")
-        for _ in 0..<50 { s.record("日", in: hot) }
-        for i in 0..<(CandidateUsageStore.maxEntries + 200) {
-            s.record("x", in: .cangjie(tableVersion: "5", code: "cold\(i)"))
+        for _ in 0..<50 { s.record("日", in: hot) }          // one record, warm
+        for i in 0..<40 { s.record("x", in: .cangjie(tableVersion: "5", code: "cold\(i)")) }
+        XCTAssertEqual(s.entryCountForTesting, 10)
+        XCTAssertEqual(s.count(of: "日", in: hot), 50, "the most-committed record survives eviction")
+    }
+
+    func testTheRunningTotalDoesNotDriftFromTheStore() {
+        // `record` maintains the total incrementally instead of recounting every commit, so the
+        // two must agree — including across eviction and repeat commits of an existing record.
+        let s = CandidateUsageStore(fileURL: fileURL, maxEntries: 8)
+        for i in 0..<30 {
+            s.record("x", in: .cangjie(tableVersion: "5", code: "c\(i % 12)"))
+            s.record("y", in: .simplex(tableVersion: "5", code: "s\(i % 5)"))
         }
-        XCTAssertLessThanOrEqual(s.entryCountForTesting, CandidateUsageStore.maxEntries)
-        XCTAssertEqual(s.count(of: "日", in: hot), 50)
+        XCTAssertEqual(s.trackedTotalForTesting, s.entryCountForTesting)
+        XCTAssertLessThanOrEqual(s.entryCountForTesting, 8)
+    }
+
+    func testRecommittingAnExistingRecordDoesNotEvictAnything() {
+        // Only a NEW record can push the store over the cap; repeat commits must not evict.
+        let s = CandidateUsageStore(fileURL: fileURL, maxEntries: 3)
+        let a = CandidateListKey.cangjie(tableVersion: "5", code: "a")
+        s.record("日", in: a); s.record("曰", in: a); s.record("旦", in: a)
+        XCTAssertEqual(s.entryCountForTesting, 3)
+        for _ in 0..<20 { s.record("日", in: a) }
+        XCTAssertEqual(s.entryCountForTesting, 3)
+        XCTAssertEqual(s.count(of: "曰", in: a), 1, "an untouched record was not evicted")
+        XCTAssertEqual(s.count(of: "旦", in: a), 1)
+    }
+
+    func testAFileHoldingMoreRecordsThanTheCapIsTrimmedAtLoad() throws {
+        // Enforced once at init rather than discovered by the first commit, which is what keeps
+        // `record`'s eviction to a single-record scan.
+        var records: [String] = []
+        for i in 0..<20 {
+            records.append("{\"scope\":\"cangjie\",\"tableVersion\":\"5\",\"code\":\"c\(i)\",\"counts\":{\"x\":\(i + 1)}}")
+        }
+        let json = "{\"version\":1,\"lists\":[" + records.joined(separator: ",") + "]}"
+        try Data(json.utf8).write(to: fileURL)
+        let s = CandidateUsageStore(fileURL: fileURL, maxEntries: 5)
+        XCTAssertEqual(s.entryCountForTesting, 5)
+        XCTAssertEqual(s.trackedTotalForTesting, 5)
+        // The five WARMEST survive (counts 16...20), the coldest are dropped.
+        for i in 15..<20 {
+            XCTAssertEqual(s.count(of: "x", in: .cangjie(tableVersion: "5", code: "c\(i)")), i + 1)
+        }
+        XCTAssertEqual(s.count(of: "x", in: .cangjie(tableVersion: "5", code: "c0")), 0)
     }
 
     func testEvictionIsDeterministic() {
         // Two stores fed the same commits must hold the same records, so the on-disk contents
-        // do not depend on dictionary iteration order.
+        // do not depend on dictionary iteration order. Same cap trick: the property is the
+        // determinism, not the size of the store.
         func fill() -> CandidateUsageStore {
-            let s = CandidateUsageStore(fileURL: tempDir.appendingPathComponent("\(UUID().uuidString).json"))
-            for i in 0..<(CandidateUsageStore.maxEntries + 50) {
-                s.record("x", in: .cangjie(tableVersion: "5", code: "c\(i)"))
-            }
+            let s = CandidateUsageStore(
+                fileURL: tempDir.appendingPathComponent("\(UUID().uuidString).json"), maxEntries: 12)
+            for i in 0..<60 { s.record("x", in: .cangjie(tableVersion: "5", code: "c\(i % 25)")) }
+            for i in 0..<20 { s.record("y", in: .association(trigger: Character(UnicodeScalar(0x4E00 + i)!))) }
             return s
         }
         let a = fill(), b = fill()
         XCTAssertEqual(a.entryCountForTesting, b.entryCountForTesting)
-        for i in 0..<(CandidateUsageStore.maxEntries + 50) {
+        for i in 0..<25 {
             let list = CandidateListKey.cangjie(tableVersion: "5", code: "c\(i)")
             XCTAssertEqual(a.count(of: "x", in: list), b.count(of: "x", in: list),
                            "eviction differed for c\(i)")
+        }
+        for i in 0..<20 {
+            let list = CandidateListKey.association(trigger: Character(UnicodeScalar(0x4E00 + i)!))
+            XCTAssertEqual(a.count(of: "y", in: list), b.count(of: "y", in: list))
         }
     }
 

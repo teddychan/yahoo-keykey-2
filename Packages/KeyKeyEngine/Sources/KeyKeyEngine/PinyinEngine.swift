@@ -16,9 +16,7 @@ public final class PinyinEngine {
 
     private let syllableTable: PinyinSyllableTable
     private let index: TonelessLanguageModelIndex
-    // How many times a candidate has been committed in the node identified by a reading key.
-    // Handed to the walker, which orders each node's candidates with it.
-    private let usageCount: (String, String) -> Int
+    private let userRank: (Character) -> Double
     private let walker: Walker
     private let segmenter: PinyinSegmenter
 
@@ -27,17 +25,13 @@ public final class PinyinEngine {
     private var tail: String = ""
     private var cursor: Int = 0             // index into `nodes`
     private var syllables: [String] = []    // raw pinyin syllables, aligned 1:1 with node readings
-    // The zhuyin readings the syllables resolved to, kept (not just passed to the walker) because
-    // a node's reading key — its candidate-list identity — is built from them, and `pendingUsage`
-    // needs that at commit time.
-    private var readings: [String] = []
 
     public init(syllableTable: PinyinSyllableTable,
                 index: TonelessLanguageModelIndex,
-                usageCount: @escaping (String, String) -> Int = { _, _ in 0 }) {
+                userRank: @escaping (Character) -> Double = { _ in 0 }) {
         self.syllableTable = syllableTable
         self.index = index
-        self.usageCount = usageCount
+        self.userRank = userRank
         self.walker = Walker(index: index)
         self.segmenter = PinyinSegmenter(table: syllableTable)
     }
@@ -107,26 +101,10 @@ public final class PinyinEngine {
         nodes.map(\.chosenText).joined() + tail
     }
 
-    /// What a commit right now would credit: ONE record per node — each node's chosen candidate
-    /// in that node's own list. A 拼音 commit finalizes the whole buffer, so every node the user
-    /// accepted counts, not only the one under the cursor.
-    ///
-    /// Empty once `commit()` has run, since the nodes are gone by then — a caller MUST read this
-    /// first. Nodes with a single candidate are skipped (nothing to reorder), which also excludes
-    /// the raw-text fallback nodes, whose one "candidate" is the untranslatable syllable itself.
-    public var pendingUsage: [CandidateUsage] {
-        nodes.compactMap { node in
-            guard node.candidates.count > 1,
-                  node.readingRange.upperBound <= readings.count else { return nil }
-            let key = Walker.readingKey(readings[node.readingRange])
-            return CandidateUsage(list: .pinyin(readingKey: key), candidate: node.chosenText)
-        }
-    }
-
     @discardableResult
     public func commit() -> String {
         let text = composingText
-        raw = ""; nodes = []; tail = ""; cursor = 0; readings = []; syllables = []
+        raw = ""; nodes = []; tail = ""; cursor = 0
         return text
     }
 
@@ -140,8 +118,8 @@ public final class PinyinEngine {
         let seg = segmenter.segment(raw)
         tail = seg.tail
         syllables = seg.syllables
-        readings = seg.syllables.compactMap { syllableTable.zhuyin(forSyllable: $0) }
-        nodes = walker.walk(readings: readings, rawSyllables: seg.syllables, usageCount: usageCount)
+        let readings = seg.syllables.compactMap { syllableTable.zhuyin(forSyllable: $0) }
+        nodes = walker.walk(readings: readings, rawSyllables: seg.syllables, userBonus: userRank)
         if cursor >= nodes.count { cursor = max(0, nodes.count - 1) }
     }
 }

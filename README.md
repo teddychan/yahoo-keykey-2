@@ -128,13 +128,14 @@ immediately.
 | **三代倉頡** (Yahoo! KeyKey compatible) | original Yahoo! KeyKey tables | Yahoo's original order | 面 `一田卜中`, 鬼 `竹戈` |
 
 **五代** is the default, so existing users are unaffected until they opt in. Both orders are
-fixed, and each is the tie-breaker rather than a score the learning layer adjusts: with
-**依選字習慣調整候選字順序** on, every candidate list is ordered by how often you have committed
-each candidate *in that list*, and the table order decides between candidates you have committed
-equally often. Turning it off shows the table order alone — so 三代 with learning off is the
-original Yahoo! KeyKey order and nothing else. Usage is counted per candidate list, so a 倉頡
+fixed, and in 倉頡/速成 each is the tie-breaker rather than a score the learning layer adjusts:
+with **依選字習慣調整候選字順序** on, every candidate list is ordered by how often you have
+committed each candidate *in that list*, and the table order decides between candidates you have
+committed equally often. Turning it off shows the table order alone — so 三代 with learning off is
+the original Yahoo! KeyKey order and nothing else. Usage is counted per candidate list, so a 倉頡
 code, a 倉頡 wildcard pattern and a 速成 code each learn separately, while 倉頡 and 速成 share
-what they learn about 聯想字詞.
+what they learn about 聯想字詞. 拼音 is outside that scheme: it ranks candidates as it always has,
+and the same setting turns its learning on and off.
 
 Yahoo! KeyKey's *associated-phrase* ranking cannot be reproduced — that data was never
 open-sourced — so associations use Yahoo! KeyKey 2's own ordering in both modes.

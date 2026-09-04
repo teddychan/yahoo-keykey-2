@@ -71,13 +71,14 @@ character.
 
 Update if you are on an older release.
 
-- **A rare character never moved to the top** — fixed in **2.13.4**. Choosing a character used to
-  be mixed with how common the built-in dictionary considers it, so a character the dictionary
-  does not know could never overtake one it does, however many times you chose it: under
-  `卜月卜尸心`, 龍 is in the dictionary and the variant 㡣 is not, so 㡣 stayed second permanently.
-  Each candidate list is now counted on its own and the count decides the order, so picking 㡣
-  once puts it first. Learning starts fresh in 2.13.4 — the previous counts recorded no candidate
-  list and could not be carried over.
+- **A rare character never moved to the top in 倉頡 or 速成** — fixed in **2.13.4**. Choosing a
+  character used to be mixed with how common the built-in dictionary considers it, so a character
+  the dictionary does not know could never overtake one it does, however many times you chose it:
+  under `卜月卜尸心`, 龍 is in the dictionary and the variant 㡣 is not, so 㡣 stayed second
+  permanently. Each 倉頡/速成 candidate list (and each 聯想字詞 list) is now counted on its own and
+  the count decides the order, so picking 㡣 once puts it first. That learning starts fresh in
+  2.13.4 — the previous counts recorded no candidate list and could not be carried over. 拼音
+  ranking is unchanged.
 - **In 速成, typing past a two-key code got stuck** — fixed in **2.13.1**. The extra key was
   added to the finished code, emptying the candidate list.
 - **三代 offered a character under the wrong code** — fixed in **2.8.0**. `人一弓口` (何) also

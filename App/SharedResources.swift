@@ -10,8 +10,8 @@ import KeyKeyEngine
 final class SharedResources {
     static let shared = SharedResources()
 
-    // Where KeyKey's own on-disk data lives (the adaptive-ordering store, plus the retired
-    // per-character one left behind for a downgrade). A local debug build gets its OWN directory
+    // Where KeyKey's own on-disk data lives: the per-list adaptive-ordering store used by
+    // 倉頡/速成/聯想, and the per-character store 拼音 still ranks by. A local debug build gets its OWN directory
     // rather than sharing the installed IME's — the reasoning is on
     // CandidateUsageStore.supportDirectory(named:). The Uninstall pane removes this exact URL,
     // which is what sweeps up BOTH learning files, so the directory must be named in one place
@@ -25,8 +25,12 @@ final class SharedResources {
     let characterRank: [Character: Double]
     let associatedPhrases: AssociatedPhrases
     let hanConvertFilter: HanConvertFilter
-    // One shared adaptive-ordering store across all controllers: per-candidate-list commit counts.
+    // One shared adaptive-ordering store across all controllers: per-candidate-list commit counts,
+    // used by 倉頡/速成 and 聯想字詞.
     let candidateUsage: CandidateUsageStore
+    // The per-character store, still the one 拼音 ranks by — 拼音 is out of the per-list change,
+    // so it must keep reading and writing exactly what it did before (see InputController).
+    let userFreq: UserFrequency
     // Small pinyin→zhuyin syllable map (eager; ~422 rows, tiny). Backs the Pinyin segmenter.
     let pinyinSyllableTable: PinyinSyllableTable
     // The heavy Pinyin LM index (~55–80 MB), resident ONLY while at least one controller is in
@@ -117,6 +121,9 @@ final class SharedResources {
         // IME's counts.
         candidateUsage = CandidateUsageStore(
             fileURL: CandidateUsageStore.defaultFileURL(directory: Self.supportDirectory))
+        // Same directory, and still live: 拼音 ranks by this store, so it is neither retired nor
+        // frozen. Explicit directory, not a default, for the reason above.
+        userFreq = UserFrequency(fileURL: UserFrequency.defaultFileURL(directory: Self.supportDirectory))
 
         // Pinyin syllable map: small, always loaded; fail-safe to empty if the resource is missing.
         if let url = Bundle.main.url(forResource: "pinyin-zhuyin", withExtension: "txt"),

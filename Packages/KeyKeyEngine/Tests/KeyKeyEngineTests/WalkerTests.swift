@@ -17,7 +17,7 @@ final class WalkerTests: XCTestCase {
         // Two singles cost -3.0 + -3.0 = -6.0; the phrase costs -5.0 (better).
         let walker = Walker(index: index())
         let nodes = walker.walk(readings: ["ㄋㄧ", "ㄏㄠ"], rawSyllables: ["ni", "hao"],
-                                usageCount: { _, _ in 0 })
+                                userBonus: { _ in 0 })
         XCTAssertEqual(nodes.count, 1)
         XCTAssertEqual(nodes[0].chosenText, "你好")
         XCTAssertEqual(nodes[0].readingRange, 0..<2)
@@ -25,7 +25,7 @@ final class WalkerTests: XCTestCase {
 
     func testSingleReadingHasCandidatesSortedByScore() {
         let walker = Walker(index: index())
-        let nodes = walker.walk(readings: ["ㄋㄧ"], rawSyllables: ["ni"], usageCount: { _, _ in 0 })
+        let nodes = walker.walk(readings: ["ㄋㄧ"], rawSyllables: ["ni"], userBonus: { _ in 0 })
         XCTAssertEqual(nodes.count, 1)
         XCTAssertEqual(nodes[0].candidates, ["你", "泥"])
         XCTAssertEqual(nodes[0].chosenText, "你")
@@ -33,16 +33,16 @@ final class WalkerTests: XCTestCase {
 
     func testUserBonusReordersCandidatesButNotSegmentation() {
         let walker = Walker(index: index())
-        // One commit of 泥 in this node's own list lifts it above 你, whose LM score is higher.
+        // Big bonus for 泥 lifts it above 你 within the node.
         let nodes = walker.walk(readings: ["ㄋㄧ"], rawSyllables: ["ni"],
-                                usageCount: { _, c in c == "泥" ? 1 : 0 })
+                                userBonus: { $0 == "泥" ? 100 : 0 })
         XCTAssertEqual(nodes[0].candidates.first, "泥")
     }
 
     func testUnmappedReadingFallsBackToRawText() {
         let walker = Walker(index: index())
         // ㄗㄗ has no LM entry -> raw-text node keeps the pinyin visible; path still complete.
-        let nodes = walker.walk(readings: ["ㄗㄗ"], rawSyllables: ["zz"], usageCount: { _, _ in 0 })
+        let nodes = walker.walk(readings: ["ㄗㄗ"], rawSyllables: ["zz"], userBonus: { _ in 0 })
         XCTAssertEqual(nodes.count, 1)
         XCTAssertEqual(nodes[0].chosenText, "zz")
     }
@@ -54,14 +54,14 @@ final class WalkerTests: XCTestCase {
         ㄏㄠ 好 -3.0
         ㄋㄧ-ㄏㄠ 你好 -50.0
         """)
-        let nodes = Walker(index: idx).walk(readings: ["ㄋㄧ", "ㄏㄠ"], rawSyllables: ["ni", "hao"], usageCount: { _, _ in 0 })
+        let nodes = Walker(index: idx).walk(readings: ["ㄋㄧ", "ㄏㄠ"], rawSyllables: ["ni", "hao"], userBonus: { _ in 0 })
         XCTAssertEqual(nodes.count, 2)
         XCTAssertEqual(nodes.map(\.chosenText), ["你", "好"])
     }
 
     func testEmptyReadings() {
         let walker = Walker(index: index())
-        XCTAssertTrue(walker.walk(readings: [], rawSyllables: [], usageCount: { _, _ in 0 }).isEmpty)
+        XCTAssertTrue(walker.walk(readings: [], rawSyllables: [], userBonus: { _ in 0 }).isEmpty)
     }
 }
 
@@ -90,7 +90,7 @@ extension WalkerTests {
         let readings = Array(repeating: "ㄋㄧ", count: 24)
         let raws = Array(repeating: "ni", count: 24)
         let start = Date()
-        let nodes = walker.walk(readings: readings, rawSyllables: raws, usageCount: { _, _ in 0 })
+        let nodes = walker.walk(readings: readings, rawSyllables: raws, userBonus: { _ in 0 })
         XCTAssertFalse(nodes.isEmpty)
         // Reconstructed reading coverage must be complete.
         XCTAssertEqual(nodes.reduce(0) { $0 + $1.readingRange.count }, 24)

@@ -147,10 +147,15 @@ enum SessionEndPolicy {
 
 // Whether user learning shapes the candidate order, and what gets counted (issues #85, #130).
 //
-// Adaptive ordering counts how often each candidate is committed IN ITS OWN candidate list, and
-// orders that list by the count — most-committed first, with the built-in order deciding whenever
-// counts are equal. See CandidateOrdering and CandidateUsageStore for the rule itself; the two
-// decisions here are the ones the setting gates.
+// For 倉頡, 速成 and 聯想字詞, adaptive ordering counts how often each candidate is committed IN
+// ITS OWN candidate list and orders that list by the count — most-committed first, with the
+// built-in order deciding whenever counts are equal. See CandidateOrdering and
+// CandidateUsageStore for the rule itself.
+//
+// 拼音 is deliberately NOT part of that: its ranking is out of scope for this change and keeps
+// using the per-character bonus it always used (`bonus`/`characterToLearn` below, over
+// UserFrequency). Both mechanisms answer to the SAME setting, so the toggle still means one thing
+// to the user, and both are paused and ignored together when it is off.
 //
 // Adaptive ordering is ON by default. Turned off, candidates keep the static order the selected
 // table and ranking give them (五代 its built-in corpus ranking, 三代 the original Yahoo! KeyKey
@@ -179,6 +184,37 @@ enum AdaptiveCandidateOrder {
     /// ignoring counts, so a user who turned it off is not still being counted.
     static func usageToRecord(_ pending: [CandidateUsage], enabled: Bool) -> [CandidateUsage] {
         enabled ? pending : []
+    }
+
+    // MARK: 拼音 — the per-character mechanism, unchanged from before this release
+
+    /// The ranking bonus to apply for `char` — the learned bonus while adaptive ordering is on,
+    /// zero when off. Consumed only by the 拼音 walker now that 倉頡/速成/聯想 count per list.
+    static func bonus(for char: Character, enabled: Bool,
+                      learned: (Character) -> Double) -> Double {
+        enabled ? learned(char) : 0
+    }
+
+    /// The character to learn from a committed composition, or nil when there is nothing to learn.
+    ///
+    /// Only a commit whose WHOLE text is one character, because UserFrequency counts characters —
+    /// a multi-character 拼音 commit has no single character to attribute. Still fed by EVERY
+    /// mode's single-character commits, as before, because that is what 拼音 ranks by; dropping
+    /// the 倉頡/速成 commits here would change 拼音's behaviour, which this release does not.
+    static func characterToLearn(fromCommitted text: String, enabled: Bool) -> Character? {
+        guard enabled, text.count == 1 else { return nil }
+        return text.first
+    }
+
+    /// The character to learn from a picked 聯想 phrase, given the suffix that pick inserts
+    /// (`KeyEventPolicy.associationSuffix`), or nil when there is nothing to learn.
+    ///
+    /// The FIRST character of the suffix — 係 for 關係 — whatever the phrase's length. This no
+    /// longer orders the 聯想 list itself (`usageToRecord(forAssociationPhrase:)` does), but it
+    /// still feeds 拼音, so it is kept for that.
+    static func characterToLearn(fromAssociationSuffix suffix: String, enabled: Bool) -> Character? {
+        guard enabled else { return nil }
+        return suffix.first
     }
 
     /// The usage a picked 聯想 phrase should credit: the WHOLE phrase — 關係, not the continuation

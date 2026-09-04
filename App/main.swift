@@ -27,6 +27,7 @@ DispatchQueue.global(qos: .userInitiated).async { _ = SharedResources.shared }
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationWillTerminate(_ notification: Notification) {
         SharedResources.shared.candidateUsage.flush()
+        SharedResources.shared.userFreq.flush()
     }
 }
 let appDelegate = AppDelegate()

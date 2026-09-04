@@ -112,10 +112,10 @@ final class KeyEventPolicyTests: XCTestCase {
     }
 
     func testEveryPendingRecordIsKept() {
-        // A 拼音 commit finalizes several nodes at once; all of them count.
+        // The gate passes the engine's whole report through, whatever it contains.
         let pending = [
-            CandidateUsage(list: .pinyin(readingKey: "ㄨㄛ"), candidate: "我"),
-            CandidateUsage(list: .pinyin(readingKey: "ㄋㄧ"), candidate: "你"),
+            CandidateUsage(list: .simplex(tableVersion: "5", code: "a"), candidate: "曰"),
+            CandidateUsage(list: .cangjieWildcard(tableVersion: "5", pattern: "h*i"), candidate: "龍"),
         ]
         XCTAssertEqual(AdaptiveCandidateOrder.usageToRecord(pending, enabled: true), pending)
     }
@@ -154,6 +154,50 @@ final class KeyEventPolicyTests: XCTestCase {
         // A one-character "phrase" inserts nothing and is not an association candidate.
         XCTAssertEqual(AdaptiveCandidateOrder.usageToRecord(forAssociationPhrase: "", enabled: true), [])
         XCTAssertEqual(AdaptiveCandidateOrder.usageToRecord(forAssociationPhrase: "關", enabled: true), [])
+    }
+
+    // MARK: 拼音 — the per-character mechanism, out of scope for the per-list change
+
+    func testBonusIsTheLearnedValueWhenEnabled() {
+        XCTAssertEqual(AdaptiveCandidateOrder.bonus(for: "漏", enabled: true,
+                                                    learned: { $0 == "漏" ? 7 : 0 }), 7)
+    }
+
+    func testBonusIsZeroWhenDisabled() {
+        // The same setting gates both mechanisms, so 拼音 is paused by the toggle too.
+        XCTAssertEqual(AdaptiveCandidateOrder.bonus(for: "漏", enabled: false,
+                                                    learned: { _ in 999 }), 0)
+    }
+
+    func testSingleCharacterCommitIsStillLearnedPerCharacter() {
+        // 拼音 ranks by this, and on the previous release every mode's single-character commits
+        // fed it. That is kept, so 拼音's learning neither resets nor stops.
+        XCTAssertEqual(AdaptiveCandidateOrder.characterToLearn(fromCommitted: "漏", enabled: true), "漏")
+    }
+
+    func testNothingIsLearnedPerCharacterWhenDisabled() {
+        XCTAssertNil(AdaptiveCandidateOrder.characterToLearn(fromCommitted: "漏", enabled: false))
+    }
+
+    func testMultiCharacterCommitIsNotLearnedPerCharacter() {
+        // UserFrequency counts characters, so a multi-character 拼音 commit has no single
+        // character to attribute. Unchanged.
+        XCTAssertNil(AdaptiveCandidateOrder.characterToLearn(fromCommitted: "今天", enabled: true))
+    }
+
+    func testEmptyCommitIsNotLearnedPerCharacter() {
+        XCTAssertNil(AdaptiveCandidateOrder.characterToLearn(fromCommitted: "", enabled: true))
+    }
+
+    func testAssociationPickStillLearnsTheContinuationPerCharacter() {
+        // No longer what orders the 聯想 list — the phrase count does — but still what feeds 拼音.
+        XCTAssertEqual(AdaptiveCandidateOrder.characterToLearn(fromAssociationSuffix: "係",
+                                                               enabled: true), "係")
+        XCTAssertEqual(AdaptiveCandidateOrder.characterToLearn(fromAssociationSuffix: "係人",
+                                                               enabled: true), "係")
+        XCTAssertNil(AdaptiveCandidateOrder.characterToLearn(fromAssociationSuffix: "係",
+                                                             enabled: false))
+        XCTAssertNil(AdaptiveCandidateOrder.characterToLearn(fromAssociationSuffix: "", enabled: true))
     }
 
     // Merely showing or dismissing a 聯想 list must count nothing. Reading counts to ORDER a list

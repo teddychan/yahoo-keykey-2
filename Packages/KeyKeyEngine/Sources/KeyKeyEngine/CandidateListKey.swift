@@ -3,12 +3,16 @@
 // Adaptive ordering counts how often each candidate is committed *in its own list*, so the
 // identity of that list is what the counts hang off. It is an enum with associated values
 // rather than a joined string on purpose: the cases carry different fields (an association
-// list has no table version, a 拼音 list has neither table nor code), and Swift's structural
+// list is keyed by a trigger character with no table version or code), and Swift's structural
 // equality makes two different lists unable to collide the way `"cangjie:5:a"` can be reached
 // from more than one set of components. Nothing here is ever concatenated to form a key.
 //
 // The table version is part of the identity wherever there is one, because 三代 and 五代 hand
 // the same code different characters — the same `a` is a different list in each.
+//
+// There is deliberately NO case for 拼音. Its candidate ranking is out of scope for this change
+// and keeps working exactly as it did, off the retired per-character store (see UserFrequency);
+// adding a case here is what would quietly pull it in.
 public enum CandidateListKey: Hashable, Sendable {
     /// A finished 倉頡 code, e.g. `("5", "ojmn")`. Only the exact code's own list.
     case cangjie(tableVersion: String, code: String)
@@ -18,10 +22,6 @@ public enum CandidateListKey: Hashable, Sendable {
     case cangjieWildcard(tableVersion: String, pattern: String)
     /// A 速成 code — one or two radicals, e.g. `("5", "a")` for 日/曰.
     case simplex(tableVersion: String, code: String)
-    /// One node of a 拼音 composition, keyed by the reading key the language model itself
-    /// indexes that node's candidates under (`ㄋㄧ-ㄏㄠ`). That key IS the list: two nodes with
-    /// the same reading key are handed the same candidates, and no other key reaches them.
-    case pinyin(readingKey: String)
     /// A 聯想字詞 list, keyed by the character that triggered it. Deliberately carries neither
     /// the input mode nor the code that produced the trigger: 倉頡 and 速成 show the same
     /// semantic list after the same character, so they must share one set of counts.
@@ -37,7 +37,6 @@ extension CandidateListKey {
         case .cangjie: return "cangjie"
         case .cangjieWildcard: return "cangjieWildcard"
         case .simplex: return "simplex"
-        case .pinyin: return "pinyin"
         case .association: return "association"
         }
     }
@@ -45,14 +44,13 @@ extension CandidateListKey {
     var tableVersionField: String? {
         switch self {
         case .cangjie(let v, _), .cangjieWildcard(let v, _), .simplex(let v, _): return v
-        case .pinyin, .association: return nil
+        case .association: return nil
         }
     }
 
     var codeField: String? {
         switch self {
         case .cangjie(_, let c), .cangjieWildcard(_, let c), .simplex(_, let c): return c
-        case .pinyin(let k): return k
         case .association: return nil
         }
     }
@@ -60,7 +58,7 @@ extension CandidateListKey {
     var triggerField: String? {
         switch self {
         case .association(let t): return String(t)
-        case .cangjie, .cangjieWildcard, .simplex, .pinyin: return nil
+        case .cangjie, .cangjieWildcard, .simplex: return nil
         }
     }
 
@@ -78,9 +76,6 @@ extension CandidateListKey {
         case "simplex":
             guard let tableVersion, let code else { return nil }
             return .simplex(tableVersion: tableVersion, code: code)
-        case "pinyin":
-            guard let code else { return nil }
-            return .pinyin(readingKey: code)
         case "association":
             guard let trigger, trigger.count == 1, let ch = trigger.first else { return nil }
             return .association(trigger: ch)

@@ -6,15 +6,16 @@ import Foundation
 // to the built-in order. Nothing here is combined with a language-model score, weighted, or
 // aged: a count is a count.
 //
-// This SUPERSEDES the retired `user-frequency.json`, which held one global count per character
-// with no record of which list it was committed in. Those counts cannot be mapped onto per-list
-// history — the file does not say which mode, table version, code, wildcard pattern or
-// association trigger produced them — so this store starts empty rather than pretending. The
-// legacy file is left on disk untouched (a downgrade still finds its data); `legacyFileURL` names
-// it so the uninstall sweep and its test can see both files live in one directory.
+// This replaces `user-frequency.json` FOR 倉頡, 速成 and 聯想字詞 only. That file holds one global
+// count per character with no record of which list it was committed in; those counts cannot be
+// mapped onto per-list history — the file does not say which mode, table version, code, wildcard
+// pattern or association trigger produced them — so this store starts empty rather than
+// pretending. The old file is NOT retired: 拼音 candidate ranking is out of scope for this change
+// and still reads and writes it. `legacyFileURL` names it so the uninstall sweep and its test can
+// see that both files live in one directory.
 //
 // Designed as a SHARED singleton accessed from multiple IMK threads, keeping the reliability
-// the retired store had:
+// the per-character store has:
 //   - `count(of:in:)` / `record(_:in:)` are synchronous and thread-safe (guarded by a lock),
 //     so the engines can keep calling them inline while sorting.
 //   - `record` updates the in-memory count immediately (so `count` is always current) and
@@ -33,12 +34,17 @@ public final class CandidateUsageStore: @unchecked Sendable {
     public static let formatVersion = 1
 
     // Bound the file: cap distinct (list, candidate) records — evicting the least-used past this
-    // — and cap any single count. Higher than the retired store's 5,000 characters because a
+    // — and cap any single count. Higher than the per-character store's 5,000 characters because a
     // per-list store necessarily holds one record per list a candidate appears in, but still a
     // few hundred KB of JSON at the cap.
     public static let maxEntries = 20_000
     public static let maxCount = 100_000
     private static let saveDelay: TimeInterval = 5
+
+    /// The cap this instance enforces. An instance value, not the static one, purely so the
+    /// storage-bound tests can exercise eviction with a handful of records instead of 20,000 —
+    /// the production path always gets `maxEntries`.
+    private let maxEntries: Int
 
     private let fileURL: URL
     private let lock = NSLock()
@@ -46,6 +52,10 @@ public final class CandidateUsageStore: @unchecked Sendable {
     private var counts: [CandidateListKey: [String: Int]]
     private var dirty = false           // a save is pending/coalescing
     private var saveScheduled = false   // a debounced save is already queued
+    // Running total of (list, candidate) records. Maintained incrementally because `record` runs
+    // on the commit path: recomputing it by summing every list's dictionary on each commit was
+    // O(number of lists) per keystroke even when nothing needed evicting.
+    private var totalRecords: Int
 
     // The app's own Application Support directory: ~/Library/Application Support/<name>.
     //
@@ -71,16 +81,41 @@ public final class CandidateUsageStore: @unchecked Sendable {
         directory.appendingPathComponent("candidate-usage.json")
     }
 
-    /// The RETIRED global-per-character store from 2.13.3 and earlier. Nothing reads or writes it
-    /// any more; it is named here because it sits in the same directory as the new file, which is
-    /// what makes the Uninstall pane's single directory sweep remove both learning files.
+    /// The per-character store (`UserFrequency`). This type does not touch it — 拼音 still does,
+    /// through UserFrequency itself — and it is named here because it sits in the same directory
+    /// as this store's file, which is what makes the Uninstall pane's single directory sweep
+    /// remove both learning files.
     public static func legacyFileURL(directory: URL) -> URL {
         directory.appendingPathComponent("user-frequency.json")
     }
 
-    public init(fileURL: URL) {
+    public convenience init(fileURL: URL) {
+        self.init(fileURL: fileURL, maxEntries: CandidateUsageStore.maxEntries)
+    }
+
+    /// Testing seam: same store with a smaller cap, so eviction can be driven cheaply.
+    init(fileURL: URL, maxEntries: Int) {
         self.fileURL = fileURL
-        self.counts = CandidateUsageStore.load(from: fileURL)
+        self.maxEntries = maxEntries
+        var loaded = CandidateUsageStore.load(from: fileURL)
+        // Enforce the cap ONCE here rather than letting `record` discover it. A file can hold
+        // more records than the cap (hand-edited, or written by a build with a larger cap), and
+        // trimming that with the sort below is fine at init — it happens once, off the commit
+        // path. Doing it here is also what guarantees `record` can only ever overflow by ONE,
+        // which is what lets its eviction be a single linear scan instead of a sort.
+        var total = loaded.values.reduce(0) { $0 + $1.count }
+        if total > maxEntries {
+            let victims = CandidateUsageStore.flatten(loaded)
+                .sorted { CandidateUsageStore.evictsFirst($0, $1) }
+                .prefix(total - maxEntries)
+            for victim in victims {
+                loaded[victim.list]?.removeValue(forKey: victim.candidate)
+                if loaded[victim.list]?.isEmpty == true { loaded.removeValue(forKey: victim.list) }
+            }
+            total = maxEntries
+        }
+        self.counts = loaded
+        self.totalRecords = total
     }
 
     /// How many times `candidate` has been committed in `list`. Zero for anything unseen —
@@ -95,10 +130,13 @@ public final class CandidateUsageStore: @unchecked Sendable {
     /// schedules a coalesced background save. Thread-safe.
     public func record(_ candidate: String, in list: CandidateListKey) {
         lock.lock()
-        let current = counts[list]?[candidate] ?? 0
+        let existing = counts[list]?[candidate]
         // Cap a single count to bound the file; once at the cap the record just stays.
-        counts[list, default: [:]][candidate] = min(current + 1, Self.maxCount)
-        evictIfNeededLocked()
+        counts[list, default: [:]][candidate] = min((existing ?? 0) + 1, Self.maxCount)
+        if existing == nil {
+            totalRecords += 1
+            evictIfNeededLocked()
+        }
         dirty = true
         let shouldSchedule = !saveScheduled
         if shouldSchedule { saveScheduled = true }
@@ -116,48 +154,89 @@ public final class CandidateUsageStore: @unchecked Sendable {
         flushIfDirty()
     }
 
-    /// Total (list, candidate) records held. Exposed for the storage-bound test.
+    /// Total (list, candidate) records held. Exposed for the storage-bound tests, which also use
+    /// it to confirm the running total agrees with the dictionaries it tracks.
     public var entryCountForTesting: Int {
         lock.lock()
         defer { lock.unlock() }
         return counts.values.reduce(0) { $0 + $1.count }
     }
 
+    /// The running total `record` maintains. Only the tests read it, to pin that it does not
+    /// drift from `entryCountForTesting`.
+    var trackedTotalForTesting: Int {
+        lock.lock()
+        defer { lock.unlock() }
+        return totalRecords
+    }
+
     // MARK: - Internal
 
     // Drop the least-used records when the total exceeds the cap. Caller holds `lock`.
     //
+    // `record` adds at most one NEW record per call, and `init` already trimmed anything the file
+    // carried above the cap, so the overflow here is exactly one. That is worth exploiting: this
+    // runs synchronously on the commit path, under the lock, so a keystroke must not pay for a
+    // sort of the whole store. Selecting the single coldest record is one linear scan with no
+    // allocation, and the loop is a safety net rather than the expected path.
+    //
     // The order is fully determined — count, then the record's fields — so a store fed the same
-    // commits always evicts the same records. The retired store broke count ties "arbitrarily",
-    // which was fine for a debug aid but would make this store's contents depend on dictionary
-    // iteration order.
+    // commits always evicts the same records. The per-character store breaks count ties
+    // "arbitrarily", which was fine for a debug aid but would make this store's contents depend
+    // on dictionary iteration order.
     private func evictIfNeededLocked() {
-        var total = 0
-        for candidates in counts.values { total += candidates.count }
-        guard total > Self.maxEntries else { return }
-        let overflow = total - Self.maxEntries
-        var flat: [(list: CandidateListKey, candidate: String, count: Int)] = []
-        flat.reserveCapacity(total)
-        for (list, candidates) in counts {
-            for (candidate, count) in candidates { flat.append((list, candidate, count)) }
-        }
-        let victims = flat.sorted { Self.evictsFirst($0, $1) }.prefix(overflow)
-        for victim in victims {
+        while totalRecords > maxEntries {
+            var coldest: Record?
+            for (list, candidates) in counts {
+                for (candidate, count) in candidates {
+                    let candidateRecord = Record(list: list, candidate: candidate, count: count)
+                    if coldest == nil || Self.evictsFirst(candidateRecord, coldest!) {
+                        coldest = candidateRecord
+                    }
+                }
+            }
+            guard let victim = coldest else { return }
             counts[victim.list]?.removeValue(forKey: victim.candidate)
             if counts[victim.list]?.isEmpty == true { counts.removeValue(forKey: victim.list) }
+            totalRecords -= 1
         }
     }
 
+    // One (list, candidate, count) triple, named so the eviction scan and the init-time trim can
+    // share both the shape and the ordering below.
+    struct Record {
+        let list: CandidateListKey
+        let candidate: String
+        let count: Int
+    }
+
+    private static func flatten(_ counts: [CandidateListKey: [String: Int]]) -> [Record] {
+        var flat: [Record] = []
+        flat.reserveCapacity(counts.values.reduce(0) { $0 + $1.count })
+        for (list, candidates) in counts {
+            for (candidate, count) in candidates {
+                flat.append(Record(list: list, candidate: candidate, count: count))
+            }
+        }
+        return flat
+    }
+
     // Coldest first, with every tie broken, so eviction is reproducible.
-    private static func evictsFirst(_ a: (list: CandidateListKey, candidate: String, count: Int),
-                                    _ b: (list: CandidateListKey, candidate: String, count: Int)) -> Bool {
+    //
+    // Compares the fields DIRECTLY. Building two arrays of field strings per comparison — which
+    // is what this did — allocated on every one of the ~n log n comparisons of a full sort,
+    // costing tens of milliseconds per commit once the store was at its cap.
+    static func evictsFirst(_ a: Record, _ b: Record) -> Bool {
         if a.count != b.count { return a.count < b.count }
-        let aFields = [a.list.scopeName, a.list.tableVersionField ?? "", a.list.codeField ?? "",
-                       a.list.triggerField ?? "", a.candidate]
-        let bFields = [b.list.scopeName, b.list.tableVersionField ?? "", b.list.codeField ?? "",
-                       b.list.triggerField ?? "", b.candidate]
-        for (lhs, rhs) in zip(aFields, bFields) where lhs != rhs { return lhs < rhs }
-        return false
+        let aScope = a.list.scopeName, bScope = b.list.scopeName
+        if aScope != bScope { return aScope < bScope }
+        let aTable = a.list.tableVersionField ?? "", bTable = b.list.tableVersionField ?? ""
+        if aTable != bTable { return aTable < bTable }
+        let aCode = a.list.codeField ?? "", bCode = b.list.codeField ?? ""
+        if aCode != bCode { return aCode < bCode }
+        let aTrigger = a.list.triggerField ?? "", bTrigger = b.list.triggerField ?? ""
+        if aTrigger != bTrigger { return aTrigger < bTrigger }
+        return a.candidate < b.candidate
     }
 
     private func flushIfDirty() {

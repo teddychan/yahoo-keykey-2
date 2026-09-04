@@ -5,13 +5,19 @@ import DragonKit
 
 @objc(InputController)
 final class InputController: IMKInputController {
-    // Adaptive ordering: persisted per-candidate-list commit counts, so a candidate the user has
-    // committed more often in a list leads that list next time.
+    // Adaptive ordering for 倉頡/速成/聯想: persisted per-candidate-list commit counts, so a
+    // candidate the user has committed more often in a list leads that list next time.
     private let candidateUsage: CandidateUsageStore
-    // The gated count handed to the engines, and read again when ordering 聯想. Stored rather
-    // than local to init because the association path needs the same closure — one gate, so the
-    // setting cannot apply to composition candidates and not to suggestions.
+    // The per-character store 拼音 ranks by. 拼音 is OUT of the per-list change, so this stays
+    // exactly as it was: read for 拼音 ordering, and written on every single-character commit the
+    // way it always was, so 拼音's learning neither resets nor stops.
+    private let userFreq: UserFrequency
+    // The gated count handed to the 倉頡/速成 engines, and read again when ordering 聯想. Stored
+    // rather than local to init because the association path needs the same closure — one gate, so
+    // the setting cannot apply to composition candidates and not to suggestions.
     private let usageCount: (CandidateListKey, String) -> Int
+    // The gated per-character bonus handed to 拼音, unchanged from before this release.
+    private let userRank: (Character) -> Double
     private let associatedPhrases: AssociatedPhrases
     // Traditional→Simplified character converter, applied only when Preferences.outputSimplifiedEnabled.
     private let hanConvertFilter: HanConvertFilter
@@ -42,6 +48,7 @@ final class InputController: IMKInputController {
         self.associatedPhrases = shared.associatedPhrases
         self.hanConvertFilter = shared.hanConvertFilter
         self.candidateUsage = shared.candidateUsage
+        self.userFreq = shared.userFreq
 
         // Live committed-usage count; the closure consults the shared store on every sort, so a
         // freshly-committed candidate leads without rebuilding the engine. It also reads
@@ -54,11 +61,22 @@ final class InputController: IMKInputController {
         }
         self.usageCount = usageCount
 
+        // 拼音's live per-character bonus, exactly as before: consulted on every walk, gated by
+        // the same setting. Kept because 拼音 candidate ranking is out of scope for the per-list
+        // change and must behave as it does on the previous release.
+        let userRank: (Character) -> Double = {
+            AdaptiveCandidateOrder.bonus(for: $0,
+                                         enabled: Preferences.adaptiveCandidateOrderEnabled,
+                                         learned: shared.userFreq.bonus(for:))
+        }
+        self.userRank = userRank
+
         // The input-method registry. Each module's makeEngine reads the shared tables and
         // rank LIVE, so rebuilding an engine after a 倉頡版本 change picks up the new table
         // (三代 uses an empty cangjieRank → the table's native order is preserved). The version
-        // is read the same way and becomes part of every list identity the engine reports, so
-        // 三代 and 五代 counts stay in separate lists.
+        // is read the same way and becomes part of every list identity 倉頡/速成 report, so
+        // 三代 and 五代 counts stay in separate lists. 拼音 takes the per-character bonus instead:
+        // its ranking is out of scope for the per-list change.
         // To add a method: append a module here and an Info.plist input mode — nothing else.
         let modules = [
             InputMethodModule(modeSuffix: "Cangjie", displayName: "倉頡") {
@@ -74,8 +92,7 @@ final class InputController: IMKInputController {
                 // Pinyin, which acquires in setValue before this closure runs). Registration
                 // alone never builds the index.
                 PinyinEngine(syllableTable: shared.pinyinSyllableTable,
-                             index: shared.pinyinIndexOrEmpty,
-                             usageCount: { usageCount(.pinyin(readingKey: $0), $1) })
+                             index: shared.pinyinIndexOrEmpty, userRank: userRank)
             },
         ]
         self.modules = modules
@@ -386,6 +403,15 @@ final class InputController: IMKInputController {
                             enabled: Preferences.adaptiveCandidateOrderEnabled) {
                             candidateUsage.record(usage.candidate, in: usage.list)
                         }
+                        // ALSO the continuation character into the per-character store, exactly
+                        // as before this release. That store no longer orders 聯想 — the line
+                        // above does — but it still orders 拼音, so dropping this would silently
+                        // change 拼音's learning, which is out of scope here.
+                        if let ch = AdaptiveCandidateOrder.characterToLearn(
+                            fromAssociationSuffix: suffix,
+                            enabled: Preferences.adaptiveCandidateOrderEnabled) {
+                            userFreq.record(ch)
+                        }
                     }
                     return true
                 }
@@ -603,9 +629,9 @@ final class InputController: IMKInputController {
         // Read the usage to credit BEFORE committing: commit() clears the code (倉頡/速成) or the
         // nodes (拼音) that identify which candidate list the pick came from, so afterwards there
         // is nothing left to attribute it to. Every commit path that reaches the client goes
-        // through this one method — Space, Return, 1–9, the 速成 third-radical auto-commit, the
-        // 拼音 cursor-past-the-last-node commit, punctuation, focus loss — so capturing it here
-        // covers all of them, and any future path inherits it for free.
+        // through this one method — Space, Return, 1–9, the 速成 third-radical auto-commit,
+        // punctuation, focus loss — so capturing it here covers all of them, and any future path
+        // inherits it for free. 拼音 reports nothing (see InputEngine): it is out of scope.
         let pending = engine.pendingUsage
         let text = engine.commit()
         if !text.isEmpty {
@@ -617,6 +643,14 @@ final class InputController: IMKInputController {
             for usage in AdaptiveCandidateOrder.usageToRecord(
                 pending, enabled: Preferences.adaptiveCandidateOrderEnabled) {
                 candidateUsage.record(usage.candidate, in: usage.list)
+            }
+            // ALSO the per-character count, exactly as before this release. 倉頡/速成 no longer
+            // order by it, but 拼音 does, and on the previous release every single-character
+            // commit from any mode fed 拼音's ranking. Keeping that is what makes 拼音 behave
+            // identically instead of quietly losing the input it learns from.
+            if let ch = AdaptiveCandidateOrder.characterToLearn(
+                fromCommitted: text, enabled: Preferences.adaptiveCandidateOrderEnabled) {
+                userFreq.record(ch)
             }
         }
         client.setMarkedText("", selectionRange: NSRange(location: 0, length: 0),

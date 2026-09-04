@@ -46,6 +46,12 @@ protocol PhraseComposingEngine: InputEngine {
     var cursorReading: String? { get }
 }
 
-// PinyinEngine already exposes the full InputEngine surface plus cursor movement.
-extension PinyinEngine: InputEngine {}
+// PinyinEngine already exposes the full InputEngine surface plus cursor movement, except
+// `pendingUsage`: 拼音 candidate ranking is deliberately OUT of the per-list adaptive-ordering
+// change, so it credits nothing to that store and keeps ranking off the per-character store it
+// always used (see UserFrequency and InputController.userRank). Empty here is the honest answer —
+// not a stub — and it keeps the single commit call site uniform across every engine.
+extension PinyinEngine: InputEngine {
+    var pendingUsage: [CandidateUsage] { [] }
+}
 extension PinyinEngine: PhraseComposingEngine {}
