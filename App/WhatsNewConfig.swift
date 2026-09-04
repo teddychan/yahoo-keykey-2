@@ -31,7 +31,7 @@ enum WhatsNewConfig {
     @MainActor
     static var content: WhatsNewContent {
         WhatsNewContent(
-            date: "2026-09-03",
+            date: "2026-09-04",
             summary: L("app.whatsNew.summary"),
             sections: [
                 ChangeSection(kind: .fixed, entries: [

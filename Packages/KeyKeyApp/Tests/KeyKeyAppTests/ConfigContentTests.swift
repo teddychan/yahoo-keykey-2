@@ -88,7 +88,7 @@ final class ConfigContentTests: XCTestCase {
         let short = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
         XCTAssertEqual(content.displayVersion, DragonVersion.display(short ?? "1.0.0"))
         XCTAssertTrue(content.displayVersion.hasPrefix("v"))
-        XCTAssertEqual(content.date, "2026-09-03")
+        XCTAssertEqual(content.date, "2026-09-04")
     }
 
     // 2.13.4 is [.fixed, .changed]: adaptive candidate ordering now follows how often you commit
