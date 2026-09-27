@@ -32,7 +32,7 @@
 "keykey.general.adaptiveCandidateOrderHint" = "Se aplica a 倉頡, 速成 y a las frases asociadas. Cada lista de candidatos se aprende por separado: dentro de una lista, los candidatos que has confirmado más veces aparecen primero, y los que has confirmado igual número de veces conservan su orden original. Un código 倉頡 con comodín se aprende aparte de un código completo, y lo aprendido sobre 聯想字詞 se comparte entre 倉頡 y 速成. 拼音 sigue ordenando los candidatos exactamente como antes. Desactívalo para usar el orden original —五代 y 拼音 usan sus clasificaciones propias; 三代, el orden original de Yahoo! KeyKey—, lo que además pausa el recuento en todas partes sin borrar lo ya aprendido.";
 "keykey.general.language" = "Idioma";
 
-/* What's New pane (2.14.0) */
+/* What's New pane (2.14.1) */
 "app.whatsNew.summary" = "Ahora Mayús + Espacio puede escribir un espacio de ancho completo (　) en 倉頡, 速成 y 拼音; actívalo en Ajustes.";
 "app.whatsNew.added1" = "Un nuevo ajuste en General ▸ Entrada, «Mayús + Espacio escribe un espacio de ancho completo», desactivado de forma predeterminada. Si lo activas, Mayús + Espacio escribe un espacio de ancho completo (　), del ancho de un carácter chino, en 倉頡, 速成 y 拼音, sin tener que cambiar de fuente de entrada. Lo que estés componiendo se confirma primero. Desactivado, Mayús + Espacio funciona exactamente igual que Espacio, como hasta ahora.";
 "app.whatsNew.fixed1" = "En 倉頡 y 速成, al pulsar Mayús + una letra (臨時英數) con la lista de candidatos en la página 2 o posterior, ahora se confirma el primer carácter de la página que estás viendo, el mismo que confirma Retorno. Antes se confirmaba el primero de la página 1, que ya no estaba en pantalla.";

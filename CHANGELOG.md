@@ -2,7 +2,7 @@
 
 A plain-language list of changes in each version, newest first.
 
-## 2.14.0
+## 2.14.1
 
 - **Added: Shift + Space can type a full-width space (　).** A new setting in **設定… ▸ 一般 ▸
   輸入**, **Shift + 空白鍵輸入全形空白**, is off by default. Turn it on and Shift + Space types a
@@ -21,6 +21,9 @@ A plain-language list of changes in each version, newest first.
   for example, paging to 符 籌 凡 鬼 … and pressing Shift + A typed 的a. It now commits the first
   candidate of the page you are looking at, as Return does, so the same keys type 符a. On page 1
   nothing changes, and 拼音 was never affected.
+
+- **There is no 2.14.0.** It was prepared but never published, so the changes above arrive
+  straight from 2.13.4 in this release.
 
 ## 2.13.4
 

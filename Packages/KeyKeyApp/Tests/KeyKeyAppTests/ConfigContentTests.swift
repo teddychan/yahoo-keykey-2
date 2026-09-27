@@ -91,7 +91,7 @@ final class ConfigContentTests: XCTestCase {
         XCTAssertEqual(content.date, "2026-09-27")
     }
 
-    // 2.14.0 is [.added, .fixed]: an opt-in setting that makes Shift + Space type a full-width
+    // 2.14.1 is [.added, .fixed]: an opt-in setting that makes Shift + Space type a full-width
     // space (　) in 倉頡, 速成 and 拼音 (issue #135), then the fix it brought with it — 臨時英數
     // (Shift + letter) now commits the first candidate of the page on screen, not page 1's.
     // `.added` leads because the setting is the release. 2.13.4's `.changed1` is gone from all

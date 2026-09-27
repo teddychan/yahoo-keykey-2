@@ -32,7 +32,7 @@
 "keykey.general.adaptiveCandidateOrderHint" = "S’applique à 倉頡, 速成 et aux phrases associées. Chaque liste de candidats est apprise séparément : au sein d’une liste, les candidats que vous avez validés le plus souvent viennent en premier, et ceux validés autant de fois conservent leur ordre d’origine. Un code 倉頡 avec joker est appris indépendamment d’un code complet, et ce qui est appris sur les 聯想字詞 est partagé entre 倉頡 et 速成. 拼音 continue de classer les candidats exactement comme avant. Désactivez cette option pour retrouver l’ordre d’origine — 五代 et 拼音 utilisent leurs propres classements, 三代 l’ordre original de Yahoo! KeyKey — ce qui met aussi le comptage en pause partout, sans effacer ce qui a déjà été appris.";
 "keykey.general.language" = "Langue";
 
-/* What's New pane (2.14.0) */
+/* What's New pane (2.14.1) */
 "app.whatsNew.summary" = "Maj + Espace peut désormais saisir une espace pleine largeur (　) en 倉頡, 速成 et 拼音 — activez-le dans les Réglages.";
 "app.whatsNew.added1" = "Un nouveau réglage dans Général ▸ Saisie, « Maj + Espace saisit une espace pleine largeur », désactivé par défaut. Une fois activé, Maj + Espace saisit une espace pleine largeur (　), de la largeur d’un caractère chinois, en 倉頡, 速成 et 拼音, sans changer de source de saisie. Ce que vous êtes en train de composer est d’abord validé. Désactivé, Maj + Espace fonctionne exactement comme Espace, comme avant.";
 "app.whatsNew.fixed1" = "En 倉頡 et 速成, appuyer sur Maj + une lettre (臨時英數) quand la liste des candidats est à la page 2 ou au-delà valide désormais le premier caractère de la page affichée, celui que valide Retour. Auparavant, c’était le premier de la page 1, qui n’était plus à l’écran.";
