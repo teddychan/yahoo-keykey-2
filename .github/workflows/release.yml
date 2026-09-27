@@ -2,7 +2,7 @@ name: Release
 
 # Thin caller: delegates to the shared macOS release pipeline
 # (teddychan/dragon-release-ci). Build via tools/build-lm.sh + tools/build-app.sh
-# (swiftc), Developer ID-sign, notarize, staple, publish Yahoo KeyKey 2, push the
+# (swiftc), Developer ID-sign, notarize, staple, publish Yahoo! KeyKey 2, push the
 # EdDSA-signed Sparkle appcast to docs/yahoo-keykey-2/, and bump the Homebrew
 # cask. Triggered by a v* tag on this repo.
 #
@@ -59,7 +59,7 @@ jobs:
         App/zh-Hans.lproj/Localizable.strings
         App/zh-Hant.lproj/Localizable.strings
       build_kind: script
-      # Yahoo KeyKey 2 now targets the macOS 26 SDK, so build on the macos-26 image.
+      # Yahoo! KeyKey 2 now targets the macOS 26 SDK, so build on the macos-26 image.
       swiftpm_runner: macos-26
       app_slug: yahoo-keykey-2
       # Moving the appcast off the marketing site. DONE as of 2.12.0 — all three steps.
@@ -113,7 +113,7 @@ jobs:
       # for the appcast: dragon-release-ci uses it for the Homebrew cask bump and the site-changelog
       # dispatch, and skips both with a warning when it is unset. So keep inheriting it.
       appcast_repo: teddychan/yahoo-keykey-2
-      release_title_prefix: Yahoo KeyKey 2
+      release_title_prefix: 'Yahoo! KeyKey 2'
       bot_name: KeyKey Release Bot
       assert_tag_matches_plist: true
       script_entitlements_path: App/YahooKeyKey2.entitlements
