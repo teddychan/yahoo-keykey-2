@@ -35,6 +35,7 @@
 /* What's New pane (2.14.0) */
 "app.whatsNew.summary" = "Ahora Mayús + Espacio puede escribir un espacio de ancho completo (　) en 倉頡, 速成 y 拼音; actívalo en Ajustes.";
 "app.whatsNew.added1" = "Un nuevo ajuste en General ▸ Entrada, «Mayús + Espacio escribe un espacio de ancho completo», desactivado de forma predeterminada. Si lo activas, Mayús + Espacio escribe un espacio de ancho completo (　), del ancho de un carácter chino, en 倉頡, 速成 y 拼音, sin tener que cambiar de fuente de entrada. Lo que estés componiendo se confirma primero. Desactivado, Mayús + Espacio funciona exactamente igual que Espacio, como hasta ahora.";
+"app.whatsNew.fixed1" = "En 倉頡 y 速成, al pulsar Mayús + una letra (臨時英數) con la lista de candidatos en la página 2 o posterior, ahora se confirma el primer carácter de la página que estás viendo, el mismo que confirma Retorno. Antes se confirmaba el primero de la página 1, que ya no estaba en pantalla.";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "Desactivar 倉頡 y 速成 en Fuentes de entrada";

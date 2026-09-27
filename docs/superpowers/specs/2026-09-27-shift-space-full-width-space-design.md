@@ -25,20 +25,32 @@ types `　` in 倉頡, 速成 and 拼音. Off (the default), nothing changes for
 | --- | --- |
 | Idle | Inserts `　`. |
 | 聯想 suggestions on screen | Dismisses them, then inserts `　`. |
-| Composing (any mode) | Commits the composition, then inserts `　`. |
+| Composing (倉頡 / 速成) | Commits the first candidate of the page on screen, then inserts `　`. |
+| Composing (拼音) | Commits the whole phrase, then inserts `　`. |
 | With ⌃, ⌥ or ⌘ also held | Not this shortcut. ⌃/⌘ already go to the app; ⌥ falls through to today's Space handling. |
 
 Caps Lock does not matter. Setting off: Shift + Space behaves exactly like Space, as before.
 
-"Commits the composition" is deliberately the same rule 臨時英數 (Shift + a letter) already
-uses: `commitCurrent(to:)` with no 聯想 offer, since a space right after would dismiss the
-suggestions anyway. One rule for both Shift shortcuts is easier to learn than two.
+Which character gets committed is the one Return commits: the first candidate of the page on
+screen. Under the 速成 code `竹戈` (141 candidates), paging to 符 籌 凡 鬼 … and pressing
+Shift + Space types 符　 — not 的　, page 1's first, which is no longer visible. 臨時英數
+(Shift + a letter) used to commit page 1's first in that situation; it now follows the same rule,
+so both Shift shortcuts commit a character the user can see. No 聯想 is offered: a space or
+letter right after would dismiss the suggestions anyway.
+
+The same rule holds in 拼音, where what is on screen is the phrase itself: the window never pages,
+and Return commits the whole phrase as shown. Type `womenshishi`, re-pick 實施 over 事實, and
+Shift + Space types 我們實施　. Forcing "the first candidate" there would have undone the pick and
+committed 我們事實, which is why `selectFirstCandidateOnScreen()` skips 拼音.
 
 ## Design
 
 - **`KeyEventPolicy.typesFullWidthSpace(enabled:keyCode:modifierFlags:)`** — the pure decision,
   unit-tested beside the other key policies. Matched by key code 49, like every other Space
   check, so it is layout-independent. `KeyEventPolicy.fullWidthSpace` holds U+3000.
+- **`InputController.selectFirstCandidateOnScreen()`** — selects `candidatePage × 9` before the
+  commit, for both Shift shortcuts. It skips 拼音, whose commit is the whole phrase and where
+  selecting would override the cursor node's own choice.
 - **`InputController.handle`** — one block straight after 臨時英數 and before the 聯想,
   candidate and 拼音 branches, which is where Space pages or commits. Placing it there is what
   makes it apply to all three input methods without touching any of them.
@@ -64,6 +76,8 @@ convert, and 全形標點 is independent of it.
 - `KeyEventPolicyTests`: on/off, Caps Lock, plain Space, Shift+⌥/⌃/⌘+Space, Shift with other
   keys, and that the inserted string is exactly U+3000.
 - `PreferencesTests`: round-trip, absent reads `false`, registered default `false`.
-- `ConfigContentTests`: the 2.14.0 What's New entry; every locale defines the same keys.
+- `ConfigContentTests`: the 2.14.0 What's New entries; every locale defines the same keys.
+- The page-2 rule, against the real 五代 速成 table and ranking: `竹戈` on page 1 commits 的, on
+  page 2 符, on page 3 么.
 - `InputController` needs a live IMK server, so the end-to-end key flow is checked by hand in a
   Debug build.

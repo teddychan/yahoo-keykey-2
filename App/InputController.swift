@@ -327,12 +327,14 @@ final class InputController: IMKInputController {
         // 臨時英數 (quick English), classic Yahoo! KeyKey style: Shift + a letter (and no other
         // modifier) emits that English letter directly. Case follows CAPS LOCK, not Shift — Shift
         // is only the trigger — so it's lowercase with Caps off, uppercase with Caps on. Any
-        // active composition/association is committed first; the next unshifted key resumes 中文.
+        // active composition/association is committed first — the first candidate of the page on
+        // screen, as Return commits — and the next unshifted key resumes 中文.
         // ⌘/⌃/⌥ combinations are left alone so app shortcuts (⌘⇧S, etc.) still work.
         if event.modifierFlags.contains(.shift),
            event.modifierFlags.intersection([.control, .option, .command]).isEmpty,
            let raw = event.charactersIgnoringModifiers?.first, raw.isASCII, raw.isLetter {
             if !engine.composingText.isEmpty {
+                selectFirstCandidateOnScreen()
                 _ = commitCurrent(to: client)
             } else if !associations.isEmpty {
                 clearAssociations()
@@ -345,12 +347,14 @@ final class InputController: IMKInputController {
 
         // 全形空白 (issue #135): with the option on, Shift + Space types a full-width space (　) in
         // every input method. It runs before the association, candidate and 拼音 branches, where
-        // Space pages or commits, and finishes anything in progress exactly as 臨時英數 above does.
+        // Space pages or commits, and finishes anything in progress exactly as 臨時英數 above does:
+        // the first candidate of the page on screen is committed, then the space is inserted.
         // Off, Shift + Space falls through and behaves exactly like Space.
         if KeyEventPolicy.typesFullWidthSpace(enabled: Preferences.shiftSpaceFullWidthSpaceEnabled,
                                               keyCode: event.keyCode,
                                               modifierFlags: event.modifierFlags) {
             if !engine.composingText.isEmpty {
+                selectFirstCandidateOnScreen()
                 _ = commitCurrent(to: client)
             } else if !associations.isEmpty {
                 clearAssociations()
@@ -711,6 +715,15 @@ final class InputController: IMKInputController {
     // plain 倉頡 types a determinate code, and 拼音 has its own key handling.
     private var isAutoCompletedComposition: Bool {
         engine is SimplexEngine || engine.composingText.contains("*")
+    }
+
+    // Pick the first candidate of the page on screen, so the commit that follows takes a character
+    // the user can see — page 2's first, not page 1's — the same one Return commits. Used by the
+    // Shift shortcuts (臨時英數, 全形空白), which commit before inserting. 拼音 is left alone: its
+    // commit is the whole phrase, and selecting would override the cursor node's own choice.
+    private func selectFirstCandidateOnScreen() {
+        guard !(engine is PhraseComposingEngine), !engine.candidates.isEmpty else { return }
+        engine.selectCandidate(candidatePage * InputController.pageSize)
     }
 
     // Leave association mode: drop the suggestions, reset paging, hide the candidate window.

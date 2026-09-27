@@ -35,6 +35,7 @@
 /* What's New pane (2.14.0) */
 "app.whatsNew.summary" = "Shift + Space can now type a full-width space (　) in 倉頡, 速成 and 拼音 — turn it on in Settings.";
 "app.whatsNew.added1" = "A new setting in General ▸ Input, “Shift + Space types a full-width space”, off by default. Turn it on and Shift + Space types a full-width space (　), the width of one Chinese character, in 倉頡, 速成 and 拼音 — no need to switch input source. Anything you are composing is committed first. With it off, Shift + Space works exactly like Space, as before.";
+"app.whatsNew.fixed1" = "In 倉頡 and 速成, Shift + a letter (臨時英數) pressed while the candidate list is on page 2 or later now commits the first character of the page you are looking at — the same one Return commits. It used to commit the first character of page 1, which was no longer on screen.";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "Disable Cangjie and Simplex from Input Sources";

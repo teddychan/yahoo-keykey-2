@@ -91,10 +91,11 @@ final class ConfigContentTests: XCTestCase {
         XCTAssertEqual(content.date, "2026-09-27")
     }
 
-    // 2.14.0 is [.added]: an opt-in setting that makes Shift + Space type a full-width space (　)
-    // in 倉頡, 速成 and 拼音 (issue #135). Nothing changes for anyone who leaves it off, so there is
-    // no `.fixed` or `.changed` entry — 2.13.4's `.fixed1` and `.changed1` are gone from all seven
-    // .strings files rather than left stranded with no section to render them.
+    // 2.14.0 is [.added, .fixed]: an opt-in setting that makes Shift + Space type a full-width
+    // space (　) in 倉頡, 速成 and 拼音 (issue #135), then the fix it brought with it — 臨時英數
+    // (Shift + letter) now commits the first candidate of the page on screen, not page 1's.
+    // `.added` leads because the setting is the release. 2.13.4's `.changed1` is gone from all
+    // seven .strings files rather than left stranded with no section to render it.
     //
     // Entry KEYS are pinned, not just kinds and counts, because kinds and counts had stopped
     // catching anything: 2.11.3, 2.11.4 and the 2.11.5 draft were all [.changed] with one entry —
@@ -105,12 +106,13 @@ final class ConfigContentTests: XCTestCase {
     // text SAYS is the release gate's job — it diffs every locale's .strings file — so between
     // them a stale pane cannot ship.
     @MainActor
-    func testWhatsNewAnnouncesTheFullWidthSpaceSetting() {
+    func testWhatsNewAnnouncesTheFullWidthSpaceSettingAndTheShiftCommitFix() {
         let content = WhatsNewConfig.content
-        XCTAssertEqual(content.sections.map(\.kind), [.added])
-        XCTAssertEqual(content.sections.map(\.entries.count), [1])
+        XCTAssertEqual(content.sections.map(\.kind), [.added, .fixed])
+        XCTAssertEqual(content.sections.map(\.entries.count), [1, 1])
         XCTAssertEqual(content.sections.flatMap(\.entries), [
             L("app.whatsNew.added1"),
+            L("app.whatsNew.fixed1"),
         ])
     }
 

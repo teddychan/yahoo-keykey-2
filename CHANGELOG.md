@@ -9,10 +9,18 @@ A plain-language list of changes in each version, newest first.
   full-width space — U+3000, the width of one Chinese character, as formal Chinese typesetting
   uses for indents and gaps — in 倉頡, 速成 and 拼音 alike, without switching input source.
 
-  If you are in the middle of a character, it is committed first, the same way Shift + a letter
-  (臨時英數) commits it before typing the letter; associated-phrase suggestions on screen are
-  dismissed. With the setting off, Shift + Space works exactly like Space, as before. Thanks to
+  If you are in the middle of typing, what Return would commit is committed first, in every
+  input method: in 倉頡 and 速成 the first candidate of the page on screen, in 拼音 the whole
+  phrase exactly as shown, including any word you re-picked. Associated-phrase suggestions on
+  screen are dismissed. With the setting off, Shift + Space works exactly like Space, as before. Thanks to
   the reporter of [issue #135](https://github.com/teddychan/yahoo-keykey-2/issues/135).
+
+- **Fixed: Shift + a letter (臨時英數) commits the character you can see.** In 倉頡 and 速成, with
+  the candidate list paged to page 2 or later, Shift + a letter committed the first candidate of
+  page 1 — a character no longer on screen — before typing the letter. Under the 速成 code `竹戈`,
+  for example, paging to 符 籌 凡 鬼 … and pressing Shift + A typed 的a. It now commits the first
+  candidate of the page you are looking at, as Return does, so the same keys type 符a. On page 1
+  nothing changes, and 拼音 was never affected.
 
 ## 2.13.4
 
