@@ -2,6 +2,43 @@
 
 A plain-language list of changes in each version, newest first.
 
+## 2.15.0
+
+- **New: 注音 (ㄅ半) input method.** The classic phonetic method is back, and it works the way it
+  always did — one syllable, one character. Type the 注音 symbols, finish the syllable with a tone
+  (**Space** is the first tone, as on any 注音 keyboard), and the candidate window opens; `1–9`
+  picks, Space and the arrow keys page. Start the next character's first symbol and the one on
+  screen is committed for you, so a sentence runs on without pressing Enter between characters.
+  聯想字詞 follows each commit exactly as it does in 倉頡 and 速成.
+
+  Add it in **System Settings ▸ Keyboard**: click **Edit…** beside **Input Sources** — the `+` is
+  inside that sheet, not on the settings page — then **+ ▸ Chinese, Traditional ▸ 注音** (log out
+  and back in first, as with any newly added input method).
+
+- **New: 注音鍵盤 — 標準（大千）or 倚天.** 大千 is the default: the layout printed on Taiwanese
+  keyboards, and the one the original Yahoo! KeyKey shipped. Switch it in **設定… ▸ 輸入方式**, or
+  straight from the input menu while 注音 is active; it applies to the next keystroke.
+
+- **注音 candidates come from the original Yahoo! KeyKey ㄅ半 table**, in that table's own order,
+  so the everyday character for a reading leads it (ㄍㄨㄛˊ → 國, ㄉㄜ˙ → 的) with no dictionary
+  re-ranking on top — the same arrangement 三代倉頡 has. What you pick is then learned for that
+  reading alone, exactly as 倉頡 learns for one code: 注音, 倉頡 and 速成 each keep their own
+  history, and all of them follow **依選字習慣調整候選字順序**.
+
+- **Two keys work differently in 注音, because 注音 needs them.** On 大千 the symbols ㄝ ㄡ ㄤ ㄥ ㄦ
+  sit on `,` `.` `;` `/` `-`, so those keys type 注音 rather than punctuation — ，and 。 are on
+  **Shift + `,`** and **Shift + `.`** instead, where the original Yahoo! KeyKey put them. And
+  because the number row types 注音 too, 聯想字詞 is always picked with **Shift + 1–9** in this
+  mode, whatever **聯想選字鍵** is set to, leaving a bare number free to type ㄅ ㄉ ㄓ ㄚ ㄞ ㄢ or a
+  tone. Nothing changes for 倉頡, 速成 or 拼音.
+
+- **Shift + Space (全形空白) works in 注音 too.** With **Shift + 空白鍵輸入全形空白** on, it
+  commits what Return would and then types 　, as in the other input methods; with it off,
+  Shift + Space works exactly like Space — including as the first tone.
+
+- **Uninstall's checklist no longer names individual input methods.** It said "倉頡 and 速成",
+  which was already missing 拼音; it now points at Yahoo! KeyKey 2's input methods as a whole.
+
 ## 2.14.1
 
 - **Added: Shift + Space can type a full-width space (　).** A new setting in **設定… ▸ 一般 ▸

@@ -60,7 +60,7 @@ Notes on the shape:
 - **Contents lists H2s only.** No nested H3s — it stays short and stays accurate.
   `Screenshots` is listed even though it appears above Contents.
 - **`<USAGE HEADING>`** is the one app-specific slot. Name it for the app
-  (`Keyboard shortcuts`, `Cangjie generation (倉頡版本)`, `Actions and snippets`,
+  (`Keyboard shortcuts`, `Input methods`, `Actions and snippets`,
   `Menu bar sections`). Everything app-specific goes here, not in new top-level H2s.
 - **Uninstall is `### Uninstall`** under Install — never its own H2.
 - `Requirements` states the real minimum macOS and, where it applies, the

@@ -259,4 +259,40 @@ final class KeyEventPolicyTests: XCTestCase {
         XCTAssertEqual(count, 3)
         XCTAssertEqual(reads, 1, "displaying a list reads its counts once and writes nothing")
     }
+
+    // MARK: effectiveAssociationTrigger (注音 types with the number row)
+
+    // In 注音 the digits ARE 注音 keys — ㄅ ㄉ ㄓ ㄚ ㄞ ㄢ and all four tones on 大千 — so a bare
+    // 1–9 must reach the engine rather than pick from the 聯想 suggestions a commit just put up.
+    // Shift+1–9 still picks, the same arrangement issue #52 offers everyone else.
+    func testZhuyinAlwaysNeedsShiftToPickAnAssociation() {
+        XCTAssertEqual(KeyEventPolicy.effectiveAssociationTrigger(configured: .number,
+                                                                  methodTypesWithNumberKeys: true),
+                       .shift)
+        XCTAssertEqual(KeyEventPolicy.effectiveAssociationTrigger(configured: .shift,
+                                                                  methodTypesWithNumberKeys: true),
+                       .shift)
+    }
+
+    // Every other method leaves the user's setting alone.
+    func testOtherMethodsKeepTheConfiguredTrigger() {
+        XCTAssertEqual(KeyEventPolicy.effectiveAssociationTrigger(configured: .number,
+                                                                  methodTypesWithNumberKeys: false),
+                       .number)
+        XCTAssertEqual(KeyEventPolicy.effectiveAssociationTrigger(configured: .shift,
+                                                                  methodTypesWithNumberKeys: false),
+                       .shift)
+    }
+
+    // End to end through the digit lookup the controller actually calls: in 注音 a bare `1` is
+    // not a pick (it types ㄅ), while Shift+`1` is.
+    func testABareDigitIsNotAPickInZhuyinButShiftDigitIs() {
+        let trigger = KeyEventPolicy.effectiveAssociationTrigger(configured: .number,
+                                                                 methodTypesWithNumberKeys: true)
+        XCTAssertNil(KeyEventPolicy.associationSelectionDigit(trigger: trigger, characters: "1",
+                                                             modifierFlags: [], keyCode: 18))
+        XCTAssertEqual(KeyEventPolicy.associationSelectionDigit(trigger: trigger, characters: "!",
+                                                               modifierFlags: [.shift], keyCode: 18),
+                       1)
+    }
 }

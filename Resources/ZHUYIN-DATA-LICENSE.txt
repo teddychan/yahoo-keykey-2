@@ -1,0 +1,79 @@
+注音 (ㄅ半) data table — source and license
+===========================================
+
+File:    Resources/zhuyin-yahoo.txt
+Content: Zhuyin reading -> single Han character mapping, used by the 注音 (ㄅ半)
+         input method.
+Format:  "<reading>\t<char>" per line. The line order is preserved verbatim — it
+         is the original table's candidate order, which 注音 surfaces directly
+         (there is no language-model ranking in that mode), exactly as the 三代
+         tables below do for 倉頡 and 速成.
+
+Conversion
+----------
+The upstream file is a `.cin` table whose rows are keyed by the KEY SEQUENCE a
+大千 typist presses (`su3`), not by the reading it spells. Keying the bundled
+table that way would hard-wire one keyboard layout into the data, so every row is
+translated through the table's own %keyname map into the reading it stands for
+(`ㄋㄧˇ`). Tones follow the source's own convention, which McBopomofo's language
+model shares: the first tone is unmarked, every other tone is a suffix.
+
+The transformation is reproducible with tools/build-zhuyin-table.py, which reads
+an unmodified bpmf-ext.cin and reports what it skips. From 97,925 upstream rows
+it wrote 97,894: the 31 dropped are 11 rows under a bare tone key (which spells
+no syllable) and 20 whose key sequence is not one syllable at all — two initials,
+or a leftover from a mistyped code such as `rufu` for 棋 (ㄑㄧˊ) — none of them
+reachable by typing. No de-duplication was needed; the table has no repeated
+(reading, character) pair.
+
+Rows naming a supplementary-plane or private-use character are NOT dropped here.
+They are a large part of a CNS 11643 table and would render as tofu, so they are
+filtered at load time by the same renderable-character rule the 倉頡 tables use
+(ZhuyinTable / CangjieTable.isRenderableCJK), leaving the bundled file a faithful
+conversion of its source.
+
+Source repository
+-----------------
+bency/YahooKeyKey  (the open-sourced Yahoo! KeyKey, New BSD)
+  https://github.com/bency/YahooKeyKey
+  File: YahooKeyKey-Source-1.1.2528/DataTables/bpmf-ext.cin
+
+The same release, and the same "large character set" lineage, as the 三代 tables
+already bundled here (cangjie-yahoo.txt / simplex-yahoo.txt) — see
+Resources/CANGJIE-DATA-LICENSE.txt for the shared provenance and the New BSD
+notice, which is reproduced in full in docs/THIRD-PARTY-NOTICES.md.
+
+Upstream data origin / attribution
+-----------------------------------
+bpmf-ext.cin's own header records it:
+
+    # Revise by opendesktop.org.tw's phone.cin to include CNS11643 and Unicode
+    # compatible characters.
+    # Also adjust some punctuations.
+    # License：Public Domain
+
+So the extended table carries an explicit Public Domain declaration of its own,
+on top of the project's New BSD release. The base table it extends
+(DataTables/bpmf.cin in the same release) is byte-for-byte the bpmf.cin shipped
+in openvanilla/openvanilla's DataTables — the two projects share this table.
+
+Punctuation
+-----------
+The 注音 punctuation placement in Packages/KeyKeyEngine/Sources/KeyKeyEngine/
+ZhuyinPunctuation.swift is transcribed from the `_punctuation_Standard_*` and
+`_punctuation_ETen_*` rows of DataTables/bpmf-punctuations.cin in the same
+release — that is where `<` typing ，and `>` typing 。 on 大千 comes from. Only
+those layout-specific rows are used; no punctuation data file is bundled.
+
+Keyboard layouts
+----------------
+大千 is transcribed from the %keyname section of bpmf-ext.cin itself, so the key
+map and the character table come from one file. 倚天 is transcribed from
+McBopomofo's Source/Engine/Mandarin/Mandarin.cpp (`CreateETenLayout()`), MIT —
+the same project this app's language model comes from.
+
+License
+-------
+Public Domain, as declared in the upstream table header quoted above, within a
+New BSD (BSD-3-Clause) source release. Only the data table is reused; Yahoo!
+KeyKey 2 uses no source code from the original Yahoo! KeyKey.

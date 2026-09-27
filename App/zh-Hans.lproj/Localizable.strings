@@ -9,7 +9,7 @@
 "keykey.general.outputSimplified" = "输出简体字";
 "keykey.general.fullWidthPunctuation" = "全角标点";
 "keykey.general.shiftSpaceFullWidthSpace" = "Shift + 空格键输入全角空格";
-"keykey.general.shiftSpaceFullWidthSpaceHint" = "适用于仓颉、速成与拼音：按 Shift + 空格键会输入一个全角空格（　），宽度与一个汉字相同，而不是当作普通的空格键。正在组字时，会先确认当前的字。";
+"keykey.general.shiftSpaceFullWidthSpaceHint" = "适用于仓颉、速成、注音与拼音：按 Shift + 空格键会输入一个全角空格（　），宽度与一个汉字相同，而不是当作普通的空格键。正在组字时，会先确认当前的字。";
 "keykey.general.associatedPhrases" = "联想词（聯想）";
 "keykey.general.associationContinuationOnly" = "联想只显示后续字";
 "keykey.general.associationContinuationOnlyHint" = "显示「系／心／于」而非「关系」，与原版 Yahoo! KeyKey 一致。实际输入的字不变。";
@@ -26,18 +26,23 @@
 "keykey.general.cangjieV5" = "五代仓颉";
 "keykey.general.cangjieV3" = "三代仓颉（兼容 Yahoo! KeyKey）";
 "keykey.general.cangjieVersionHint" = "「三代仓颉」使用 Yahoo! KeyKey 原版的拆码与候选字顺序（同时应用于仓颉与速成），立即生效。";
+"keykey.general.zhuyinLayout" = "注音键盘";
+"keykey.general.zhuyinLayoutDachen" = "标准（大千）";
+"keykey.general.zhuyinLayoutEten" = "倚天";
+"keykey.general.zhuyinLayoutHint" = "注音（ㄅ半）符号在键盘上的位置，立即生效。「标准（大千）」就是台湾键盘上印的那一套，也是原版 Yahoo! KeyKey 的默认设置。空格键是一声；候选字出现后按 1–9 选字。在注音中，联想字词固定以 Shift + 数字选取（不受「联想选字键」影响），因为数字键要用来打注音。";
 "keykey.general.strokeConfirmation" = "以空格键确认字根";
 "keykey.general.strokeConfirmationHint" = "在速成、以及使用通配符（*）的仓颉中，字根还没输完就会出现候选字，此时空格键会直接翻到下一页，而不是确认你输入的字根。开启后，第一次按空格键只确认字根并停留在第 1 页；再按一次空格键才翻页，或直接按 1–9 选字。普通仓颉不受影响。";
 "keykey.general.adaptiveCandidateOrder" = "依选字习惯调整候选字顺序";
-"keykey.general.adaptiveCandidateOrderHint" = "适用于仓颉、速成与联想词。每个候选字列表各自独立学习：在同一个列表内，你确认次数较多的候选字排在前面；确认次数相同时，保持原本的顺序。含万用字元的仓颉码与完整的码分开学习；联想词学到的内容由仓颉与速成共用。拼音的候选字顺序与以往完全相同，没有改变。关闭后会显示原本的顺序（五代与拼音使用内建排序，三代使用原本的 Yahoo! KeyKey 顺序），同时全部暂停计次，但不会清除已经学到的内容。";
+"keykey.general.adaptiveCandidateOrderHint" = "适用于仓颉、速成、注音与联想词。每个候选字列表各自独立学习：在同一个列表内，你确认次数较多的候选字排在前面；确认次数相同时，保持原本的顺序。含万用字元的仓颉码与完整的码分开学习；联想词学到的内容由仓颉、速成与注音共用。拼音的候选字顺序与以往完全相同，没有改变。关闭后会显示原本的顺序（五代与拼音使用内建排序，三代与注音使用原本的 Yahoo! KeyKey 顺序），同时全部暂停计次，但不会清除已经学到的内容。";
 "keykey.general.language" = "语言";
 
-/* What's New pane (2.14.1) */
-"app.whatsNew.summary" = "现在可以在仓颉、速成与拼音中，用 Shift + 空格键输入全角空格（　），请到设置中开启。";
-"app.whatsNew.added1" = "「通用 ▸ 输入」新增「Shift + 空格键输入全角空格」，默认关闭。开启后，在仓颉、速成与拼音中按 Shift + 空格键，就会输入一个全角空格（　），宽度与一个汉字相同，不必切换输入法。正在组字时，会先确认当前的字。关闭时，Shift + 空格键和以往一样，与空格键完全相同。";
-"app.whatsNew.fixed1" = "在仓颉与速成中，候选字列表翻到第 2 页或之后时按 Shift + 英文字母（临时英数），现在会先确认你眼前这一页的第一个字，与按 Return 键相同。过去确认的是第 1 页的第一个字，而那个字已经不在画面上。";
+/* What's New pane (2.15.0) */
+"app.whatsNew.summary" = "注音（ㄅ半）回来了，而且就是你熟悉的那一套：一个音一个字。打注音符号，用声调结束一个字（空格键是一声），候选字就会出现，按 1–9 选字。接着直接打下一个字的第一个符号，屏幕上的字就会自动送出，不用按 Enter。键盘可选「标准（大千）」或「倚天」。仓颉、速成与拼音完全不受影响。";
+"app.whatsNew.added1" = "新增注音（ㄅ半）输入法。打注音符号，再用声调结束一个字——空格键就是一声，和任何注音键盘一样——候选字随即出现：按 1–9 选字，空格键或方向键翻页。直接打下一个字的第一个符号时，屏幕上的字会自动送出，所以一句话可以一直打下去，中间不用按 Enter。每送出一个字，同样会跟着出现联想字词，与仓颉、速成相同。候选字取自原版 Yahoo! KeyKey 的 ㄅ半 字表，并保持该字表原本的顺序（ㄍㄨㄛˊ → 國、ㄉㄜ˙ → 的），之后再依你的选字习惯，针对每个读音各自学习。请到「系统设置 ▸ 键盘」，点按「输入源」旁的「编辑…」（「+」在这个窗口里，不在设置页上），再点按「+ ▸ 繁体中文 ▸ 注音」添加（和添加任何输入法一样，添加后请注销再登录）。";
+"app.whatsNew.added2" = "注音键盘可选「标准（大千）」或「倚天」。默认是大千，也就是台湾键盘上印的那一套，以及原版 Yahoo! KeyKey 的默认设置。可以在「设置… ▸ 输入方式」切换，或在使用注音时直接从输入菜单切换，下一个按键就生效。";
+"app.whatsNew.changed1" = "在注音中，有两个按键和其他输入法不一样，因为注音需要它们。大千键盘上的 ㄝ ㄡ ㄤ ㄥ ㄦ 就位在 , . ; / - 这几个键上，所以在注音中这些键打的是注音符号，而不是标点；「，」和「。」改用 Shift + , 和 Shift + . ——这也是原版 Yahoo! KeyKey 原本的做法。另外，因为数字键也要用来打注音，在注音中联想字词固定以 Shift + 数字选取，不论「联想选字键」设置为何，这样一来，直接按数字才能打出 ㄅ ㄉ ㄓ ㄚ ㄞ ㄢ 和声调。仓颉、速成与拼音都没有改变。";
 
 /* Uninstall pane checklist */
-"keykey.uninstall.item.inputSources" = "从输入源中停用仓颉与速成";
+"keykey.uninstall.item.inputSources" = "从输入源中停用 Yahoo! KeyKey 2 的输入方式";
 "keykey.uninstall.item.learningAndSettings" = "删除用户学习数据与偏好设置";
 "keykey.uninstall.item.trash" = "将 Yahoo! KeyKey 2 移到废纸篓";

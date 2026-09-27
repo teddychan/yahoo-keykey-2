@@ -9,7 +9,9 @@ you are on and which mode you were typing in.
 3. [A character's code is not what I expect](#3-a-characters-code-is-not-what-i-expect)
 4. [Space pages instead of accepting my code](#4-space-pages-instead-of-accepting-my-code)
 5. [Typing a number inserts a word instead](#5-typing-a-number-inserts-a-word-instead)
-6. [Already fixed in earlier versions](#6-already-fixed-in-earlier-versions)
+6. [In 注音, the comma and period keys type ㄝ and ㄡ](#6-in-注音-the-comma-and-period-keys-type-ㄝ-and-ㄡ)
+7. [In 注音, my tone key picks a candidate](#7-in-注音-my-tone-key-picks-a-candidate)
+8. [Already fixed in earlier versions](#8-already-fixed-in-earlier-versions)
 
 Also: [documentation gaps](#documentation-gaps) — things missing from these docs rather than
 problems with the app.
@@ -18,8 +20,9 @@ problems with the app.
 
 macOS only looks for new input methods when you log in.
 
-**Fix:** log out and back in. Then add it under **System Settings ▸ Keyboard ▸ Input Sources ▸
-+ ▸ Traditional Chinese** and pick **倉頡** and/or **速成**. Until it is on that list, **⌃Space**
+**Fix:** log out and back in. Then add it in **System Settings ▸ Keyboard**: click **Edit…**
+beside **Input Sources** — the `+` is inside that sheet, not on the settings page itself — then
+**+ ▸ Chinese, Traditional**, and pick **倉頡**, **速成**, **注音** and/or **拼音**. Until it is on that list, **⌃Space**
 has nothing to switch to.
 
 ## 2. 倉頡 is greyed out and will not turn on
@@ -67,7 +70,29 @@ After you commit a character, Yahoo! KeyKey 2 suggests words that commonly follo
 then types the digit and clears the suggestions, so numbers flow normally right after a
 character.
 
-## 6. Already fixed in earlier versions
+## 6. In 注音, the comma and period keys type ㄝ and ㄡ
+
+They are 注音 keys. On the **標準（大千）** keyboard the symbols ㄝ ㄡ ㄤ ㄥ ㄦ sit on `,` `.` `;`
+`/` `-`, so in 注音 those keys have to type 注音 — otherwise no character whose reading starts
+with one of them (兒, 偶, 昂…) could be typed at all.
+
+**Fix:** use the shifted keys, where the original Yahoo! KeyKey put them: **Shift + `,`** types
+，and **Shift + `.`** types 。 In 大千, `'` types 、 and **Shift + `'`** types ；. 「」『』？！：
+are on their usual keys, which 注音 does not use. Nothing changes in 倉頡, 速成 or 拼音.
+
+## 7. In 注音, my tone key picks a candidate
+
+Once a tone has finished the syllable, the candidate window is open — and while it is open,
+`1–9` picks a candidate, which is what those keys have always done in this app and in ㄅ半
+itself. On 大千 the tone keys are `3` `4` `6` `7`, so a second tone press lands on a row instead
+of correcting the tone.
+
+**Fix:** press **Backspace** once. That removes the tone and leaves the symbols you typed, so you
+can enter the right tone. (Before any tone is typed there is no candidate window, so the number
+row types 注音 normally.) For the same reason, 聯想字詞 is picked with **Shift + 1–9** in 注音
+whatever **聯想選字鍵** is set to, leaving a bare number free to type ㄅ ㄉ ㄓ ㄚ ㄞ ㄢ.
+
+## 8. Already fixed in earlier versions
 
 Update if you are on an older release.
 

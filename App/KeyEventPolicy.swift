@@ -83,6 +83,22 @@ enum KeyEventPolicy {
         }
     }
 
+    /// The association trigger actually in force for the active input method.
+    ///
+    /// 注音 types with the number row — on 大千 the digits are ㄅ ㄉ ㄓ ㄚ ㄞ ㄢ and all four tone
+    /// keys — so a bare 1–9 there is a keystroke the typist means as 注音, not as a pick from the
+    /// 聯想 suggestions that a commit just put on screen. Without this, every character whose
+    /// reading starts with one of those symbols would select a suggestion instead: 我們 could not
+    /// be followed by 不, because `1` would take a suggestion. Shift+1–9 still picks, which is the
+    /// same arrangement issue #52 added for everyone who types numbers mid-sentence.
+    ///
+    /// `configured` is returned untouched for every other method, so the user's setting is what
+    /// governs 倉頡, 速成 and 拼音.
+    static func effectiveAssociationTrigger(configured: AssociationTrigger,
+                                            methodTypesWithNumberKeys: Bool) -> AssociationTrigger {
+        methodTypesWithNumberKeys ? .shift : configured
+    }
+
     /// The index into the FULL list that selection digit `digit` picks on `page`, or nil when that
     /// row falls past the end of the list. A nil is not a key the caller should pass on: the last
     /// page is rarely full, and a digit pressed on an empty row is swallowed so no stray number

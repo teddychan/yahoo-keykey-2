@@ -122,6 +122,43 @@ final class CandidateUsageStoreTests: XCTestCase {
         XCTAssertEqual(s.count(of: "關係", in: .association(trigger: "關")), 2)
     }
 
+    // MARK: - 注音 lists
+
+    func testZhuyinHistoriesAreIsolatedByReading() {
+        let s = store()
+        s.record("世", in: .zhuyin(reading: "ㄕˋ"))
+        XCTAssertEqual(s.count(of: "世", in: .zhuyin(reading: "ㄕˋ")), 1)
+        // Tone is part of the reading, so ㄕ is a different list — and so is another reading
+        // entirely.
+        XCTAssertEqual(s.count(of: "世", in: .zhuyin(reading: "ㄕ")), 0)
+        XCTAssertEqual(s.count(of: "世", in: .zhuyin(reading: "ㄋㄧˇ")), 0)
+    }
+
+    func testZhuyinAndCangjieListsDoNotMix() {
+        let s = store()
+        s.record("世", in: .zhuyin(reading: "ㄕˋ"))
+        XCTAssertEqual(s.count(of: "世", in: .cangjie(tableVersion: "5", code: "ptm")), 0)
+        XCTAssertEqual(s.count(of: "世", in: .simplex(tableVersion: "5", code: "pm")), 0)
+    }
+
+    // A 注音 list must survive a reload like every other one — the store writes it under its own
+    // scope with the reading in the code field, and CandidateListKey.make rebuilds it from that.
+    func testZhuyinCountsSurviveAReload() {
+        let s = store()
+        s.record("世", in: .zhuyin(reading: "ㄕˋ"))
+        s.record("世", in: .zhuyin(reading: "ㄕˋ"))
+        s.record("你", in: .zhuyin(reading: "ㄋㄧˇ"))
+        s.flush()
+
+        let r = CandidateUsageStore(fileURL: fileURL)
+        XCTAssertEqual(r.count(of: "世", in: .zhuyin(reading: "ㄕˋ")), 2)
+        XCTAssertEqual(r.count(of: "你", in: .zhuyin(reading: "ㄋㄧˇ")), 1)
+        XCTAssertEqual(r.count(of: "世", in: .zhuyin(reading: "ㄕ")), 0)
+        XCTAssertEqual(r.count(of: "世", in: .cangjie(tableVersion: "5", code: "ptm")), 0)
+        r.record("世", in: .zhuyin(reading: "ㄕˋ"))
+        XCTAssertEqual(r.count(of: "世", in: .zhuyin(reading: "ㄕˋ")), 3, "a reloaded count keeps incrementing")
+    }
+
     // MARK: - Persistence (spec: reload retains counts and list identities)
 
     func testReloadRetainsCountsAndListIdentities() {

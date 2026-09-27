@@ -36,6 +36,14 @@ extension CangjieEngine: InputEngine {}
 // SimplexEngine mirrors the CangjieEngine surface exactly (direct digit-select then commit()).
 extension SimplexEngine: InputEngine {}
 
+// ZhuyinEngine (注音/ㄅ半) is a single-character engine like the two above — one syllable, one
+// character, digit-select then commit() — so it needs nothing beyond this surface. The two rules
+// that are its own (Space is the first-tone key; a 注音 key against a finished syllable starts the
+// next character) are methods the controller reaches through a cast, exactly as it does for
+// SimplexEngine.keyStartsNewComposition, because both must commit into the client and only the
+// controller can do that.
+extension ZhuyinEngine: InputEngine {}
+
 // Richer surface for phrase-composition engines (Pinyin): an editable multi-node buffer
 // with a node cursor. The IMK controller detects this protocol to route cursor movement
 // and per-node candidate selection. Cangjie/Simplex do NOT conform (single-char engines).

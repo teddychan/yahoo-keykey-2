@@ -31,16 +31,58 @@ final class InputEngineConformanceTests: XCTestCase {
         return PinyinEngine(syllableTable: table, index: index)
     }
 
+    // ㄕˋ is 是/事/世 — two candidates and a tone, which is all 注音 needs to be driven.
+    private func makeZhuyin() -> ZhuyinEngine {
+        ZhuyinEngine(table: ZhuyinTable(text: """
+        ㄕˋ\t是
+        ㄕˋ\t事
+        ㄋㄧˇ\t你
+        """), layout: .dachen)
+    }
+
     func testConcreteEnginesConformToInputEngine() {
         XCTAssertTrue((makeCangjie() as Any) is InputEngine)
         XCTAssertTrue((SimplexEngine(table: SimplexTable(text: "a\t日\n"), tableVersion: "5") as Any) is InputEngine)
         XCTAssertTrue((makePinyin() as Any) is InputEngine)
+        XCTAssertTrue((makeZhuyin() as Any) is InputEngine)
     }
 
     func testOnlyPinyinIsPhraseComposing() {
         XCTAssertTrue((makePinyin() as Any) is PhraseComposingEngine)
         XCTAssertFalse((makeCangjie() as Any) is PhraseComposingEngine)
         XCTAssertFalse((SimplexEngine(table: SimplexTable(text: "a\t日\n"), tableVersion: "5") as Any) is PhraseComposingEngine)
+        // 注音 is a single-character method like 倉頡/速成 — one syllable, one character — so it
+        // must NOT be routed through the cursor/node branch 拼音 uses.
+        XCTAssertFalse((makeZhuyin() as Any) is PhraseComposingEngine)
+    }
+
+    // The protocol surface the controller drives 注音 through: keys in, candidates out, pick,
+    // commit, reset. The two rules that are 注音's own (Space as the first tone, and a 注音 key
+    // ending a finished syllable) are NOT on the protocol — the controller reaches them by cast,
+    // exactly as it does for 速成 — so this covers what handle() calls uniformly.
+    func testDrivingZhuyinThroughProtocol() {
+        let engine: InputEngine = makeZhuyin()
+        XCTAssertTrue(engine.handleKey("g"))          // ㄕ
+        XCTAssertEqual(engine.candidates, [], "no tone yet, so nothing to pick")
+        XCTAssertTrue(engine.handleKey("4"))          // ˋ
+        XCTAssertEqual(engine.composingText, "ㄕˋ")
+        XCTAssertEqual(engine.candidates, ["是", "事"])
+        engine.selectCandidate(1)
+        XCTAssertEqual(engine.pendingUsage,
+                       [CandidateUsage(list: .zhuyin(reading: "ㄕˋ"), candidate: "事")])
+        XCTAssertEqual(engine.commit(), "事")
+        XCTAssertEqual(engine.composingText, "")
+        XCTAssertEqual(engine.pendingUsage, [])
+    }
+
+    func testZhuyinProtocolBackspaceAndOutOfRangeSelectAreSafe() {
+        let engine: InputEngine = makeZhuyin()
+        _ = engine.handleKey("g")
+        _ = engine.handleKey("4")
+        engine.selectCandidate(999)                   // out of range: no-op, no crash
+        engine.backspace()                            // removes the tone
+        XCTAssertEqual(engine.composingText, "ㄕ")
+        XCTAssertEqual(engine.candidates, [])
     }
 
     func testDrivingCangjieThroughProtocol() {

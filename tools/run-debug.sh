@@ -53,8 +53,9 @@ killall TextInputSwitcher 2>/dev/null || true
 cat <<EOF
 
 Debug IME installed: $DST
-Add it in System Settings -> Keyboard -> Input Sources -> + -> Chinese, Traditional ->
-"倉頡 (Debug)" / "速成 (Debug)" / "拼音 (Debug)" — the suffix is how you tell this build's modes
-apart from the installed release's, which are named plainly. If they don't appear at all, log
+Add it in System Settings -> Keyboard -> "Edit..." beside Input Sources (the + is inside that
+sheet, not on the settings page) -> + -> Chinese, Traditional ->
+"倉頡 (Debug)" / "速成 (Debug)" / "注音 (Debug)" / "拼音 (Debug)" — the suffix is how you tell
+this build's modes apart from the installed release's, which are named plainly. If they don't appear at all, log
 out/in once (this registers separately from the release IME).
 EOF

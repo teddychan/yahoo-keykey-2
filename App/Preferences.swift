@@ -1,4 +1,5 @@
 import Cocoa
+import KeyKeyEngine
 
 // Which Cangjie decomposition table (and, for the Yahoo table, candidate order) the
 // 倉頡/速成 engines use. 五代 keeps the standard McBopomofo LM ranking; 三代 uses the
@@ -16,6 +17,13 @@ enum AssociationTrigger: String {
     case shift  = "shift"    // Shift+1–9 picks; plain 1–9 types the digit
 }
 
+// Which 注音 keyboard the ㄅ半 engine reads keys through — 大千 (the layout printed on Taiwanese
+// keyboards, and the original Yahoo! KeyKey's default) or 倚天. Unlike CangjieVersion and
+// AssociationTrigger above, this is NOT a second app-level enum over the same raw values: the
+// engine already owns ZhuyinKeyboardLayout.Identifier, whose cases ARE the persisted strings, so
+// a twin here could only drift from the layouts that actually exist.
+typealias ZhuyinLayout = ZhuyinKeyboardLayout.Identifier
+
 // Typed accessors for the user-facing settings, persisted in the IME process's
 // standard UserDefaults. Read live (no caching) so changes apply without restarting.
 enum Preferences {
@@ -30,6 +38,7 @@ enum Preferences {
         static let associationSelectionTrigger = "associationSelectionTrigger"
         static let strokeConfirmationEnabled = "strokeConfirmationEnabled"
         static let adaptiveCandidateOrderEnabled = "adaptiveCandidateOrderEnabled"
+        static let zhuyinLayout = "zhuyinLayout"
         static let shiftSpaceFullWidthSpaceEnabled = "shiftSpaceFullWidthSpaceEnabled"
     }
 
@@ -50,6 +59,7 @@ enum Preferences {
             Key.associationSelectionTrigger: AssociationTrigger.number.rawValue,
             Key.strokeConfirmationEnabled: false,
             Key.adaptiveCandidateOrderEnabled: true,
+            Key.zhuyinLayout: ZhuyinLayout.dachen.rawValue,
             Key.shiftSpaceFullWidthSpaceEnabled: false,
         ])
     }
@@ -115,7 +125,14 @@ enum Preferences {
         set { UserDefaults.standard.set(newValue, forKey: Key.strokeConfirmationEnabled) }
     }
 
-    // When true (the default), each candidate the user commits in 倉頡, 速成 or 聯想 is counted
+    // The 注音 keyboard layout; unknown/absent falls back to 大千 (the registered default), which
+    // is both the layout on a Taiwanese keyboard and the one the original Yahoo! KeyKey shipped.
+    static var zhuyinLayout: ZhuyinLayout {
+        get { ZhuyinLayout(rawValue: UserDefaults.standard.string(forKey: Key.zhuyinLayout) ?? "") ?? .dachen }
+        set { UserDefaults.standard.set(newValue.rawValue, forKey: Key.zhuyinLayout) }
+    }
+
+    // When true (the default), each candidate the user commits in 倉頡, 速成, 注音 or 聯想 is counted
     // within its OWN candidate list, and the list is ordered by that count — most-committed
     // first, built-in order deciding equal counts. 拼音 is out of that scheme and keeps ranking by
     // the per-character count it always used, but the SAME flag gates it, so the toggle still

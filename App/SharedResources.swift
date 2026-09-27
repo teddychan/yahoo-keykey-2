@@ -37,6 +37,12 @@ final class SharedResources {
     // Pinyin mode (ref-counted). Built lazily from data.txt on the first acquire.
     let pinyinIndexCache: RefCountedResource<TonelessLanguageModelIndex>
 
+    // The 注音 (ㄅ半) character table, behind its OWN lock: it shares nothing with the 倉頡 set
+    // below and must not be serialized behind a 倉頡版本 reload. Built on first use (see
+    // `zhuyinTable`), which is why it is a var rather than a `let` set in init.
+    private let zhuyinLock = NSLock()
+    private var cachedZhuyinTable: ZhuyinTable?
+
     // The selected 倉頡版本, the table it loads, the sort rank that goes with it, and the two
     // indexes derived from them are ONE piece of state that has to change together, so a single
     // lock guards the whole set and loadCangjieTables() publishes it in one step. Previously the
@@ -219,6 +225,34 @@ final class SharedResources {
         return built
     }
 
+    // The 注音 (ㄅ半) table for the 注音 input method, built on FIRST USE and kept.
+    //
+    // Not loaded at launch: it is ~1.2 MB of text that only a 注音 typist ever reads, and a
+    // 倉頡/速成/拼音 user should not pay to parse it. Not ref-counted like the Pinyin index
+    // either: what it holds after the renderable filter is ~35k single characters — small enough
+    // that dropping it on every mode switch would cost more parses than it saves memory, and far
+    // from the ~55–80 MB that made the Pinyin index worth releasing.
+    //
+    // The lock is HELD across the parse, unlike loadCangjieTables() which reads its file outside
+    // one. That is deliberate at this call site: the alternative lets two controllers entering 注音
+    // at once each build a table and one of them throw its copy away, and the wait it can cause is
+    // the other controller's first composition only.
+    var zhuyinTable: ZhuyinTable {
+        zhuyinLock.lock()
+        defer { zhuyinLock.unlock() }
+        if let cachedZhuyinTable { return cachedZhuyinTable }
+        let built: ZhuyinTable
+        if let url = Bundle.main.url(forResource: "zhuyin-yahoo", withExtension: "txt"),
+           let loaded = try? ZhuyinTable(contentsOf: url) {
+            built = loaded
+        } else {
+            NSLog("YahooKeyKey: zhuyin-yahoo.txt missing; 注音 input unavailable")
+            built = ZhuyinTable(text: "")
+        }
+        cachedZhuyinTable = built
+        return built
+    }
+
     // The currently-resident Pinyin index (non-nil while a controller holds Pinyin), or an empty
     // index when none is resident. The Pinyin module's makeEngine reads this; the controller
     // manages acquire/release so the index is built only while Pinyin is actually in use.
@@ -246,4 +280,8 @@ final class SharedResources {
 extension Notification.Name {
     // Posted after SharedResources rebuilds its Cangjie/Simplex tables for a new version.
     static let cangjieVersionChanged = Notification.Name("YahooKeyKeyCangjieVersionChanged")
+    // Posted after the 注音鍵盤 setting changes, from Settings or the input menu. Nothing is
+    // rebuilt in SharedResources for it — the ㄅ半 table is the same whichever keyboard types it,
+    // so only the live engines need swapping (see InputController.rebuildActiveEngine).
+    static let zhuyinLayoutChanged = Notification.Name("YahooKeyKeyZhuyinLayoutChanged")
 }

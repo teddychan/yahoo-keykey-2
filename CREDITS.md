@@ -21,6 +21,10 @@ KeyKey-style experience alive on modern macOS.
   (`tables/cangjie/cangjie5.txt`); the table declares itself freely
   redistributable without restriction. See `Resources/CANGJIE-DATA-LICENSE.txt`.
   https://github.com/definite/ibus-table-chinese
+- **注音 (ㄅ半) table** — from the open-sourced **Yahoo! KeyKey** release
+  (`DataTables/bpmf-ext.cin`), whose own header declares it Public Domain; the
+  same release the 三代 tables come from. See `Resources/ZHUYIN-DATA-LICENSE.txt`.
+  https://github.com/bency/YahooKeyKey
 - **OpenCC** — Traditional↔Simplified Chinese conversion data. Apache-2.0.
   https://github.com/BYVoid/OpenCC
 

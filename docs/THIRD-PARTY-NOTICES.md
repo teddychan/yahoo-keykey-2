@@ -11,6 +11,7 @@ license — all of them permit redistribution, including commercial use:
 | OpenCC conversion data | Apache-2.0 |
 | Cangjie-5 table | "Freely redistributable without restriction" (upstream table header; see `Resources/CANGJIE-DATA-LICENSE.txt`) |
 | Yahoo! KeyKey 三代 tables (倉頡第三代 / 速成) | New BSD (BSD-3-Clause) |
+| Yahoo! KeyKey 注音 (ㄅ半) table | Public Domain (upstream table header), within the same New BSD release |
 
 Yahoo! KeyKey 2 is an independent reimplementation and is not affiliated with, or
 endorsed by, Yahoo. See `CREDITS.md`.
@@ -103,6 +104,24 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 The third condition is why the summary at the top of this file states that
 Yahoo! KeyKey 2 is not affiliated with, or endorsed by, Yahoo.
+
+## Yahoo! KeyKey 注音 (ㄅ半) table
+The bundled `Resources/zhuyin-yahoo.txt` is converted from the same source release
+as the 三代 tables above (`YahooKeyKey-Source-1.1.2528/DataTables/bpmf-ext.cin`),
+so the New BSD notice reproduced above covers it as well. That table carries an
+explicit licence line of its own in its header — **"License：Public Domain"** —
+above a note recording that it revises opendesktop.org.tw's `phone.cin` to cover
+CNS 11643 and Unicode-compatible characters. Its base table, `bpmf.cin` in the
+same directory, is byte-for-byte the one in `openvanilla/openvanilla`'s
+DataTables; the two projects share it.
+
+Rows are keyed by the reading (`ㄋㄧˇ`) rather than by the keys a 大千 typist
+presses, which is the only change of substance; `Resources/ZHUYIN-DATA-LICENSE.txt`
+records the conversion, what it skips, and the generator that reproduces it.
+
+The 注音 punctuation placement (`<` → ，and `>` → 。 on 大千) is transcribed from
+`DataTables/bpmf-punctuations.cin` in that release, and the 倚天 key map from
+McBopomofo's `Mandarin.cpp` (MIT, credited above). Only data is reused.
 
 ## Project source code
 The original Yahoo! KeyKey 2 source code (Swift engine + macOS app) is released

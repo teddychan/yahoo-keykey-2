@@ -87,6 +87,21 @@ final class InputController: IMKInputController {
                 SimplexEngine(table: shared.simplexTable, characterRank: shared.cangjieRank,
                               tableVersion: Preferences.cangjieVersion.rawValue, usageCount: usageCount)
             },
+            // Written without a trailing closure, unlike its neighbours: the trailing closure
+            // would bind to methodMenuItems (the last member), not makeEngine.
+            InputMethodModule(
+                modeSuffix: "Zhuyin", displayName: "注音",
+                // The table is built on first use inside SharedResources, so merely registering
+                // the method costs nothing; the layout is read LIVE here, so the engine a mode
+                // switch builds always matches the current setting, and a layout change while
+                // 注音 is active rebuilds through .zhuyinLayoutChanged (see init).
+                makeEngine: {
+                    ZhuyinEngine(table: shared.zhuyinTable,
+                                 layout: ZhuyinKeyboardLayout.layout(for: Preferences.zhuyinLayout),
+                                 usageCount: usageCount)
+                },
+                methodMenuItems: InputController.zhuyinLayoutMenuItems
+            ),
             InputMethodModule(modeSuffix: "Pinyin", displayName: "拼音") {
                 // Cheap: reads the currently-acquired index (empty until a controller enters
                 // Pinyin, which acquires in setValue before this closure runs). Registration
@@ -103,10 +118,15 @@ final class InputController: IMKInputController {
         self.engine = modules[0].makeEngine()
         super.init(server: server, delegate: delegate, client: inputClient)
 
-        // Rebuild the live engine when the user changes 倉頡版本 in Settings, so the new
-        // table/order applies immediately without re-selecting the input method.
-        NotificationCenter.default.addObserver(self, selector: #selector(cangjieVersionChanged),
+        // Rebuild the live engine when the user changes 倉頡版本 or the 注音鍵盤 in Settings (or,
+        // for the keyboard, from the input menu), so the new table/order/layout applies
+        // immediately without re-selecting the input method. Both notifications do the same thing
+        // — swap the engine for a freshly-built one — because every module's makeEngine reads its
+        // settings live.
+        NotificationCenter.default.addObserver(self, selector: #selector(rebuildActiveEngine),
                                                name: .cangjieVersionChanged, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(rebuildActiveEngine),
+                                               name: .zhuyinLayoutChanged, object: nil)
     }
 
     deinit {
@@ -117,9 +137,10 @@ final class InputController: IMKInputController {
         }
     }
 
-    // Rebuild the active engine after a 倉頡版本 change. Mirrors the reset in
-    // setValue(_:forTag:client:): commit any in-progress composition, then swap engines.
-    @objc private func cangjieVersionChanged() {
+    // Rebuild the active engine after a setting the engine was built from changed (倉頡版本,
+    // 注音鍵盤). Mirrors the reset in setValue(_:forTag:client:): commit any in-progress
+    // composition, then swap engines.
+    @objc private func rebuildActiveEngine() {
         if let client = client() {
             _ = commitCurrent(to: client)
         } else {
@@ -179,7 +200,10 @@ final class InputController: IMKInputController {
         let methodItems = currentModule.methodMenuItems()
         if !methodItems.isEmpty {
             menu.addItem(.separator())
-            methodItems.forEach(menu.addItem)
+            for item in methodItems {
+                item.target = self
+                menu.addItem(item)
+            }
         }
 
         // 3. App menu grouping (§5A): About · Check for updates · Settings.
@@ -254,6 +278,35 @@ final class InputController: IMKInputController {
             }
         }
         return menu
+    }
+
+    // 注音鍵盤 (the method-specific zone of the input menu, shown only while 注音 is active). The
+    // items carry no target: `menu()` points every method item at this controller, because the
+    // macOS input menu routes a top-level selection back to the controller and ignores the item's
+    // own target — the same reason the App-menu items are re-pointed there.
+    private static func zhuyinLayoutMenuItems() -> [NSMenuItem] {
+        let active = Preferences.zhuyinLayout
+        return [
+            (title: "標準鍵盤（大千）", layout: ZhuyinLayout.dachen,
+             action: #selector(InputController.selectZhuyinLayoutDachen)),
+            (title: "倚天鍵盤", layout: ZhuyinLayout.eten,
+             action: #selector(InputController.selectZhuyinLayoutEten)),
+        ].map { entry in
+            let item = NSMenuItem(title: entry.title, action: entry.action, keyEquivalent: "")
+            item.state = active == entry.layout ? .on : .off
+            return item
+        }
+    }
+
+    @objc private func selectZhuyinLayoutDachen() { setZhuyinLayout(.dachen) }
+    @objc private func selectZhuyinLayoutEten() { setZhuyinLayout(.eten) }
+
+    // Persist the choice and rebuild every controller's engine, so the new keyboard applies to
+    // the very next keystroke — in this app and in every other one the IME is loaded into.
+    private func setZhuyinLayout(_ layout: ZhuyinLayout) {
+        guard Preferences.zhuyinLayout != layout else { return }
+        Preferences.zhuyinLayout = layout
+        NotificationCenter.default.post(name: .zhuyinLayoutChanged, object: nil)
     }
 
     @objc private func toggleAssociated() {
@@ -398,7 +451,9 @@ final class InputController: IMKInputController {
             // a bare digit is NOT a pick, so it falls through, dismisses, and the idle engine
             // lets the app type the number.
             let selectionDigit = KeyEventPolicy.associationSelectionDigit(
-                trigger: Preferences.associationSelectionTrigger,
+                trigger: KeyEventPolicy.effectiveAssociationTrigger(
+                    configured: Preferences.associationSelectionTrigger,
+                    methodTypesWithNumberKeys: engine is ZhuyinEngine),
                 characters: event.characters,
                 modifierFlags: event.modifierFlags,
                 keyCode: event.keyCode)
@@ -454,9 +509,16 @@ final class InputController: IMKInputController {
         // Full-width punctuation when idle: no active composition (and not in association mode,
         // already handled above). A mapped ASCII punctuation key inserts its full-width form.
         // Mid-composition keys are left to the engine below.
+        //
+        // 注音 comes first on the keys it uses: on 大千 the symbols ㄝ ㄡ ㄤ ㄥ ㄦ sit on
+        // `,` `.` `;` `/` `-`, so without this guard 全形標點 would eat them and no syllable
+        // could START with one — 兒, 偶, 昂 would be untypable. The marks those keys carry move
+        // to their shifted forms instead (ZhuyinPunctuation), which is where the original
+        // Yahoo! KeyKey put them.
         if Preferences.fullWidthPunctuationEnabled,
            engine.composingText.isEmpty, let ch = event.characters?.first,
-           let full = Punctuation.fullWidth(for: ch) {
+           !zhuyinClaimsKey(ch),
+           let full = zhuyinPunctuation(for: ch) ?? Punctuation.fullWidth(for: ch) {
             client.insertText(full, replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
             return true
         }
@@ -504,6 +566,17 @@ final class InputController: IMKInputController {
             // Anything else (e.g. punctuation) commits the buffer, then passes to the app.
             _ = commitCurrent(to: client)
             return false
+        }
+
+        // 注音 (ㄅ半): Space is the FIRST-TONE key, the one tone with no key of its own on a 注音
+        // keyboard. It applies only to an unfinished syllable — `applyFirstTone()` answers false
+        // for an empty buffer and for a syllable that already carries a tone — so Space keeps
+        // every other meaning it has: paging and committing once candidates are up (the branches
+        // below), and a literal space when nothing is being composed.
+        if event.keyCode == 49, let zhuyin = engine as? ZhuyinEngine, zhuyin.applyFirstTone() {
+            resetCompositionState()
+            refresh(client)
+            return true
         }
 
         // Cangjie/Simplex show candidates as soon as a code resolves, and their keys are a–z,
@@ -592,6 +665,18 @@ final class InputController: IMKInputController {
         // to a 3-key code no 速成 table contains, so the candidate window emptied and the
         // character could no longer be selected at all (issue #113). No 聯想 is offered here: the
         // user is mid-word, and the suggestions would cover the new composition's candidates.
+        // 注音: a finished syllable (one carrying a tone) is a whole character waiting to be
+        // picked, so the next 注音 key belongs to the NEXT character. Commit the one in progress —
+        // taking the first candidate of the page on screen, as Space would — and let the key below
+        // start a fresh syllable, the way the original ㄅ半 lets a typist run on without pressing
+        // Enter between characters. Same shape as the 速成 rule below it, and no 聯想 here either:
+        // the suggestions would cover the new composition's candidates.
+        if let zhuyin = engine as? ZhuyinEngine, zhuyin.keyStartsNewComposition(ch) {
+            if !engine.candidates.isEmpty {
+                engine.selectCandidate(candidatePage * InputController.pageSize)
+            }
+            _ = commitCurrent(to: client)
+        }
         if let simplex = engine as? SimplexEngine, simplex.keyStartsNewComposition(ch) {
             if !engine.candidates.isEmpty {
                 engine.selectCandidate(candidatePage * InputController.pageSize)
@@ -692,6 +777,19 @@ final class InputController: IMKInputController {
         associations = []
         candidateWindow.hide()
         return true
+    }
+
+    // Whether the active 注音 layout types a 注音 symbol with this key (false in every other
+    // input method). What keeps 全形標點 off the keys 注音 needs — see the punctuation branch.
+    private func zhuyinClaimsKey(_ ch: Character) -> Bool {
+        (engine as? ZhuyinEngine)?.mapsKey(ch) ?? false
+    }
+
+    // The full-width mark 注音 puts on this key, or nil to fall back to the shared table. Only
+    // 注音 moves any: `<` and `>` carry ，and 。 there, because `,` and `.` type 注音 symbols.
+    private func zhuyinPunctuation(for ch: Character) -> String? {
+        guard engine is ZhuyinEngine else { return nil }
+        return ZhuyinPunctuation.fullWidth(for: ch, layout: Preferences.zhuyinLayout)
     }
 
     // Apply Traditional→Simplified conversion iff the user enabled "輸出簡體字" (read live).

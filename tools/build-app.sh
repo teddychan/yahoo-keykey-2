@@ -95,12 +95,36 @@ DRAGONKIT_URL="https://github.com/teddychan/dragon-kit"
 "$ROOT/tools/resolve-dragon-kit.sh" "$KIT_DIR" "$DRAGONKIT_TAG" "$DRAGONKIT_URL"
 ( cd "$KIT_DIR" && swift build -c release )
 KIT_REL="$(cd "$KIT_DIR" && swift build -c release --show-bin-path)"
+# SwiftPM's output layout moved: on the pre-xcbuild build system the .swiftmodules sit in a
+# Modules/ subdirectory of the bin path, and on the current one (Xcode 26 / Swift 6.4) they sit in
+# the bin path itself. Try the old location first so the pinned CI toolchain is unaffected, and
+# fall back — a developer on a newer Xcode otherwise gets "no such module 'DragonKit'" from the
+# App compile below, with nothing to say the cause is a directory that moved.
 KIT_MODULES="$KIT_REL/Modules"
+[ -d "$KIT_MODULES" ] || KIT_MODULES="$KIT_REL"
 KIT_BUNDLE="$KIT_REL/DragonKit_DragonKit.bundle"
 
 echo "==> Archiving DragonKit object files into static libs"
-libtool -static -o "$MODULE_DIR/libDragonKit.a" $(find -L "$KIT_REL/DragonKit.build" -name '*.o')
-libtool -static -o "$MODULE_DIR/libDragonKitUpdates.a" $(find -L "$KIT_REL/DragonKitUpdates.build" -name '*.o')
+# Same layout move as KIT_MODULES above, and the per-module objects are what it scattered: the old
+# build system left them in "<bin path>/<module>.build", the current one under
+# ".build/out/Intermediates.noindex/<module>.build" — and for some modules not at all, emitting a
+# single merged "<bin path>/<module>.o" instead. Take whichever of the three this toolchain
+# produced, oldest layout first, and fail loudly rather than handing libtool an empty list (which
+# prints its usage and exits 0-ish, so the real error surfaces much later as a link failure).
+for module in DragonKit DragonKitUpdates; do
+  objects="$(find -L "$KIT_REL/$module.build" -name '*.o' 2>/dev/null || true)"
+  if [ -z "$objects" ]; then
+    objects="$(find -L "$KIT_DIR/.build/out/Intermediates.noindex/$module.build" -name '*.o' 2>/dev/null || true)"
+  fi
+  if [ -z "$objects" ] && [ -f "$KIT_REL/$module.o" ]; then
+    objects="$KIT_REL/$module.o"
+  fi
+  if [ -z "$objects" ]; then
+    echo "ERROR: no object files for $module under $KIT_REL or $KIT_DIR/.build/out" >&2
+    exit 1
+  fi
+  libtool -static -o "$MODULE_DIR/lib$module.a" $objects
+done
 
 echo "==> Compiling App against KeyKeyEngine + DragonKit"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
@@ -169,6 +193,13 @@ if [ ! -f "$ROOT/Resources/pinyin-zhuyin.txt" ]; then
 fi
 cp "$ROOT/Resources/pinyin-zhuyin.txt" "$APP/Contents/Resources/pinyin-zhuyin.txt"
 
+echo "==> Copying bundled 注音 (ㄅ半) table (zhuyin-yahoo.txt)"
+if [ ! -f "$ROOT/Resources/zhuyin-yahoo.txt" ]; then
+  echo "ERROR: Resources/zhuyin-yahoo.txt missing; run tools/build-zhuyin-table.py first" >&2
+  exit 1
+fi
+cp "$ROOT/Resources/zhuyin-yahoo.txt" "$APP/Contents/Resources/zhuyin-yahoo.txt"
+
 echo "==> Copying bundled Han-conversion table (opencc-TSCharacters.txt)"
 if [ ! -f "$ROOT/Packages/KeyKeyEngine/Resources/opencc-TSCharacters.txt" ]; then
   echo "ERROR: Packages/KeyKeyEngine/Resources/opencc-TSCharacters.txt missing" >&2
@@ -212,8 +243,8 @@ if [[ "${KEYKEY_DEBUG_ID:-}" == "1" ]]; then
   PLIST="$APP/Contents/Info.plist"
   # Single pass moves every release-id occurrence into the .debug namespace: CFBundleIdentifier,
   # TISInputSourceID, InputMethodConnectionName, and the two ComponentInputModeDict mode ids
-  # (...Cangjie / ...Simplex). InputController matches modes by the ".Cangjie"/".Simplex" SUFFIX,
-  # which is preserved, so mode switching keeps working. SUFeedURL/SUPublicEDKey don't contain
+  # (...Cangjie / ...Simplex / ...Zhuyin / ...Pinyin). InputController matches modes by that
+  # SUFFIX, which is preserved, so mode switching keeps working. SUFeedURL/SUPublicEDKey don't contain
   # the base id, so they're untouched.
   sed -i '' "s|${RELEASE_BUNDLE_ID}|${DEBUG_BUNDLE_ID}|g" "$PLIST"
   # Distinct name in the menu bar / Input Sources picker: " Debug" appended to whatever the two

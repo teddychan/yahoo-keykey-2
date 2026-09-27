@@ -9,7 +9,7 @@
 "keykey.general.outputSimplified" = "간체자로 출력";
 "keykey.general.fullWidthPunctuation" = "전각 문장 부호";
 "keykey.general.shiftSpaceFullWidthSpace" = "Shift + 스페이스로 전각 공백 입력";
-"keykey.general.shiftSpaceFullWidthSpaceHint" = "倉頡, 速成과 拼音에 적용됩니다. Shift + 스페이스를 누르면 일반 스페이스 대신 한자 한 글자 너비의 전각 공백(　)을 입력합니다. 조합 중인 글자는 먼저 확정됩니다.";
+"keykey.general.shiftSpaceFullWidthSpaceHint" = "倉頡, 速成, 注音과 拼音에 적용됩니다. Shift + 스페이스를 누르면 일반 스페이스 대신 한자 한 글자 너비의 전각 공백(　)을 입력합니다. 조합 중인 글자는 먼저 확정됩니다.";
 "keykey.general.associatedPhrases" = "연상 입력(聯想)";
 "keykey.general.associationContinuationOnly" = "연상 후보에 이어지는 글자만 표시";
 "keykey.general.associationContinuationOnlyHint" = "「關係」 대신 「係／心／於」를 표시합니다(원래 Yahoo! KeyKey와 같음). 실제로 입력되는 글자는 바뀌지 않습니다.";
@@ -26,18 +26,23 @@
 "keykey.general.cangjieV5" = "5세대 창힐";
 "keykey.general.cangjieV3" = "3세대 창힐(Yahoo! KeyKey 호환)";
 "keykey.general.cangjieVersionHint" = "「3세대 창힐」은 원래 Yahoo! KeyKey의 코드표와 후보 순서를 사용합니다(창힐과 속성 모두에 적용). 즉시 적용됩니다.";
+"keykey.general.zhuyinLayout" = "주음 키보드";
+"keykey.general.zhuyinLayoutDachen" = "표준(大千)";
+"keykey.general.zhuyinLayoutEten" = "이톈(倚天)";
+"keykey.general.zhuyinLayoutHint" = "주음(ㄅ半) 기호의 키 배열이며 즉시 적용됩니다. 「표준(大千)」은 대만 키보드에 인쇄된 배열이자 원래 Yahoo! KeyKey의 기본값입니다. 스페이스가 1성이고, 후보가 표시되면 1–9로 선택합니다. 주음에서는 숫자 키로 주음을 입력하므로, 연상 어구는 위 설정과 관계없이 항상 Shift + 숫자로 선택합니다.";
 "keykey.general.strokeConfirmation" = "스페이스로 코드 확정";
 "keykey.general.strokeConfirmationHint" = "속성, 그리고 * 와일드카드를 사용하는 창힐에서는 코드를 다 입력하기 전에 후보가 나타나므로, 스페이스가 입력한 코드를 확정하지 않고 다음 페이지로 넘어갑니다. 이 옵션을 켜면 첫 번째 스페이스는 코드만 확정하고 1페이지에 머무릅니다. 페이지를 넘기려면 스페이스를 한 번 더 누르거나 1~9로 바로 선택하세요. 일반 창힐은 영향을 받지 않습니다.";
 "keykey.general.adaptiveCandidateOrder" = "선택한 글자에 맞춰 후보 순서 조정";
-"keykey.general.adaptiveCandidateOrderHint" = "倉頡, 速成과 연상 어구에 적용됩니다. 후보 목록마다 따로 학습합니다. 같은 목록 안에서는 확정한 횟수가 많은 후보가 먼저 오고, 횟수가 같은 후보는 원래 순서를 유지합니다. 와일드카드가 있는 倉頡 코드는 완전한 코드와 별도로 학습하며, 聯想字詞에 대해 학습한 내용은 倉頡과 速成이 함께 사용합니다. 拼音의 후보 순서는 종전과 똑같이 유지됩니다. 끄면 원래 순서로 돌아갑니다(五代와 拼音은 내장 순위, 三代는 본래의 Yahoo! KeyKey 순서). 집계도 모두 멈추지만 이미 학습한 내용은 지워지지 않습니다.";
+"keykey.general.adaptiveCandidateOrderHint" = "倉頡, 速成, 注音과 연상 어구에 적용됩니다. 후보 목록마다 따로 학습합니다. 같은 목록 안에서는 확정한 횟수가 많은 후보가 먼저 오고, 횟수가 같은 후보는 원래 순서를 유지합니다. 와일드카드가 있는 倉頡 코드는 완전한 코드와 별도로 학습하며, 聯想字詞에 대해 학습한 내용은 倉頡, 速成, 注音이 함께 사용합니다. 拼音의 후보 순서는 종전과 똑같이 유지됩니다. 끄면 원래 순서로 돌아갑니다(五代와 拼音은 내장 순위, 三代와 注音은 본래의 Yahoo! KeyKey 순서). 집계도 모두 멈추지만 이미 학습한 내용은 지워지지 않습니다.";
 "keykey.general.language" = "언어";
 
-/* What's New pane (2.14.1) */
-"app.whatsNew.summary" = "이제 倉頡, 速成, 拼音에서 Shift + 스페이스로 전각 공백(　)을 입력할 수 있습니다. 설정에서 켜세요.";
-"app.whatsNew.added1" = "일반 ▸ 입력에 ‘Shift + 스페이스로 전각 공백 입력’ 설정이 추가되었습니다. 기본값은 끔입니다. 켜면 倉頡, 速成, 拼音에서 Shift + 스페이스를 눌러 한자 한 글자 너비의 전각 공백(　)을 입력할 수 있으므로 입력 소스를 바꿀 필요가 없습니다. 조합 중인 글자는 먼저 확정됩니다. 끄면 Shift + 스페이스는 예전처럼 스페이스와 똑같이 동작합니다.";
-"app.whatsNew.fixed1" = "倉頡과 速成에서 후보 목록이 2페이지 이상일 때 Shift + 영문자(臨時英數)를 누르면, 이제 Return 키와 마찬가지로 지금 보고 있는 페이지의 첫 글자가 확정됩니다. 이전에는 이미 화면에 없는 1페이지의 첫 글자가 확정되었습니다.";
+/* What's New pane (2.15.0) */
+"app.whatsNew.summary" = "주음(ㄅ半)이 예전 그대로, 한 음절에 한 글자 방식으로 돌아왔습니다. 주음 기호를 입력하고 성조로 음절을 끝내면(스페이스가 1성) 후보가 나타나며 1–9로 고릅니다. 다음 글자의 첫 기호를 입력하면 화면의 글자가 자동으로 확정되므로 문장 중간에 Enter를 누를 필요가 없습니다. 키보드는 「표준(大千)」과 「이톈(倚天)」 중에서 고를 수 있습니다. 창힐·속성·병음은 전혀 달라지지 않았습니다.";
+"app.whatsNew.added1" = "주음(ㄅ半) 입력 방식을 추가했습니다. 주음 기호를 입력한 뒤 성조로 음절을 끝내면 — 어느 주음 키보드에서나 그렇듯 스페이스가 1성입니다 — 후보 창이 열립니다. 1–9로 선택하고, 스페이스와 화살표 키로 페이지를 넘깁니다. 다음 글자의 첫 기호를 입력하면 화면의 글자가 자동으로 확정되어, 글자마다 Enter를 누르지 않고 문장을 이어 쓸 수 있습니다. 확정할 때마다 연상 어구가 따라 나오는 것도 창힐·속성과 같습니다. 후보는 원래 Yahoo! KeyKey의 ㄅ半 표에서 그 표의 순서 그대로 가져오며(ㄍㄨㄛˊ → 國, ㄉㄜ˙ → 的), 선택한 결과는 그 발음에 한해 학습됩니다. 「시스템 설정 ▸ 키보드」에서 「입력 소스」 옆의 「편집…」을 클릭하고(「+」는 설정 페이지가 아니라 그 시트 안에 있습니다) 「+ ▸ 번체 중국어 ▸ 注音」에서 추가한 뒤, 새로 추가한 입력 방식과 마찬가지로 로그아웃했다가 다시 로그인하세요.";
+"app.whatsNew.added2" = "주음 키보드를 「표준(大千)」과 「이톈(倚天)」 중에서 고를 수 있습니다. 기본값은 大千으로, 대만 키보드에 인쇄된 배열이자 원래 Yahoo! KeyKey의 기본값입니다. 「설정… ▸ 입력 방식」에서, 또는 주음을 쓰는 중에 입력 메뉴에서 바로 바꿀 수 있으며 다음 입력부터 적용됩니다.";
+"app.whatsNew.changed1" = "주음에서는 두 가지 키가 다르게 동작합니다. 주음이 그 키를 쓰기 때문입니다. 大千에서는 ㄝ ㄡ ㄤ ㄥ ㄦ가 , . ; / - 자리에 있어서, 주음에서는 이 키들이 문장 부호가 아니라 주음 기호를 입력합니다. 「，」와 「。」는 Shift + , 와 Shift + . 로 옮겨졌는데, 이는 원래 Yahoo! KeyKey의 배치이기도 합니다. 또한 숫자 키도 주음 입력에 쓰이므로, 주음에서는 「연상 선택 키」 설정과 관계없이 연상 어구를 항상 Shift + 숫자로 고릅니다. 덕분에 숫자 키를 그대로 눌러 ㄅ ㄉ ㄓ ㄚ ㄞ ㄢ과 성조를 입력할 수 있습니다. 창힐·속성·병음은 달라지지 않았습니다.";
 
 /* Uninstall pane checklist */
-"keykey.uninstall.item.inputSources" = "입력 소스에서 창힐과 속성 사용 중지";
+"keykey.uninstall.item.inputSources" = "입력 소스에서 Yahoo! KeyKey 2의 입력 방식 사용 중지";
 "keykey.uninstall.item.learningAndSettings" = "사용자 학습 데이터와 환경설정 삭제";
 "keykey.uninstall.item.trash" = "Yahoo! KeyKey 2를 휴지통으로 이동";

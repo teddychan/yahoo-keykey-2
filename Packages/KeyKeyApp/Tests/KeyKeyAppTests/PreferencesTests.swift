@@ -1,7 +1,9 @@
 import XCTest
+import KeyKeyEngine
 @testable import KeyKeyApp
 
-// Covers Preferences (typed UserDefaults accessors + clamping) and the CangjieVersion enum.
+// Covers Preferences (typed UserDefaults accessors + clamping), the CangjieVersion enum, and the
+// 注音鍵盤 choice (ZhuyinLayout, whose cases the engine owns).
 // Each test writes explicit values into UserDefaults.standard (the domain Preferences reads),
 // so ordering between tests does not matter.
 final class PreferencesTests: XCTestCase {
@@ -11,7 +13,7 @@ final class PreferencesTests: XCTestCase {
         for key in ["candidateFontSize", "associatedPhrasesEnabled", "fullWidthPunctuationEnabled",
                     "outputSimplifiedEnabled", "cangjieVersion", "associationContinuationOnly",
                     "codeHintEnabled", "associationSelectionTrigger", "strokeConfirmationEnabled",
-                    "adaptiveCandidateOrderEnabled", "shiftSpaceFullWidthSpaceEnabled"] {
+                    "adaptiveCandidateOrderEnabled", "zhuyinLayout", "shiftSpaceFullWidthSpaceEnabled"] {
             defaults.removeObject(forKey: key)
         }
         super.tearDown()
@@ -143,16 +145,22 @@ final class PreferencesTests: XCTestCase {
         XCTAssertEqual(Preferences.associationSelectionTrigger, .shift)
         Preferences.associationSelectionTrigger = .number
         XCTAssertEqual(Preferences.associationSelectionTrigger, .number)
+        // 大千 by default: the layout on a Taiwanese keyboard, and the original Yahoo! KeyKey's.
+        XCTAssertEqual(Preferences.zhuyinLayout, .dachen)
     }
 
     func testAssociationTriggerUnknownRawFallsBackToNumber() {
         defaults.set("zzz", forKey: "associationSelectionTrigger")   // not a valid case
         XCTAssertEqual(Preferences.associationSelectionTrigger, .number)
+        // 大千 by default: the layout on a Taiwanese keyboard, and the original Yahoo! KeyKey's.
+        XCTAssertEqual(Preferences.zhuyinLayout, .dachen)
     }
 
     func testAssociationTriggerAbsentFallsBackToNumber() {
         defaults.removeObject(forKey: "associationSelectionTrigger")
         XCTAssertEqual(Preferences.associationSelectionTrigger, .number)
+        // 大千 by default: the layout on a Taiwanese keyboard, and the original Yahoo! KeyKey's.
+        XCTAssertEqual(Preferences.zhuyinLayout, .dachen)
     }
 
     func testAssociationTriggerRawValues() {
@@ -172,7 +180,7 @@ final class PreferencesTests: XCTestCase {
         for key in ["candidateFontSize", "associatedPhrasesEnabled", "fullWidthPunctuationEnabled",
                     "outputSimplifiedEnabled", "cangjieVersion", "associationContinuationOnly",
                     "codeHintEnabled", "associationSelectionTrigger", "strokeConfirmationEnabled",
-                    "adaptiveCandidateOrderEnabled", "shiftSpaceFullWidthSpaceEnabled"] {
+                    "adaptiveCandidateOrderEnabled", "zhuyinLayout", "shiftSpaceFullWidthSpaceEnabled"] {
             defaults.removeObject(forKey: key)
         }
         Preferences.registerDefaults()
@@ -190,6 +198,8 @@ final class PreferencesTests: XCTestCase {
         XCTAssertFalse(Preferences.shiftSpaceFullWidthSpaceEnabled)
         XCTAssertEqual(Preferences.cangjieVersion, .v5)
         XCTAssertEqual(Preferences.associationSelectionTrigger, .number)
+        // 大千 by default: the layout on a Taiwanese keyboard, and the original Yahoo! KeyKey's.
+        XCTAssertEqual(Preferences.zhuyinLayout, .dachen)
         XCTAssertEqual(Preferences.candidateFontSize, 18)    // defaultFontSize
     }
 
@@ -204,5 +214,34 @@ final class PreferencesTests: XCTestCase {
         XCTAssertEqual(CangjieVersion(rawValue: "5"), .v5)
         XCTAssertEqual(CangjieVersion(rawValue: "3"), .v3)
         XCTAssertNil(CangjieVersion(rawValue: "x"))
+    }
+
+    // MARK: zhuyinLayout (注音鍵盤)
+
+    func testZhuyinLayoutRoundTrip() {
+        Preferences.zhuyinLayout = .eten
+        XCTAssertEqual(Preferences.zhuyinLayout, .eten)
+        XCTAssertEqual(defaults.string(forKey: "zhuyinLayout"), "eten")
+        Preferences.zhuyinLayout = .dachen
+        XCTAssertEqual(Preferences.zhuyinLayout, .dachen)
+    }
+
+    func testZhuyinLayoutUnknownRawFallsBackToDachen() {
+        defaults.set("ibm", forKey: "zhuyinLayout")   // a layout this app does not ship
+        XCTAssertEqual(Preferences.zhuyinLayout, .dachen)
+    }
+
+    func testZhuyinLayoutAbsentFallsBackToDachen() {
+        defaults.removeObject(forKey: "zhuyinLayout")
+        XCTAssertEqual(Preferences.zhuyinLayout, .dachen)
+    }
+
+    // The raw values are what is on disk, so changing one resets every user's keyboard.
+    func testZhuyinLayoutRawValues() {
+        XCTAssertEqual(ZhuyinLayout.dachen.rawValue, "dachen")
+        XCTAssertEqual(ZhuyinLayout.eten.rawValue, "eten")
+        XCTAssertEqual(ZhuyinLayout(rawValue: "dachen"), .dachen)
+        XCTAssertEqual(ZhuyinLayout(rawValue: "eten"), .eten)
+        XCTAssertNil(ZhuyinLayout(rawValue: "hsu"))
     }
 }
