@@ -36,13 +36,32 @@
 "keykey.general.adaptiveCandidateOrderHint" = "Applies to 倉頡, 速成, 注音 and associated phrases. Every candidate list is learned on its own: within a list, the candidates you have committed more often come first, and candidates you have committed equally often keep their built-in order. A 倉頡 code with a wildcard is learned separately from a complete code, and what is learned about 聯想字詞 is shared by 倉頡, 速成 and 注音. 拼音 keeps ranking candidates exactly as it did before. Turn it off for the built-in order — 五代 and 拼音 use their built-in rankings, 三代 and 注音 the original Yahoo! KeyKey order — which also pauses counting everywhere, without erasing what you have already learned.";
 "keykey.general.language" = "Language";
 
-/* What's New pane (2.15.0) */
-"app.whatsNew.summary" = "注音 (ㄅ半) is back, and it works the way it always did: one syllable, one character. Type the 注音 symbols, finish the syllable with a tone (Space is the first tone), and the candidates appear — 1–9 picks. Start the next character and the one on screen is committed for you, so you never press Enter mid-sentence. Choose the 標準 (大千) or 倚天 keyboard. 倉頡, 速成 and 拼音 are untouched.";
-"app.whatsNew.added1" = "The 注音 (ㄅ半) input method. Type the 注音 symbols and finish the syllable with a tone — Space is the first tone, as on any 注音 keyboard — and the candidate window opens: 1–9 picks, Space and the arrow keys page. Start the next character's first symbol and the one on screen is committed for you, so a sentence runs on without pressing Enter between characters. 聯想字詞 follows each commit, exactly as in 倉頡 and 速成. Candidates come from the original Yahoo! KeyKey ㄅ半 table in that table's own order (ㄍㄨㄛˊ → 國, ㄉㄜ˙ → 的), and what you pick is then learned for that reading alone. Add it in System Settings ▸ Keyboard: click Edit… beside Input Sources — the + is inside that sheet, not on the settings page — then + ▸ Chinese, Traditional ▸ 注音, and log out and back in as you would for any newly added input method.";
-"app.whatsNew.added2" = "A choice of 注音 keyboard: 標準 (大千) or 倚天. 大千 is the default — the layout printed on Taiwanese keyboards, and the one the original Yahoo! KeyKey shipped. Switch it in 設定… ▸ 輸入方式, or straight from the input menu while 注音 is active; it applies to the next keystroke.";
-"app.whatsNew.changed1" = "Two keys behave differently in 注音, because 注音 needs them. On 大千 the symbols ㄝ ㄡ ㄤ ㄥ ㄦ sit on , . ; / and -, so those keys type 注音 rather than punctuation, and ，。 move to Shift + , and Shift + . — where the original Yahoo! KeyKey put them. And because the number row types 注音 too, 聯想字詞 is always picked with Shift + a number in this mode, whatever 聯想選字鍵 is set to, which leaves a bare number free to type ㄅ ㄉ ㄓ ㄚ ㄞ ㄢ or a tone. Nothing changes for 倉頡, 速成 or 拼音.";
+/* General pane ▸ Installation (2.16.0): moving to /Library/Input Methods */
+"keykey.general.installation" = "Installation";
+"keykey.general.installForAllUsers" = "Install for All Users…";
+"keykey.general.installForAllUsersHint" = "Keeps Yahoo! KeyKey 2 working when another app, such as 1Password, turns on secure input — macOS then greys out input methods installed for just one user. Moves it to /Library/Input Methods and asks for an administrator password; every later update asks for one too.";
+"keykey.general.installedForAllUsers" = "Installed for all users";
+"keykey.general.installedForAllUsersHint" = "In /Library/Input Methods, so Yahoo! KeyKey 2 keeps working when another app turns on secure input. Updates ask for an administrator password.";
+"keykey.general.installedWithHomebrew" = "Installed with Homebrew";
+"keykey.general.installedWithHomebrewHint" = "To install for all users, so Yahoo! KeyKey 2 keeps working when another app turns on secure input, run `brew reinstall --cask yahoo-keykey-2` in Terminal.";
+"keykey.general.installConfirmTitle" = "Install for all users?";
+"keykey.general.installConfirmMessage" = "Yahoo! KeyKey 2 will ask for an administrator password, move itself to /Library/Input Methods and restart. Your settings and everything it has learned are kept.";
+"keykey.general.installConfirm" = "Install";
+"keykey.general.installPrompt" = "Yahoo! KeyKey 2 wants to install itself for all users.";
+"keykey.general.installFailedTitle" = "Could not install for all users";
+"keykey.general.installFailedMessage" = "Nothing was changed. %@";
+"keykey.general.installOldCopyTitle" = "Installed for all users";
+"keykey.general.installOldCopyMessage" = "The old copy at %@ could not be removed. Move it to the Trash yourself, then log out and back in.";
+"keykey.general.installSignatureUnreadable" = "Yahoo! KeyKey 2 could not confirm its own signature. Reinstall it from the latest release and try again.";
+
+/* What's New pane (2.16.0) */
+"app.whatsNew.summary" = "Yahoo! KeyKey 2 can now keep working when another app leaves macOS secure input switched on — 1Password often does after your Mac locks — which until now greyed out 倉頡 and every other mode in the input menu until you quit that app. Choose Settings… ▸ General ▸ Install for All Users… once, enter an administrator password, and Yahoo! KeyKey 2 moves to /Library/Input Methods, where macOS keeps it usable.";
+"app.whatsNew.added1" = "Install for All Users…, in Settings… ▸ General. While any app holds secure input — the mode meant for typing passwords — macOS greys out input methods installed for a single user, and a copy in your own ~/Library/Input Methods is one of them. Installed for all users, in /Library/Input Methods, Yahoo! KeyKey 2 keeps working like Apple's own input methods. It asks for an administrator password once and restarts, keeping your settings and everything it has learned; each later update asks for the password too.";
+"app.whatsNew.changed1" = "The Homebrew cask now installs for all users, so Homebrew asks for your password. Installed with Homebrew before this release? Run brew reinstall --cask yahoo-keykey-2 to move your copy.";
+"app.whatsNew.changed2" = "While another app holds secure input, Yahoo! KeyKey 2 keeps typing but stops learning from what you pick, so nothing typed then is saved. Learning picks up again as soon as secure input is off.";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "Disable Yahoo! KeyKey 2's input methods from Input Sources";
 "keykey.uninstall.item.learningAndSettings" = "Delete user-learning data and preferences";
 "keykey.uninstall.item.trash" = "Move Yahoo! KeyKey 2 to the Trash";
+"keykey.uninstall.item.trashAllUsers" = "Not Yahoo! KeyKey 2 itself: installed for all users, it stays in /Library/Input Methods until you drag it to the Trash in Finder (which asks for an administrator password), or run brew uninstall --cask yahoo-keykey-2 if Homebrew installed it";

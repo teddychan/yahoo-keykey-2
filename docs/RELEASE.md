@@ -190,6 +190,13 @@ It requires these repository secrets: `DEVELOPER_ID_CERT_P12_BASE64`,
 `NOTARY_ISSUER_ID`, `PUBLIC_RELEASE_TOKEN`, `SPARKLE_EDDSA_PRIVATE_KEY` (the same
 set used by clipmenu-2 / ice-2).
 
+The cask bump only rewrites the `version` and `sha256` lines of the tap's
+`Casks/yahoo-keykey-2.rb`, on whatever `main` holds when the job runs. So a change to the
+rest of the cask — its install target, `postflight_steps`, caveats — has to be **merged in
+teddychan/homebrew-tap before the tag is pushed**, or that release ships the old cask.
+(Since 2.16.0 the cask installs to `/Library/Input Methods` as root:wheel; see
+[known issue #2](../known_issues.md#2-倉頡-is-greyed-out-and-will-not-turn-on).)
+
 The appcast became app-owned across 2.11.3 and 2.11.4 — the caller passes `appcast_repo:
 teddychan/yahoo-keykey-2`, where it used to take the default of the marketing-site repo. A
 Sparkle appcast is update infrastructure, not marketing content, so it belongs in the app's
@@ -275,8 +282,8 @@ If running locally instead of CI:
   entirely.
 
 - **Input method doesn't appear** in System Settings: confirm the app is in
-  `~/Library/Input Methods/`, then **log out and back in** — the login scan is
-  required.
+  `~/Library/Input Methods/` or, installed for all users, `/Library/Input Methods/`, then
+  **log out and back in** — the login scan is required.
 
 ---
 

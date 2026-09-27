@@ -88,16 +88,15 @@ final class ConfigContentTests: XCTestCase {
         let short = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
         XCTAssertEqual(content.displayVersion, DragonVersion.display(short ?? "1.0.0"))
         XCTAssertTrue(content.displayVersion.hasPrefix("v"))
-        XCTAssertEqual(content.date, "2026-09-27")
+        XCTAssertEqual(content.date, "2026-09-28")
     }
 
-    // 2.15.0 is [.added, .changed]: the release IS an input method — 注音 (ㄅ半), with a choice of
-    // 標準（大千）or 倚天 keyboard — so `.added` leads with one entry for the method and one for the
-    // keyboard. The single `.changed` entry covers the two keys that behave differently in 注音 and
-    // would otherwise be read as bugs: `,` and `.` type ㄝ and ㄡ, and 聯想字詞 needs Shift + a
-    // number because the number row types 注音.
+    // 2.16.0 is [.added, .changed]: one `.added` entry for 設定… ▸ 一般 ▸ 為所有使用者安裝…, which
+    // moves KeyKey to /Library/Input Methods so it stays usable while another app holds secure
+    // input, and two `.changed` entries for what moves with it — the Homebrew cask installing for
+    // all users, and learning pausing while secure input is on.
     //
-    // 2.14.1's `.fixed1` is gone from all seven .strings files rather than left stranded with no
+    // 2.15.0's `.added2` is gone from all seven .strings files rather than left stranded with no
     // section to render it — see WhatsNewConfig.
     //
     // Entry KEYS are pinned, not just kinds and counts, because kinds and counts had stopped
@@ -109,14 +108,14 @@ final class ConfigContentTests: XCTestCase {
     // text SAYS is the release gate's job — it diffs every locale's .strings file — so between
     // them a stale pane cannot ship.
     @MainActor
-    func testWhatsNewAnnouncesTheZhuyinMethodAndItsTwoKeyChanges() {
+    func testWhatsNewAnnouncesTheAllUsersInstallAndWhatChangesWithIt() {
         let content = WhatsNewConfig.content
         XCTAssertEqual(content.sections.map(\.kind), [.added, .changed])
-        XCTAssertEqual(content.sections.map(\.entries.count), [2, 1])
+        XCTAssertEqual(content.sections.map(\.entries.count), [1, 2])
         XCTAssertEqual(content.sections.flatMap(\.entries), [
             L("app.whatsNew.added1"),
-            L("app.whatsNew.added2"),
             L("app.whatsNew.changed1"),
+            L("app.whatsNew.changed2"),
         ])
     }
 

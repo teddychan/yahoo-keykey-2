@@ -36,13 +36,32 @@
 "keykey.general.adaptiveCandidateOrderHint" = "套用於倉頡、速成、注音與聯想字詞。每個候選字清單各自獨立學習：在同一個清單內，你確認次數較多的候選字排在前面；確認次數相同時，維持原本的順序。含萬用字元的倉頡碼與完整的碼分開學習；聯想字詞學到的內容由倉頡、速成與注音共用。拼音的候選字順序與以往完全相同，沒有改變。關閉後會顯示原本的順序（五代與拼音使用內建排序，三代與注音使用原本的 Yahoo! KeyKey 順序），同時全部暫停計次，但不會清除已經學到的內容。";
 "keykey.general.language" = "語言";
 
-/* What's New pane (2.15.0) */
-"app.whatsNew.summary" = "注音（ㄅ半）回來了，而且就是你熟悉的那一套：一個音一個字。打注音符號，用聲調結束一個字（空白鍵是一聲），候選字就會出現，按 1–9 選字。接著直接打下一個字的第一個符號，畫面上的字就會自動送出，不用按 Enter。鍵盤可選「標準（大千）」或「倚天」。倉頡、速成與拼音完全不受影響。";
-"app.whatsNew.added1" = "新增注音（ㄅ半）輸入法。打注音符號，再用聲調結束一個字——空白鍵就是一聲，和任何注音鍵盤一樣——候選字隨即出現：按 1–9 選字，空白鍵或方向鍵翻頁。直接打下一個字的第一個符號時，畫面上的字會自動送出，所以一句話可以一直打下去，中間不用按 Enter。每送出一個字，一樣會跟著出現聯想字詞，與倉頡、速成相同。候選字取自原版 Yahoo! KeyKey 的 ㄅ半 字表，並保持該字表原本的順序（ㄍㄨㄛˊ → 國、ㄉㄜ˙ → 的），之後再依你的選字習慣，針對每個讀音各自學習。請到「系統設定 ▸ 鍵盤」，按「輸入來源」旁的「編輯…」（「+」在這個視窗裡，不在設定頁上），再按「+ ▸ 繁體中文 ▸ 注音」加入（和新增任何輸入法一樣，加完請登出再登入）。";
-"app.whatsNew.added2" = "注音鍵盤可選「標準（大千）」或「倚天」。預設是大千，也就是台灣鍵盤上印的那一套，以及原版 Yahoo! KeyKey 的預設。可以在「設定… ▸ 輸入方式」切換，或在使用注音時直接從輸入選單切換，下一個按鍵就生效。";
-"app.whatsNew.changed1" = "在注音中，有兩個按鍵和其他輸入法不一樣，因為注音需要它們。大千鍵盤上的 ㄝ ㄡ ㄤ ㄥ ㄦ 就位在 , . ; / - 這幾個鍵上，所以在注音中這些鍵打的是注音符號，而不是標點；「，」和「。」改用 Shift + , 和 Shift + . ——這也是原版 Yahoo! KeyKey 原本的做法。另外，因為數字鍵也要用來打注音，在注音中聯想字詞固定以 Shift + 數字選取，不論「聯想選字鍵」設定為何，這樣一來，直接按數字才能打出 ㄅ ㄉ ㄓ ㄚ ㄞ ㄢ 和聲調。倉頡、速成與拼音都沒有改變。";
+/* General pane ▸ Installation (2.16.0): moving to /Library/Input Methods */
+"keykey.general.installation" = "安裝";
+"keykey.general.installForAllUsers" = "為所有使用者安裝…";
+"keykey.general.installForAllUsersHint" = "其他 App（例如 1Password）開啟「安全輸入」時，macOS 會把只為單一使用者安裝的輸入法變成灰色。為所有使用者安裝後，Yahoo! KeyKey 2 會移到 /Library/Input Methods，照常可以使用。需要輸入管理者密碼，之後每次更新也會要求輸入。";
+"keykey.general.installedForAllUsers" = "已為所有使用者安裝";
+"keykey.general.installedForAllUsersHint" = "位於 /Library/Input Methods，其他 App 開啟「安全輸入」時仍可使用 Yahoo! KeyKey 2。更新時會要求輸入管理者密碼。";
+"keykey.general.installedWithHomebrew" = "以 Homebrew 安裝";
+"keykey.general.installedWithHomebrewHint" = "若要為所有使用者安裝，讓其他 App 開啟「安全輸入」時仍可使用 Yahoo! KeyKey 2，請在「終端機」執行 `brew reinstall --cask yahoo-keykey-2`。";
+"keykey.general.installConfirmTitle" = "要為所有使用者安裝嗎？";
+"keykey.general.installConfirmMessage" = "Yahoo! KeyKey 2 會要求輸入管理者密碼，將自己移到 /Library/Input Methods，然後重新啟動。你的設定和學到的選字習慣都會保留。";
+"keykey.general.installConfirm" = "安裝";
+"keykey.general.installPrompt" = "Yahoo! KeyKey 2 要為所有使用者安裝。";
+"keykey.general.installFailedTitle" = "無法為所有使用者安裝";
+"keykey.general.installFailedMessage" = "沒有做任何變更。%@";
+"keykey.general.installOldCopyTitle" = "已為所有使用者安裝";
+"keykey.general.installOldCopyMessage" = "無法移除位於 %@ 的舊拷貝。請自行將它移到垃圾桶，然後登出再重新登入。";
+"keykey.general.installSignatureUnreadable" = "Yahoo! KeyKey 2 無法確認自己的簽署。請從最新版本重新安裝後再試一次。";
+
+/* What's New pane (2.16.0) */
+"app.whatsNew.summary" = "其他 App 沒有關掉 macOS 的「安全輸入」時——1Password 常在 Mac 鎖定後這樣——Yahoo! KeyKey 2 現在也能照常使用。以前遇到這種情況，倉頡等所有輸入方式都會在輸入選單中變成灰色，直到你結束那個 App 為止。只要選一次「設定… ▸ 一般 ▸ 為所有使用者安裝…」並輸入管理者密碼，Yahoo! KeyKey 2 就會移到 /Library/Input Methods，macOS 會讓它繼續可用。";
+"app.whatsNew.added1" = "「設定… ▸ 一般」新增「為所有使用者安裝…」。任何 App 開啟「安全輸入」（原本用來輸入密碼的模式）時，macOS 會把只為單一使用者安裝的輸入法變成灰色，放在你自己 ~/Library/Input Methods 裡的拷貝就屬於這一類。為所有使用者安裝在 /Library/Input Methods 後，Yahoo! KeyKey 2 就像 Apple 內建的輸入法一樣照常可用。只需輸入一次管理者密碼，它會重新啟動，你的設定和學到的選字習慣都會保留；之後每次更新也會要求輸入密碼。";
+"app.whatsNew.changed1" = "Homebrew cask 現在會為所有使用者安裝，因此 Homebrew 會要求輸入你的密碼。如果你在這個版本之前用 Homebrew 安裝，請執行 brew reinstall --cask yahoo-keykey-2 來移動你的拷貝。";
+"app.whatsNew.changed2" = "其他 App 開著「安全輸入」時，Yahoo! KeyKey 2 仍可打字，但不會從你的選字學習，因此那段時間輸入的內容都不會被記錄。「安全輸入」一關閉，就會恢復學習。";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "從輸入來源中停用 Yahoo! KeyKey 2 的輸入方式";
 "keykey.uninstall.item.learningAndSettings" = "刪除使用者學習資料與偏好設定";
 "keykey.uninstall.item.trash" = "將 Yahoo! KeyKey 2 移到垃圾桶";
+"keykey.uninstall.item.trashAllUsers" = "但不包括 Yahoo! KeyKey 2 本身：為所有使用者安裝的拷貝會留在 /Library/Input Methods，需由你在 Finder 中拖到垃圾桶（會要求輸入管理者密碼）；若以 Homebrew 安裝，請執行 brew uninstall --cask yahoo-keykey-2";

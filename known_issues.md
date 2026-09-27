@@ -28,19 +28,30 @@ has nothing to switch to.
 ## 2. 倉頡 is greyed out and will not turn on
 
 Another app has switched on a macOS privacy feature called **secure input**, the one normally
-used while you type a password. While it is on, macOS blocks every input method that did not
-come from Apple — so 倉頡 goes grey while the U.S. keyboard keeps working.
+used while you type a password, and has not switched it off again. While it is on, macOS only
+lets through its own input methods and the ones **installed for all users**, in
+`/Library/Input Methods`. A copy of Yahoo! KeyKey 2 in your own `~/Library/Input Methods` — where
+every install used to put it — goes grey, while the U.S. keyboard keeps working. That is also why
+some other input methods, such as Google Japanese Input, carry on as if nothing happened: they
+install for all users.
 
-Nothing is wrong with your installation, and no update to Yahoo! KeyKey 2 can change this: only
-the app that switched secure input on is able to switch it off again.
+**Permanent fix (2.16.0 and later):** open **設定… ▸ 一般** and choose **為所有使用者安裝…**
+(*Install for All Users…*). It asks for an administrator password once, moves Yahoo! KeyKey 2 to
+`/Library/Input Methods` and restarts it, keeping your settings and everything it has learned. From
+then on it keeps working whichever app turns secure input on. Each later update asks for an
+administrator password too. Installed with Homebrew? Run `brew reinstall --cask yahoo-keykey-2`
+instead — the cask now installs for all users.
 
-Usually that app simply forgot to turn it off after showing a password box. **1Password** is the
-most common culprit — a known bug on their side, with no setting to prevent it. Chrome, Dropbox,
-WeChat and similar apps can do the same.
+**Right now, without changing anything:** bring the app holding secure input to the front, or quit
+it. **1Password** is the most common culprit: when your Mac locks, 1Password locks itself too, and
+its unlock screen can keep secure input on after you unlock the Mac. Clicking 1Password in the Dock
+is usually enough — it lets go within a couple of seconds, no need to quit it. 1Password has fixed
+this in its beta, 8.12.38 and later (**1Password ▸ Settings ▸ Advanced ▸ Release channel**), so the
+regular release should follow. Chrome, Dropbox, WeChat and similar apps can do the same; if 1Password
+is not it, quit apps one at a time until 倉頡 lights up.
 
-**Fix:** quit the app holding it, and 倉頡 works again immediately — no restart and no logging
-out. If you are not sure which app it is, quit them one at a time until 倉頡 lights up; trying
-1Password first is a good bet, and you can reopen it straight away.
+While secure input is on, an all-users Yahoo! KeyKey 2 keeps typing but stops learning from what you
+pick, so nothing typed then is saved; it picks up again once secure input is off.
 
 Be aware that tools claiming to name the responsible app are unreliable — they tend to report
 whichever app happened to be in front when secure input was switched on, not the one holding it.
