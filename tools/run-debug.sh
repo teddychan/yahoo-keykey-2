@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Build + install + launch a LOCAL DEBUG build of Yahoo KeyKey 2.
+# Build + install + launch a LOCAL DEBUG build of Yahoo! KeyKey 2.
 #
-# It registers as a SEPARATE input method — "Yahoo KeyKey 2 Debug", bundle id
+# It registers as a SEPARATE input method — "Yahoo! KeyKey 2 Debug", bundle id
 # com.dragonapp.inputmethod.yahoo-keykey.debug — so it never collides with or shadows the installed
 # RELEASE IME (com.dragonapp.inputmethod.yahoo-keykey). Two bundles sharing the release id register as
 # duplicates in Launch Services and hide the real input source from the Input Sources picker.

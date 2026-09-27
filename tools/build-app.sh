@@ -1,5 +1,5 @@
 #!/bin/bash
-# Build "Yahoo KeyKey 2" (YahooKeyKey2.app) headlessly with swiftc, assemble the .app
+# Build "Yahoo! KeyKey 2" (YahooKeyKey2.app) headlessly with swiftc, assemble the .app
 # bundle, ad-hoc sign it.
 #
 # This is a deliberate deviation from the plan's "create the Xcode project in the IDE"
@@ -13,12 +13,16 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 BUILD="$ROOT/build"
 # Debug identity (opt-in via KEYKEY_DEBUG_ID=1): build a SEPARATE input method named
-# "Yahoo KeyKey 2 Debug" with bundle id com.dragonapp.inputmethod.yahoo-keykey.debug, so a local test
+# "Yahoo! KeyKey 2 Debug" with bundle id com.dragonapp.inputmethod.yahoo-keykey.debug, so a local test
 # build never collides with / shadows the installed RELEASE IME. (Two bundles sharing the
 # release id register as duplicates in Launch Services and hide the real input source from
 # the Input Sources picker.) Release/CI builds leave KEYKEY_DEBUG_ID unset and are unaffected.
 RELEASE_BUNDLE_ID="com.dragonapp.inputmethod.yahoo-keykey"
 if [[ "${KEYKEY_DEBUG_ID:-}" == "1" ]]; then
+  # The bundle FILENAME, not the name a user sees — that comes from the plist, renamed below. No
+  # "!" on purpose, like the release's YahooKeyKey2.app (#126): tools/run-debug.sh installs, kills
+  # and relaunches by this exact path, and renaming it would strand the old bundle in
+  # ~/Library/Input Methods beside the new one, two copies claiming the one .debug id.
   APP_BUNDLE_NAME="Yahoo KeyKey 2 Debug"
   DEBUG_BUNDLE_ID="${RELEASE_BUNDLE_ID}.debug"
 else
@@ -39,7 +43,7 @@ KIT_DIR="$ROOT/vendor/dragon-kit"
 
 SDK="$(xcrun --show-sdk-path)"
 # Apple Silicon only: pin the target to arm64 regardless of the build host's
-# architecture. Yahoo KeyKey 2 does not ship an Intel (x86_64) slice. macOS 26 minimum.
+# architecture. Yahoo! KeyKey 2 does not ship an Intel (x86_64) slice. macOS 26 minimum.
 TARGET="arm64-apple-macosx26.0"
 
 # Optimization. swiftc defaults to -Onone, so until now every build — including the notarized
@@ -204,7 +208,7 @@ rm -rf "$APP/Contents/Resources/DragonKit_DragonKit.bundle"
 cp -R "$KIT_BUNDLE" "$APP/Contents/Resources/DragonKit_DragonKit.bundle"
 
 if [[ "${KEYKEY_DEBUG_ID:-}" == "1" ]]; then
-  echo "==> Applying debug identity ($DEBUG_BUNDLE_ID / \"$APP_BUNDLE_NAME\")"
+  echo "==> Applying debug identity ($DEBUG_BUNDLE_ID / ${APP_BUNDLE_NAME}.app)"
   PLIST="$APP/Contents/Info.plist"
   # Single pass moves every release-id occurrence into the .debug namespace: CFBundleIdentifier,
   # TISInputSourceID, InputMethodConnectionName, and the two ComponentInputModeDict mode ids
@@ -212,8 +216,17 @@ if [[ "${KEYKEY_DEBUG_ID:-}" == "1" ]]; then
   # which is preserved, so mode switching keeps working. SUFeedURL/SUPublicEDKey don't contain
   # the base id, so they're untouched.
   sed -i '' "s|${RELEASE_BUNDLE_ID}|${DEBUG_BUNDLE_ID}|g" "$PLIST"
-  # Distinct name in the menu bar / Input Sources picker.
-  sed -i '' "s|<string>Yahoo KeyKey 2</string>|<string>Yahoo KeyKey 2 Debug</string>|g" "$PLIST"
+  # Distinct name in the menu bar / Input Sources picker: " Debug" appended to whatever the two
+  # name keys hold, found by KEY and never by the name itself. This used to match the literal
+  # "Yahoo KeyKey 2", which silently matched nothing once #126 renamed the product
+  # "Yahoo! KeyKey 2" — every Debug build after that carried the .debug id and the Debug channel
+  # under the release's exact name, and the build still exited 0. The result is now asserted
+  # below, after the localized overrides, so a rename can no longer slip past unnoticed.
+  # A plain assignment, so set -e stops the build if a key is missing rather than writing " Debug".
+  for key in CFBundleName CFBundleDisplayName; do
+    NAME="$(plutil -extract "$key" raw -o - "$PLIST")"
+    plutil -replace "$key" -string "$NAME Debug" "$PLIST"
+  done
   # The version field stays the numeric candidate for the NEXT public release — never
   # "2.11.1 (Debug)". MAC-APP-RELEASE-LIFECYCLE.md makes CFBundleShortVersionString the sole
   # source of truth the release tag is asserted against, and the shared release workflow
@@ -245,12 +258,13 @@ if [[ "${KEYKEY_DEBUG_ID:-}" == "1" ]]; then
   # fine: this runs again on a rebuild into an existing bundle, where the key is already gone.
   /usr/libexec/PlistBuddy -c "Delete :SUFeedURL" "$PLIST" 2>/dev/null || true
   # Re-key the localized input-mode display names (倉頡 / 速成) to the .debug mode ids, and
-  # re-label the localized app name so the picker/menu show "Yahoo KeyKey 2 Debug" (the
+  # re-label the localized app name so the picker/menu show "Yahoo! KeyKey 2 Debug" (the
   # localized CFBundleDisplayName here would otherwise override the Info.plist value above).
+  # Keyed on the CFBundleName / CFBundleDisplayName lines for the same reason as the plist.
   for sf in "$APP/Contents/Resources"/*.lproj/InfoPlist.strings; do
     [ -f "$sf" ] || continue
     sed -i '' "s|${RELEASE_BUNDLE_ID}|${DEBUG_BUNDLE_ID}|g" "$sf"
-    sed -i '' 's|"Yahoo KeyKey 2"|"Yahoo KeyKey 2 Debug"|g' "$sf"
+    sed -i '' -E 's|^(CFBundle(Display)?Name = "[^"]*)(";)$|\1 Debug\3|' "$sf"
     # And mark the mode names themselves. Re-keying moved the KEYS to the .debug mode ids but left
     # their VALUES reading exactly "倉頡" / "速成" / "拼音" — character for character the release
     # IME's. These are the strings System Settings ▸ Keyboard ▸ Input Sources actually lists, so the
@@ -273,6 +287,18 @@ if [[ "${KEYKEY_DEBUG_ID:-}" == "1" ]]; then
     plutil -lint "$sf" >/dev/null
   done
   plutil -lint "$PLIST"
+  # Prove the rename took, in the plist and in every locale that overrides it — the same stance as
+  # the numeric-version assert above. A pattern that matches nothing is not an error to sed, which
+  # is exactly how the name went unrenamed for a month. A missing key reads as "" and fails too.
+  for f in "$PLIST" "$APP/Contents/Resources"/*.lproj/InfoPlist.strings; do
+    for key in CFBundleName CFBundleDisplayName; do
+      NAME="$(/usr/libexec/PlistBuddy -c "Print :$key" "$f" 2>/dev/null || true)"
+      if [[ "$NAME" != *" Debug" ]]; then
+        echo "ERROR: $key in ${f#"$APP/"} is '$NAME', not a Debug name — the debug rename matched nothing" >&2
+        exit 1
+      fi
+    done
+  done
 fi
 
 echo "==> Embedding Sparkle.framework"
