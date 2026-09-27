@@ -88,18 +88,13 @@ final class ConfigContentTests: XCTestCase {
         let short = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
         XCTAssertEqual(content.displayVersion, DragonVersion.display(short ?? "1.0.0"))
         XCTAssertTrue(content.displayVersion.hasPrefix("v"))
-        XCTAssertEqual(content.date, "2026-09-04")
+        XCTAssertEqual(content.date, "2026-09-27")
     }
 
-    // 2.13.4 is [.fixed, .changed]: adaptive candidate ordering now follows how often you commit
-    // each candidate in its own candidate list, so a rare character you pick leads the list next
-    // time even when the built-in dictionary has never heard of it — which it previously could
-    // never do at any number of picks (issue #130). `.fixed` leads, because what a user meets is
-    // a behaviour that was reported as broken; the one `.changed` entry is the consequence they
-    // notice on first launch, that the learning history starts fresh.
-    //
-    // 2.13.3's `.changed2` (the rename to "Yahoo! KeyKey 2") is gone from all seven .strings
-    // files rather than left stranded with no section to render it — see WhatsNewConfig.
+    // 2.14.0 is [.added]: an opt-in setting that makes Shift + Space type a full-width space (　)
+    // in 倉頡, 速成 and 拼音 (issue #135). Nothing changes for anyone who leaves it off, so there is
+    // no `.fixed` or `.changed` entry — 2.13.4's `.fixed1` and `.changed1` are gone from all seven
+    // .strings files rather than left stranded with no section to render them.
     //
     // Entry KEYS are pinned, not just kinds and counts, because kinds and counts had stopped
     // catching anything: 2.11.3, 2.11.4 and the 2.11.5 draft were all [.changed] with one entry —
@@ -110,13 +105,12 @@ final class ConfigContentTests: XCTestCase {
     // text SAYS is the release gate's job — it diffs every locale's .strings file — so between
     // them a stale pane cannot ship.
     @MainActor
-    func testWhatsNewAnnouncesTheAdaptiveOrderingFixAndTheFreshHistory() {
+    func testWhatsNewAnnouncesTheFullWidthSpaceSetting() {
         let content = WhatsNewConfig.content
-        XCTAssertEqual(content.sections.map(\.kind), [.fixed, .changed])
-        XCTAssertEqual(content.sections.map(\.entries.count), [1, 1])
+        XCTAssertEqual(content.sections.map(\.kind), [.added])
+        XCTAssertEqual(content.sections.map(\.entries.count), [1])
         XCTAssertEqual(content.sections.flatMap(\.entries), [
-            L("app.whatsNew.fixed1"),
-            L("app.whatsNew.changed1"),
+            L("app.whatsNew.added1"),
         ])
     }
 

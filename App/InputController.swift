@@ -343,6 +343,23 @@ final class InputController: IMKInputController {
             return true
         }
 
+        // 全形空白 (issue #135): with the option on, Shift + Space types a full-width space (　) in
+        // every input method. It runs before the association, candidate and 拼音 branches, where
+        // Space pages or commits, and finishes anything in progress exactly as 臨時英數 above does.
+        // Off, Shift + Space falls through and behaves exactly like Space.
+        if KeyEventPolicy.typesFullWidthSpace(enabled: Preferences.shiftSpaceFullWidthSpaceEnabled,
+                                              keyCode: event.keyCode,
+                                              modifierFlags: event.modifierFlags) {
+            if !engine.composingText.isEmpty {
+                _ = commitCurrent(to: client)
+            } else if !associations.isEmpty {
+                clearAssociations()
+            }
+            client.insertText(KeyEventPolicy.fullWidthSpace,
+                              replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
+            return true
+        }
+
         // Association mode (聯想): after committing a single character we offer follow-on phrases.
         // The engine has no active composition here. Digits pick a phrase; arrows page; Esc
         // dismisses; any other key dismisses the suggestions and is then processed normally.

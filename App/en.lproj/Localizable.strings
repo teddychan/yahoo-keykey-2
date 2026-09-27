@@ -8,6 +8,8 @@
 "keykey.general.input" = "Input";
 "keykey.general.outputSimplified" = "Output Simplified Chinese";
 "keykey.general.fullWidthPunctuation" = "Full-width punctuation";
+"keykey.general.shiftSpaceFullWidthSpace" = "Shift + Space types a full-width space";
+"keykey.general.shiftSpaceFullWidthSpaceHint" = "Applies to 倉頡, 速成 and 拼音: Shift + Space types a full-width space (　), the width of one Chinese character, instead of acting like Space. Anything you are composing is committed first.";
 "keykey.general.associatedPhrases" = "Associated phrases (聯想)";
 "keykey.general.associationContinuationOnly" = "Show only the continuation in associated phrases";
 "keykey.general.associationContinuationOnlyHint" = "Show 係／心／於 instead of 關係, like the original Yahoo! KeyKey. What you commit is unchanged.";
@@ -30,10 +32,9 @@
 "keykey.general.adaptiveCandidateOrderHint" = "Applies to 倉頡, 速成 and associated phrases. Every candidate list is learned on its own: within a list, the candidates you have committed more often come first, and candidates you have committed equally often keep their built-in order. A 倉頡 code with a wildcard is learned separately from a complete code, and what is learned about 聯想字詞 is shared between 倉頡 and 速成. 拼音 keeps ranking candidates exactly as it did before. Turn it off for the built-in order — 五代 and 拼音 use their built-in rankings, 三代 the original Yahoo! KeyKey order — which also pauses counting everywhere, without erasing what you have already learned.";
 "keykey.general.language" = "Language";
 
-/* What's New pane (2.13.4) */
-"app.whatsNew.summary" = "In 倉頡, 速成 and associated phrases, picking a character now decides where it appears next time. The candidate order follows how often you have chosen each candidate in that particular list, so a character you pick moves in front of the ones you have not — including a character the built-in dictionary does not know, which previously could never get there. That learning starts fresh with this version. 拼音 is unchanged.";
-"app.whatsNew.fixed1" = "In 倉頡 and 速成, a character you pick now leads its candidate list next time. Yahoo! KeyKey 2 used to mix how often you had chosen a character together with how common the built-in dictionary considers it, so picking a rare character only nudged it forward — and a character the dictionary does not know could never overtake one it does, however many times you chose it. Under 卜月卜尸心, for example, 龍 is in the dictionary and the variant 㡣 is not, so 㡣 stayed in second place permanently. Each candidate list is now counted on its own: the candidate you have chosen most often in that list comes first, and the dictionary order only decides between candidates you have chosen the same number of times. Pick 㡣 once and it leads the next time you type that code. A candidate you genuinely use more often stays ahead until the other one has been chosen as many times. 聯想字詞 follows the same rule; 拼音 is not affected by this change.";
-"app.whatsNew.changed1" = "Candidate learning for 倉頡, 速成 and associated phrases starts fresh. What you pick is now remembered for each candidate list separately — the characters under one 倉頡 code, one 倉頡 wildcard pattern, one 速成 code, or the words suggested after one character — instead of one count per character shared across all of them. What was stored before was a single count per character with no record of which list you had been choosing from, so there is no accurate way to turn it into the new per-list history; rather than guess, Yahoo! KeyKey 2 starts counting these again. 倉頡 and 速成 share what they learn about 聯想字詞, because both suggest the same words after the same character. 拼音 keeps its own learning, which is neither changed nor reset.";
+/* What's New pane (2.14.0) */
+"app.whatsNew.summary" = "Shift + Space can now type a full-width space (　) in 倉頡, 速成 and 拼音 — turn it on in Settings.";
+"app.whatsNew.added1" = "A new setting in General ▸ Input, “Shift + Space types a full-width space”, off by default. Turn it on and Shift + Space types a full-width space (　), the width of one Chinese character, in 倉頡, 速成 and 拼音 — no need to switch input source. Anything you are composing is committed first. With it off, Shift + Space works exactly like Space, as before.";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "Disable Cangjie and Simplex from Input Sources";

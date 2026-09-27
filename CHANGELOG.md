@@ -2,6 +2,18 @@
 
 A plain-language list of changes in each version, newest first.
 
+## 2.14.0
+
+- **Added: Shift + Space can type a full-width space (　).** A new setting in **設定… ▸ 一般 ▸
+  輸入**, **Shift + 空白鍵輸入全形空白**, is off by default. Turn it on and Shift + Space types a
+  full-width space — U+3000, the width of one Chinese character, as formal Chinese typesetting
+  uses for indents and gaps — in 倉頡, 速成 and 拼音 alike, without switching input source.
+
+  If you are in the middle of a character, it is committed first, the same way Shift + a letter
+  (臨時英數) commits it before typing the letter; associated-phrase suggestions on screen are
+  dismissed. With the setting off, Shift + Space works exactly like Space, as before. Thanks to
+  the reporter of [issue #135](https://github.com/teddychan/yahoo-keykey-2/issues/135).
+
 ## 2.13.4
 
 - **Fixed: in 倉頡 and 速成, a character you pick now leads its candidate list next time.**

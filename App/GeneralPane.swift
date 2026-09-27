@@ -22,6 +22,8 @@ private struct GeneralPaneView: View {
             DragonSection(LocalizedStringKey(L("keykey.general.input"))) {
                 Toggle(L("keykey.general.outputSimplified"), isOn: $model.outputSimplified)
                 Toggle(L("keykey.general.fullWidthPunctuation"), isOn: $model.fullWidthPunctuation)
+                Toggle(L("keykey.general.shiftSpaceFullWidthSpace"), isOn: $model.shiftSpaceFullWidthSpace)
+                    .dragonAnnotation(LocalizedStringKey(L("keykey.general.shiftSpaceFullWidthSpaceHint")))
                 Toggle(L("keykey.general.associatedPhrases"), isOn: $model.associatedPhrases)
                 Toggle(L("keykey.general.associationContinuationOnly"), isOn: $model.associationContinuationOnly)
                     .dragonAnnotation(LocalizedStringKey(L("keykey.general.associationContinuationOnlyHint")))

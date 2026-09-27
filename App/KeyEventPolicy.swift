@@ -33,6 +33,20 @@ enum KeyEventPolicy {
         enabled && autoCompletedCode && !alreadyConfirmed
     }
 
+    /// U+3000 IDEOGRAPHIC SPACE — the full-width space (全形空白), one Chinese character wide.
+    static let fullWidthSpace = "\u{3000}"
+
+    /// Whether this key press types a full-width space (issue #135): Shift + Space, with no
+    /// ⌃⌥⌘, while the option is on. Matched by key code like every other Space check, so it holds
+    /// on any keyboard layout. Caps Lock does not matter.
+    ///
+    /// Off (the default), Shift + Space keeps behaving exactly like Space.
+    static func typesFullWidthSpace(enabled: Bool, keyCode: UInt16,
+                                    modifierFlags: NSEvent.ModifierFlags) -> Bool {
+        enabled && keyCode == 49 && modifierFlags.contains(.shift)
+            && modifierFlags.intersection([.control, .option, .command]).isEmpty
+    }
+
     // MARK: - The numbered candidate window (candidates and 聯想 page identically)
 
     /// The 1–9 selection digit a key event's `characters` denotes, or nil for anything else. Reads

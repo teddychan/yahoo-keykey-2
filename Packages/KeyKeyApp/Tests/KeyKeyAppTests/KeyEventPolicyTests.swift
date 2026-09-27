@@ -47,6 +47,51 @@ final class KeyEventPolicyTests: XCTestCase {
                                                          alreadyConfirmed: false))
     }
 
+    // MARK: typesFullWidthSpace (issue #135)
+
+    private static let space: UInt16 = 49
+
+    func testShiftSpaceTypesFullWidthSpaceWhenEnabled() {
+        XCTAssertTrue(KeyEventPolicy.typesFullWidthSpace(enabled: true, keyCode: Self.space,
+                                                         modifierFlags: [.shift]))
+        // Caps Lock is a state, not a chord — it must not stop the shortcut.
+        XCTAssertTrue(KeyEventPolicy.typesFullWidthSpace(enabled: true, keyCode: Self.space,
+                                                         modifierFlags: [.shift, .capsLock]))
+    }
+
+    func testDisabledOptionLeavesShiftSpaceAsSpace() {
+        // Default (off): Shift + Space keeps behaving exactly like Space.
+        XCTAssertFalse(KeyEventPolicy.typesFullWidthSpace(enabled: false, keyCode: Self.space,
+                                                          modifierFlags: [.shift]))
+    }
+
+    func testPlainSpaceNeverTypesFullWidthSpace() {
+        XCTAssertFalse(KeyEventPolicy.typesFullWidthSpace(enabled: true, keyCode: Self.space,
+                                                          modifierFlags: []))
+        XCTAssertFalse(KeyEventPolicy.typesFullWidthSpace(enabled: true, keyCode: Self.space,
+                                                          modifierFlags: [.capsLock]))
+    }
+
+    func testOtherChordsWithShiftSpaceAreLeftAlone() {
+        for extra: NSEvent.ModifierFlags in [.option, .control, .command] {
+            XCTAssertFalse(KeyEventPolicy.typesFullWidthSpace(enabled: true, keyCode: Self.space,
+                                                              modifierFlags: [.shift, extra]),
+                           "Shift + \(extra) + Space must not type a full-width space")
+        }
+    }
+
+    func testShiftWithAnotherKeyIsNotFullWidthSpace() {
+        // Shift + letter is 臨時英數, not this shortcut. Key code 0 is A; 36 is Return.
+        XCTAssertFalse(KeyEventPolicy.typesFullWidthSpace(enabled: true, keyCode: 0,
+                                                          modifierFlags: [.shift]))
+        XCTAssertFalse(KeyEventPolicy.typesFullWidthSpace(enabled: true, keyCode: 36,
+                                                          modifierFlags: [.shift]))
+    }
+
+    func testFullWidthSpaceIsTheIdeographicSpace() {
+        XCTAssertEqual(KeyEventPolicy.fullWidthSpace.unicodeScalars.map(\.value), [0x3000])
+    }
+
     func testImeRelevantModifiersAreNotSystemShortcuts() {
         // ⇧+letter (臨時英數) and plain/⌥ typing stay with the IME.
         XCTAssertFalse(KeyEventPolicy.isSystemShortcut([]))

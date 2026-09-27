@@ -108,6 +108,8 @@ rm -rf ~/Library/HTTPStorages/com.dragonapp.inputmethod.yahoo-keykey
 - **See the code (反查／拆碼提示)** — show each candidate's 倉頡 code, or its pinyin reading.
 - **臨時英數** — hold **Shift** and press a letter to type that one English letter without
   switching input source.
+- **全形空白** — turn on **Shift + 空白鍵輸入全形空白** in Settings and **Shift + Space** types a
+  full-width space (　) in all three modes.
 - **Backup and restore** — save your settings to a folder from **設定…** and bring them back
   later, handy when setting up a new Mac.
 - **Free and open source** — MIT licensed, signed and notarized, with in-app updates.

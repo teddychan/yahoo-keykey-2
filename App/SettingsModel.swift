@@ -29,6 +29,13 @@ final class SettingsModel {
         set { Preferences.fullWidthPunctuationEnabled = newValue }
     }
 
+    // Shift + 空白鍵輸入全形空白 (issue #135). A plain toggle, so a computed forwarder is fine;
+    // InputController reads Preferences live on every key press.
+    var shiftSpaceFullWidthSpace: Bool {
+        get { Preferences.shiftSpaceFullWidthSpaceEnabled }
+        set { Preferences.shiftSpaceFullWidthSpaceEnabled = newValue }
+    }
+
     var associatedPhrases: Bool {
         get { Preferences.associatedPhrasesEnabled }
         set { Preferences.associatedPhrasesEnabled = newValue }

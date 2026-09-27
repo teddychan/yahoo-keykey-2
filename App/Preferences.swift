@@ -30,6 +30,7 @@ enum Preferences {
         static let associationSelectionTrigger = "associationSelectionTrigger"
         static let strokeConfirmationEnabled = "strokeConfirmationEnabled"
         static let adaptiveCandidateOrderEnabled = "adaptiveCandidateOrderEnabled"
+        static let shiftSpaceFullWidthSpaceEnabled = "shiftSpaceFullWidthSpaceEnabled"
     }
 
     static let minFontSize: CGFloat = 14
@@ -49,6 +50,7 @@ enum Preferences {
             Key.associationSelectionTrigger: AssociationTrigger.number.rawValue,
             Key.strokeConfirmationEnabled: false,
             Key.adaptiveCandidateOrderEnabled: true,
+            Key.shiftSpaceFullWidthSpaceEnabled: false,
         ])
     }
 
@@ -124,5 +126,13 @@ enum Preferences {
     static var adaptiveCandidateOrderEnabled: Bool {
         get { UserDefaults.standard.bool(forKey: Key.adaptiveCandidateOrderEnabled) }
         set { UserDefaults.standard.set(newValue, forKey: Key.adaptiveCandidateOrderEnabled) }
+    }
+
+    // When true, Shift + Space types a full-width space (　) in every input method, committing
+    // anything being composed first (issue #135). Off by default, so Shift + Space keeps
+    // behaving exactly like Space until the user opts in.
+    static var shiftSpaceFullWidthSpaceEnabled: Bool {
+        get { UserDefaults.standard.bool(forKey: Key.shiftSpaceFullWidthSpaceEnabled) }
+        set { UserDefaults.standard.set(newValue, forKey: Key.shiftSpaceFullWidthSpaceEnabled) }
     }
 }
