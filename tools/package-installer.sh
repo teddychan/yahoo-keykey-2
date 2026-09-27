@@ -1,5 +1,5 @@
 #!/bin/bash
-# Build a GUI .pkg installer for "Yahoo KeyKey 2" (an InputMethodKit input method).
+# Build a GUI .pkg installer for "Yahoo! KeyKey 2" (an InputMethodKit input method).
 #
 # The resulting double-clickable .pkg drives the native macOS Installer.app flow,
 # installs YahooKeyKey2.app into the CURRENT user's ~/Library/Input Methods/

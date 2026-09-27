@@ -35,7 +35,7 @@ Yahoo! KeyKey 三代 tables (倉頡第三代 / 速成)
 
 Files:   Resources/cangjie-yahoo.txt  (Cangjie 3rd Generation, 倉頡第三代)
          Resources/simplex-yahoo.txt  (Simplex / 速成, quick codes)
-Content: <code>\t<char> mapping used by the "三代倉頡（Yahoo KeyKey 相容）" mode.
+Content: <code>\t<char> mapping used by the "三代倉頡（Yahoo! KeyKey 相容）" mode.
          The line order is preserved verbatim — it is the original Yahoo! KeyKey
          candidate order, which that mode surfaces directly.
 Format:  Extracted from the source .cin %chardef sections; only rows whose code is

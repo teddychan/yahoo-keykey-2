@@ -1,4 +1,4 @@
-Yahoo KeyKey 2 was installed into:
+Yahoo! KeyKey 2 was installed into:
 
     ~/Library/Input Methods/YahooKeyKey2.app
 
@@ -9,10 +9,9 @@ To finish setup:
      Use the "Log Out" button below to do this now.
 
   2. Open System Settings ▸ Keyboard ▸ Input Sources ▸ "+",
-     choose Traditional Chinese, and add:
-         Yahoo KeyKey 2 — Cangjie    and/or
-         Yahoo KeyKey 2 — Simplex
+     choose Traditional Chinese, and add any of the Yahoo! KeyKey 2 modes:
+         倉頡 (Cangjie)   速成 (Simplex)   拼音 (Pinyin)
 
   3. Switch input source with Ctrl-Space and start typing.
 
-Enjoy Yahoo KeyKey 2!
+Enjoy Yahoo! KeyKey 2!

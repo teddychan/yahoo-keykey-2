@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  productbuild distribution definition for "Yahoo KeyKey 2".
+  productbuild distribution definition for "Yahoo! KeyKey 2".
 
   Placeholders below are substituted by tools/package-installer.sh at build time:
     __VERSION__        CFBundleShortVersionString read from the built app
@@ -15,7 +15,7 @@
     * customize="never"  -> single straightforward flow, no component selection.
 -->
 <installer-gui-script minSpecVersion="1">
-    <title>Yahoo KeyKey 2</title>
+    <title>Yahoo! KeyKey 2</title>
 
     <welcome file="welcome.txt" mime-type="text/plain"/>
     <conclusion file="conclusion.txt" mime-type="text/plain"/>

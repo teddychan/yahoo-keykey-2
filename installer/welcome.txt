@@ -1,10 +1,11 @@
-Yahoo KeyKey 2 — Traditional Chinese Input Method
+Yahoo! KeyKey 2 — Traditional Chinese Input Method
 
-This installer adds Yahoo KeyKey 2 to your Mac. It is a Traditional
-Chinese input method offering two input modes:
+This installer adds Yahoo! KeyKey 2 to your Mac. It is a Traditional
+Chinese input method offering three input modes:
 
     • Cangjie (倉頡)
     • Simplex / Quick (速成)
+    • Pinyin (拼音)
 
 It installs into your personal Input Methods folder
 (~/Library/Input Methods/YahooKeyKey2.app), so NO administrator

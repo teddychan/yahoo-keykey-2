@@ -1,5 +1,5 @@
 #!/bin/bash
-# Package "Yahoo KeyKey 2" for non-App-Store distribution.
+# Package "Yahoo! KeyKey 2" for non-App-Store distribution.
 #
 # Produces a downloadable .zip containing YahooKeyKey2.app + Install.txt, which
 # users copy into ~/Library/Input Methods/ and enable in System Settings. No DMG.
@@ -115,7 +115,7 @@ mkdir -p "$STAGE"
 cp -R "$APP" "$STAGE/$APP_NAME"
 
 cat > "$STAGE/Install.txt" <<EOF
-Yahoo KeyKey 2 — Install
+Yahoo! KeyKey 2 — Install
 
 Install from this zip by copying the app into your Input Methods folder:
 
@@ -126,8 +126,8 @@ Install from this zip by copying the app into your Input Methods folder:
 2. Log out and log back in. macOS only scans input methods at login.
 
 3. Open System Settings > Keyboard > Input Sources > "+",
-   choose Traditional Chinese, and add:
-       Yahoo KeyKey 2 — Cangjie   and/or   Yahoo KeyKey 2 — Simplex
+   choose Traditional Chinese, and add any of the Yahoo! KeyKey 2 modes:
+       倉頡 (Cangjie)   速成 (Simplex)   拼音 (Pinyin)
 
 4. Switch input source with Ctrl-Space and start typing.
 
