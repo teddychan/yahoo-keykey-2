@@ -36,11 +36,29 @@
 "keykey.general.adaptiveCandidateOrderHint" = "倉頡・速成・注音と聯想字詞に適用されます。候選字リストごとに個別に学習します。同じリスト内では、確定した回数が多い候補が先に並び、回数が同じ候補は元の順序を保ちます。ワイルドカードを含む倉頡コードは完全なコードとは別に学習し、聯想字詞について学習した内容は倉頡・速成・注音で共有されます。拼音の候補の並び順は従来どおりで変わりません。オフにすると元の順序に戻ります（五代と拼音は内蔵の順位、三代と注音は本来の Yahoo! KeyKey の順序）。集計もすべて一時停止しますが、すでに学習した内容は消えません。";
 "keykey.general.language" = "言語";
 
-/* What's New pane (2.15.0) */
-"app.whatsNew.summary" = "注音（ㄅ半）が戻ってきました。しかも以前と同じ、1音1文字の方式です。注音記号を打ち、声調で音節を確定すると（スペースキーが第1声）候補が表示され、1–9 で選べます。次の文字の最初の記号を打てば画面の文字はそのまま確定されるので、文の途中で Enter を押す必要はありません。キーボードは「標準（大千）」と「倚天」から選べます。倉頡・速成・拼音はまったく変わりません。";
-"app.whatsNew.added1" = "注音（ㄅ半）入力方式を追加しました。注音記号を打ち、声調で音節を確定します。スペースキーが第1声で、これはどの注音キーボードでも同じです。確定すると候補ウインドウが開き、1–9 で選択、スペースキーや矢印キーでページを送れます。次の文字の最初の記号を打つと画面の文字は自動的に確定されるため、文をそのまま打ち続けられます。確定のたびに連想語句が表示されるのも倉頡・速成と同じです。候補はオリジナルの Yahoo! KeyKey の ㄅ半 表から、その表自身の順序のまま取られ（ㄍㄨㄛˊ → 國、ㄉㄜ˙ → 的）、選んだ結果はその読みごとに学習されます。「システム設定 ▸ キーボード」で「入力ソース」の横の「編集…」をクリックし（「+」は設定ページではなくそのシートの中にあります）、「+ ▸ 繁体字中国語 ▸ 注音」で追加して、他の入力方式と同様に一度ログアウトしてからログインし直してください。";
-"app.whatsNew.added2" = "注音キーボードを「標準（大千）」と「倚天」から選べます。既定は大千で、台湾のキーボードに印字されている配置、そしてオリジナルの Yahoo! KeyKey の初期設定でもあります。「設定… ▸ 入力方式」から、または注音の使用中に入力メニューから切り替えられ、次の打鍵から反映されます。";
-"app.whatsNew.changed1" = "注音では2つのキーの働きが変わります。注音がそのキーを必要とするためです。大千では ㄝ ㄡ ㄤ ㄥ ㄦ が , . ; / - の位置にあるので、注音ではこれらのキーが句読点ではなく注音記号を入力します。「，」と「。」は Shift + , と Shift + . に移り、これはオリジナルの Yahoo! KeyKey と同じ配置です。また数字キーも注音の入力に使うため、注音では連想語句の選択が「聯想選字鍵」の設定にかかわらず常に Shift + 数字になります。これにより、数字キーをそのまま押して ㄅ ㄉ ㄓ ㄚ ㄞ ㄢ や声調を入力できます。倉頡・速成・拼音に変更はありません。";
+/* General pane ▸ Installation (2.16.0): moving to /Library/Input Methods */
+"keykey.general.installation" = "インストール";
+"keykey.general.installForAllUsers" = "すべてのユーザ用にインストール…";
+"keykey.general.installForAllUsersHint" = "1Password などほかのアプリが「セキュア入力」をオンにすると、macOS は1人のユーザ用にインストールされた入力方式をグレイ表示にします。すべてのユーザ用にインストールすると、Yahoo! KeyKey 2 は /Library/Input Methods に移動し、そのまま使えます。管理者パスワードが必要で、以後のアップデートでも毎回求められます。";
+"keykey.general.installedForAllUsers" = "すべてのユーザ用にインストール済み";
+"keykey.general.installedForAllUsersHint" = "/Library/Input Methods にあるため、ほかのアプリがセキュア入力をオンにしても Yahoo! KeyKey 2 を使えます。アップデート時に管理者パスワードが求められます。";
+"keykey.general.installedWithHomebrew" = "Homebrew でインストール済み";
+"keykey.general.installedWithHomebrewHint" = "すべてのユーザ用にインストールして、ほかのアプリがセキュア入力をオンにしても Yahoo! KeyKey 2 を使えるようにするには、ターミナルで `brew reinstall --cask yahoo-keykey-2` を実行してください。";
+"keykey.general.installConfirmTitle" = "すべてのユーザ用にインストールしますか？";
+"keykey.general.installConfirmMessage" = "Yahoo! KeyKey 2 は管理者パスワードを求め、/Library/Input Methods に移動してから再起動します。設定と学習した内容はそのまま残ります。";
+"keykey.general.installConfirm" = "インストール";
+"keykey.general.installPrompt" = "Yahoo! KeyKey 2 がすべてのユーザ用にインストールしようとしています。";
+"keykey.general.installFailedTitle" = "すべてのユーザ用にインストールできませんでした";
+"keykey.general.installFailedMessage" = "何も変更されていません。%@";
+"keykey.general.installOldCopyTitle" = "すべてのユーザ用にインストールしました";
+"keykey.general.installOldCopyMessage" = "%@ にある古いコピーを削除できませんでした。ご自分でゴミ箱に入れてから、ログアウトしてもう一度ログインしてください。";
+"keykey.general.installSignatureUnreadable" = "Yahoo! KeyKey 2 は自身の署名を確認できませんでした。最新のリリースから再インストールして、もう一度お試しください。";
+
+/* What's New pane (2.16.0) */
+"app.whatsNew.summary" = "ほかのアプリが macOS の「セキュア入力」をオンにしたままでも（Mac のロック後に 1Password がよくそうなります）、Yahoo! KeyKey 2 が使えるようになりました。これまでは、そのアプリを終了するまで倉頡などすべての入力方式が入力メニューでグレイ表示になっていました。「設定… ▸ 一般 ▸ すべてのユーザ用にインストール…」を一度選んで管理者パスワードを入力すると、Yahoo! KeyKey 2 は /Library/Input Methods に移動し、macOS がそのまま使えるようにします。";
+"app.whatsNew.added1" = "「設定… ▸ 一般」に「すべてのユーザ用にインストール…」を追加しました。いずれかのアプリがセキュア入力（パスワード入力用のモード）をオンにしている間、macOS は1人のユーザ用にインストールされた入力方式をグレイ表示にします。ご自分の ~/Library/Input Methods にあるコピーもその一つです。すべてのユーザ用に /Library/Input Methods へインストールすると、Yahoo! KeyKey 2 は Apple 純正の入力方式と同じように使えます。管理者パスワードを一度入力すると再起動し、設定と学習した内容はそのまま残ります。以後のアップデートでもパスワードが求められます。";
+"app.whatsNew.changed1" = "Homebrew の cask がすべてのユーザ用にインストールするようになったため、Homebrew がパスワードを求めます。このリリースより前に Homebrew でインストールした場合は、brew reinstall --cask yahoo-keykey-2 を実行してコピーを移動してください。";
+"app.whatsNew.changed2" = "ほかのアプリがセキュア入力をオンにしている間、Yahoo! KeyKey 2 は入力はできますが、選んだ字から学習しないため、その間に入力した内容は保存されません。セキュア入力がオフになるとすぐに学習を再開します。";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "入力ソースから Yahoo! KeyKey 2 の入力方式を無効にする";

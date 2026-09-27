@@ -2,10 +2,12 @@ import SwiftUI
 import DragonKit
 import KeyKeyEngine
 
-// KeyKey's General settings pane: the real input toggles (輸出簡體字 / 全形標點 / 聯想字詞 and the
+// KeyKey's General settings pane: the 安裝 section first (it moves this copy to /Library/Input
+// Methods — see SystemInstall), then the real input toggles (輸出簡體字 / 全形標點 / 聯想字詞 and the
 // 聯想只顯示接續字 option), the candidate font size, the 倉頡版本 picker and 以空白鍵確認字根
-// toggle, and the shared language picker. Everything binds to `SettingsModel`, which forwards
-// to the live `Preferences` the engine reads — so changes apply on the next composition, no restart.
+// toggle, and the shared language picker. Everything but the 安裝 section binds to `SettingsModel`,
+// which forwards to the live `Preferences` the engine reads — so changes apply on the next
+// composition, no restart.
 struct GeneralPane: SettingsPane {
     let id = "general"
     let title = "keykey.pane.general"
@@ -20,6 +22,15 @@ private struct GeneralPaneView: View {
 
     var body: some View {
         DragonForm {
+            // First, because it decides whether everything below keeps working while another app
+            // holds secure input. Hidden for a copy running from anywhere else (a build folder, a
+            // translocated copy), which has no install to speak of.
+            if installation.location != .elsewhere {
+                DragonSection(LocalizedStringKey(L("keykey.general.installation"))) {
+                    InstallationRow(model: installation)
+                }
+            }
+
             DragonSection(LocalizedStringKey(L("keykey.general.input"))) {
                 Toggle(L("keykey.general.outputSimplified"), isOn: $model.outputSimplified)
                 Toggle(L("keykey.general.fullWidthPunctuation"), isOn: $model.fullWidthPunctuation)
@@ -95,6 +106,121 @@ private struct GeneralPaneView: View {
                 // read through L(), which dragonLocalized() re-resolves in place, so there is
                 // nothing to relaunch for.
                 LanguagePicker()
+            }
+        }
+    }
+
+    // Shared, not @State: the pane is rebuilt whenever the language changes, and a fresh model
+    // would lose the result of an install still waiting on its password prompt.
+    private var installation: InstallationModel { .shared }
+}
+
+// The 安裝 section: where this copy is installed, and the one-shot move to /Library/Input Methods
+// that keeps KeyKey usable while another app holds secure input (see SystemInstall).
+private struct InstallationRow: View {
+    @Bindable var model: InstallationModel
+
+    var body: some View {
+        switch model.location {
+        case .allUsers:
+            Text(L("keykey.general.installedForAllUsers"))
+                .dragonAnnotation(LocalizedStringKey(L("keykey.general.installedForAllUsersHint")))
+        case .homebrew:
+            Text(L("keykey.general.installedWithHomebrew"))
+                .dragonAnnotation(LocalizedStringKey(L("keykey.general.installedWithHomebrewHint")))
+        case .currentUser:
+            Button(L("keykey.general.installForAllUsers")) { model.alert = .confirm }
+                .disabled(model.isInstalling)
+                .dragonAnnotation(LocalizedStringKey(L("keykey.general.installForAllUsersHint")))
+                // One alert driven by one value: stacking several .alert modifiers on a view drops
+                // all but one (the same reason BackupSettingsPane carries its notice as data).
+                .alert(model.alert.map(Self.title) ?? "",
+                       isPresented: Binding(get: { model.alert != nil },
+                                            set: { if !$0 { model.alert = nil } }),
+                       presenting: model.alert) { alert in
+                    switch alert {
+                    case .confirm:
+                        Button(L("keykey.general.installConfirm")) { Task { await model.install() } }
+                        Button(L("DragonKit.cancel"), role: .cancel) {}
+                    case .failed:
+                        Button(L("DragonKit.ok")) {}
+                    case .oldCopyLeft(_, let newCopy):
+                        Button(L("DragonKit.ok")) { SystemInstall.relaunch(from: newCopy) }
+                    }
+                } message: { alert in
+                    Text(Self.message(alert))
+                }
+        case .elsewhere:
+            EmptyView()
+        }
+    }
+
+    private static func title(_ alert: InstallationModel.Alert) -> String {
+        switch alert {
+        case .confirm: L("keykey.general.installConfirmTitle")
+        case .failed: L("keykey.general.installFailedTitle")
+        case .oldCopyLeft: L("keykey.general.installOldCopyTitle")
+        }
+    }
+
+    private static func message(_ alert: InstallationModel.Alert) -> String {
+        switch alert {
+        case .confirm: L("keykey.general.installConfirmMessage")
+        case .failed(let detail): String(format: L("keykey.general.installFailedMessage"), detail)
+        case .oldCopyLeft(let path, _): String(format: L("keykey.general.installOldCopyMessage"), path)
+        }
+    }
+}
+
+@MainActor
+@Observable
+private final class InstallationModel {
+    static let shared = InstallationModel()
+
+    enum Alert {
+        case confirm
+        case failed(String)
+        /// Installed, but the per-user copy could not be removed: say where it is, then hand over.
+        case oldCopyLeft(path: String, newCopy: URL)
+    }
+
+    let location: SystemInstall.Location
+    private(set) var isInstalling = false
+    var alert: Alert?
+
+    private init() {
+        let bundle = Bundle.main.bundleURL.standardizedFileURL
+        location = SystemInstall.location(
+            ofBundleAt: bundle.path,
+            homeDirectory: FileManager.default.homeDirectoryForCurrentUser.path,
+            homebrewTargets: SystemInstall.homebrewTargets(cask: SystemInstall.homebrewCask,
+                                                           appName: bundle.lastPathComponent))
+    }
+
+    func install() async {
+        guard !isInstalling else { return }
+        isInstalling = true
+        defer { isInstalling = false }
+        let bundle = Bundle.main.bundleURL.standardizedFileURL
+        switch await SystemInstall.installCopy(of: bundle, prompt: L("keykey.general.installPrompt")) {
+        case .cancelled:
+            break
+        case .failed(let detail):
+            alert = .failed(detail)
+        case .signatureUnreadable:
+            alert = .failed(L("keykey.general.installSignatureUnreadable"))
+        case .installed:
+            let newCopy = URL(fileURLWithPath: SystemInstall.directory, isDirectory: true)
+                .appendingPathComponent(bundle.lastPathComponent, isDirectory: true)
+            // Exactly one copy may carry the bundle id: with two, macOS may launch either, and
+            // DragonKit's uninstaller refuses to run at all. The new copy is a verified duplicate,
+            // so the old one is removed outright rather than left in the Trash, where it would
+            // still count as a second copy.
+            do {
+                try FileManager.default.removeItem(at: bundle)
+                SystemInstall.relaunch(from: newCopy)
+            } catch {
+                alert = .oldCopyLeft(path: bundle.path, newCopy: newCopy)
             }
         }
     }

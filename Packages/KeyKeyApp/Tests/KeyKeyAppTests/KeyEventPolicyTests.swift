@@ -260,6 +260,19 @@ final class KeyEventPolicyTests: XCTestCase {
         XCTAssertEqual(reads, 1, "displaying a list reads its counts once and writes nothing")
     }
 
+    // MARK: learning while secure input is on
+
+    // Installed for all users, macOS keeps delivering keys to KeyKey while another app holds
+    // secure input, so the two stores must not keep what is typed then. Only recording pauses:
+    // the setting alone decides whether stored counts ORDER a list, so a lock does not reshuffle
+    // candidates the user already knows.
+    func testLearningIsRecordedOnlyWhenTheSettingIsOnAndSecureInputIsOff() {
+        XCTAssertTrue(AdaptiveCandidateOrder.recordsLearning(enabled: true, secureEventInput: false))
+        XCTAssertFalse(AdaptiveCandidateOrder.recordsLearning(enabled: true, secureEventInput: true))
+        XCTAssertFalse(AdaptiveCandidateOrder.recordsLearning(enabled: false, secureEventInput: false))
+        XCTAssertFalse(AdaptiveCandidateOrder.recordsLearning(enabled: false, secureEventInput: true))
+    }
+
     // MARK: effectiveAssociationTrigger (注音 types with the number row)
 
     // In 注音 the digits ARE 注音 keys — ㄅ ㄉ ㄓ ㄚ ㄞ ㄢ and all four tones on 大千 — so a bare

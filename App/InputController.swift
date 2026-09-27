@@ -474,9 +474,11 @@ final class InputController: IMKInputController {
                         // list its trigger character opens. That list is shared by 倉頡 and 速成.
                         // Same store, same gate. Merely showing or dismissing suggestions counts
                         // nothing — only this branch, the one that commits a suggestion, records.
+                        let learning = AdaptiveCandidateOrder.recordsLearning(
+                            enabled: Preferences.adaptiveCandidateOrderEnabled,
+                            secureEventInput: IsSecureEventInputEnabled())
                         for usage in AdaptiveCandidateOrder.usageToRecord(
-                            forAssociationPhrase: phrase,
-                            enabled: Preferences.adaptiveCandidateOrderEnabled) {
+                            forAssociationPhrase: phrase, enabled: learning) {
                             candidateUsage.record(usage.candidate, in: usage.list)
                         }
                         // ALSO the continuation character into the per-character store, exactly
@@ -484,8 +486,7 @@ final class InputController: IMKInputController {
                         // above does — but it still orders 拼音, so dropping this would silently
                         // change 拼音's learning, which is out of scope here.
                         if let ch = AdaptiveCandidateOrder.characterToLearn(
-                            fromAssociationSuffix: suffix,
-                            enabled: Preferences.adaptiveCandidateOrderEnabled) {
+                            fromAssociationSuffix: suffix, enabled: learning) {
                             userFreq.record(ch)
                         }
                     }
@@ -745,9 +746,12 @@ final class InputController: IMKInputController {
             // Adaptive ordering: count this commit within its own candidate list, so a candidate
             // the user commits more often leads that list next time. Nothing is recorded while
             // adaptive ordering is off — the setting pauses counting as well as ignoring counts,
-            // so a user who turned it off is not still being counted.
-            for usage in AdaptiveCandidateOrder.usageToRecord(
-                pending, enabled: Preferences.adaptiveCandidateOrderEnabled) {
+            // so a user who turned it off is not still being counted — or while another app holds
+            // secure input (see AdaptiveCandidateOrder.recordsLearning).
+            let learning = AdaptiveCandidateOrder.recordsLearning(
+                enabled: Preferences.adaptiveCandidateOrderEnabled,
+                secureEventInput: IsSecureEventInputEnabled())
+            for usage in AdaptiveCandidateOrder.usageToRecord(pending, enabled: learning) {
                 candidateUsage.record(usage.candidate, in: usage.list)
             }
             // ALSO the per-character count, exactly as before this release. 倉頡/速成 no longer
@@ -755,7 +759,7 @@ final class InputController: IMKInputController {
             // commit from any mode fed 拼音's ranking. Keeping that is what makes 拼音 behave
             // identically instead of quietly losing the input it learns from.
             if let ch = AdaptiveCandidateOrder.characterToLearn(
-                fromCommitted: text, enabled: Preferences.adaptiveCandidateOrderEnabled) {
+                fromCommitted: text, enabled: learning) {
                 userFreq.record(ch)
             }
         }

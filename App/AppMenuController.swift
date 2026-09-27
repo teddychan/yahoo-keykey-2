@@ -66,7 +66,8 @@ final class AppMenuController {
 
     // Uninstall config ported from the old Uninstaller.swift: wipe the bundle-id defaults
     // domain, the app's Application Support dir, and caches; then DragonUninstaller moves the
-    // bundle to the Trash. The bundle here is the IME under ~/Library/Input Methods.
+    // bundle to the Trash. The bundle here is the IME under ~/Library/Input Methods, or under
+    // /Library/Input Methods once installed for all users (see SystemInstall).
     //
     // The Application Support dir is named as a DIRECTORY, not file by file, which is what makes
     // it hold BOTH learning stores: `candidate-usage.json`, the per-list counts 倉頡/速成/聯想 use,
@@ -98,8 +99,9 @@ final class AppMenuController {
     /// `brew install --cask yahoo-keykey-2` then refuses outright — "already installed" — for an
     /// app that isn't there, pointing at nothing that would fix it. Naming the token lets the kit's
     /// post-exit shell run `brew uninstall --cask --force yahoo-keykey-2` and clear that record.
-    /// The cask installs to `~/Library/Input Methods/` rather than `/Applications`, which changes
-    /// nothing here: brew removes whatever its receipt points at.
+    /// The cask installs to `/Library/Input Methods/` (before 2.16.0, `~/Library/Input Methods/`)
+    /// rather than `/Applications`, which changes nothing here: brew removes whatever its receipt
+    /// points at.
     ///
     /// **Never a flat token.** `brew uninstall --cask` is not bundle-scoped, and
     /// `Casks/yahoo-keykey-2.rb` carries `uninstall quit: "com.dragonapp.inputmethod.yahoo-keykey"`

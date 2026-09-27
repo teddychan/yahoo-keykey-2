@@ -2,6 +2,34 @@
 
 A plain-language list of changes in each version, newest first.
 
+## 2.16.0
+
+- **New: Install for All Users (設定… ▸ 一般 ▸ 為所有使用者安裝…).** While any app holds macOS
+  **secure input** — the mode meant for typing passwords — macOS greys out every input method
+  installed for just one user, and until now every way of installing Yahoo! KeyKey 2 put it in your
+  own `~/Library/Input Methods`. 1Password in particular leaves secure input on after your Mac locks,
+  so 倉頡 and the other modes went grey until you quit it
+  ([issue #134](https://github.com/teddychan/yahoo-keykey-2/issues/134)). macOS still lets through
+  its own input methods and those installed for all users in `/Library/Input Methods` — which is why
+  Google Japanese Input kept working while Yahoo! KeyKey 2 did not.
+
+  The new button asks for an administrator password once, copies Yahoo! KeyKey 2 to
+  `/Library/Input Methods` as a system-owned copy, checks that the copy carries the same signature,
+  removes the per-user copy and restarts. Your settings and everything it has learned are kept, and
+  your input sources stay as they were. From then on each update asks for an administrator password
+  too, because the folder belongs to the system.
+
+- **The Homebrew cask now installs for all users.** New installs go straight to
+  `/Library/Input Methods`, and Homebrew asks for your password. Installed with Homebrew before
+  2.16.0? Run `brew reinstall --cask yahoo-keykey-2` once to move your copy; the button in Settings
+  leaves a Homebrew-managed copy alone, because moving it behind Homebrew's back would break later
+  upgrades.
+
+- **Learning pauses while secure input is on.** Installed for all users, Yahoo! KeyKey 2 keeps
+  receiving keystrokes while another app holds secure input, so it no longer learns from what you
+  pick then — nothing typed while secure input is on is written to disk. Learning resumes as soon as
+  secure input is off, and the order you already know is unchanged.
+
 ## 2.15.0
 
 - **New: 注音 (ㄅ半) input method.** The classic phonetic method is back, and it works the way it

@@ -216,6 +216,18 @@ enum AdaptiveCandidateOrder {
         enabled ? pending : []
     }
 
+    /// Whether a commit may be learned from: the setting is on AND no app holds macOS secure
+    /// input. The result is what the four write-side gates take as `enabled:`.
+    ///
+    /// Installed for all users (/Library/Input Methods), KeyKey keeps receiving keys while secure
+    /// input is on — that is the point of installing it there — so what is typed then is typing
+    /// the system was asked to protect, and neither store keeps it. The read side (`count`,
+    /// `bonus`) still follows the setting alone, so a lock pauses learning without reordering any
+    /// list the user already knows.
+    static func recordsLearning(enabled: Bool, secureEventInput: Bool) -> Bool {
+        enabled && !secureEventInput
+    }
+
     // MARK: 拼音 — the per-character mechanism, unchanged from before this release
 
     /// The ranking bonus to apply for `char` — the learned bonus while adaptive ordering is on,

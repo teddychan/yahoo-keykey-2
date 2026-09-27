@@ -19,6 +19,16 @@ LSREG="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServic
 echo "==> Building debug-id app"
 KEYKEY_DEBUG_ID=1 "$ROOT/tools/build-app.sh" "$@"
 
+# 設定… ▸ 一般 ▸ 為所有使用者安裝… on a Debug build moves it to /Library/Input Methods as root:wheel —
+# a second copy of the .debug id this script cannot remove, which macOS may keep launching instead of
+# the build installed below. Say so rather than install beside it silently.
+SYS_DST="/Library/Input Methods/${DEBUG_NAME}.app"
+if [ -e "$SYS_DST" ]; then
+  echo "WARNING: a root-owned Debug copy is installed for all users at $SYS_DST" >&2
+  echo "         (left by the 為所有使用者安裝… button). It shares this build's bundle id." >&2
+  echo "         Remove it first:  sudo rm -rf \"$SYS_DST\"" >&2
+fi
+
 echo "==> Installing to ~/Library/Input Methods"
 pkill -f "${DEBUG_NAME}.app/Contents/MacOS" 2>/dev/null || true
 sleep 1
