@@ -129,7 +129,11 @@ final class AppMenuController {
             checklistItems: [
                 L("keykey.uninstall.item.inputSources"),
                 L("keykey.uninstall.item.learningAndSettings"),
-                L("keykey.uninstall.item.trash"),
+                // An all-users copy is root:wheel inside root-owned /Library/Input Methods, and the
+                // kit's NSWorkspace.recycle gets no password prompt, so it cannot be trashed from
+                // here: say so up front rather than promise it and end on "Uninstall Incomplete".
+                Bundle.main.bundleURL.standardizedFileURL.path.hasPrefix(SystemInstall.directory + "/")
+                    ? L("keykey.uninstall.item.trashAllUsers") : L("keykey.uninstall.item.trash"),
             ],
             extraCleanupPaths: [
                 SharedResources.supportDirectory,

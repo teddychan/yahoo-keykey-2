@@ -64,3 +64,4 @@
 "keykey.uninstall.item.inputSources" = "从输入源中停用 Yahoo! KeyKey 2 的输入方式";
 "keykey.uninstall.item.learningAndSettings" = "删除用户学习数据与偏好设置";
 "keykey.uninstall.item.trash" = "将 Yahoo! KeyKey 2 移到废纸篓";
+"keykey.uninstall.item.trashAllUsers" = "但不包括 Yahoo! KeyKey 2 本身：为所有用户安装的副本会留在 /Library/Input Methods，需由你在访达中拖到废纸篓（会要求输入管理员密码）；若通过 Homebrew 安装，请运行 brew uninstall --cask yahoo-keykey-2";

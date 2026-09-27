@@ -64,3 +64,4 @@
 "keykey.uninstall.item.inputSources" = "入力ソースから Yahoo! KeyKey 2 の入力方式を無効にする";
 "keykey.uninstall.item.learningAndSettings" = "学習データと環境設定を削除する";
 "keykey.uninstall.item.trash" = "Yahoo! KeyKey 2 をゴミ箱に入れる";
+"keykey.uninstall.item.trashAllUsers" = "ただし Yahoo! KeyKey 2 本体は除く：すべてのユーザ用にインストールしたコピーは /Library/Input Methods に残るため、Finder でゴミ箱にドラッグしてください（管理者パスワードが求められます）。Homebrew でインストールした場合は brew uninstall --cask yahoo-keykey-2 を実行してください";

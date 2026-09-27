@@ -64,3 +64,4 @@
 "keykey.uninstall.item.inputSources" = "Disable Yahoo! KeyKey 2's input methods from Input Sources";
 "keykey.uninstall.item.learningAndSettings" = "Delete user-learning data and preferences";
 "keykey.uninstall.item.trash" = "Move Yahoo! KeyKey 2 to the Trash";
+"keykey.uninstall.item.trashAllUsers" = "Not Yahoo! KeyKey 2 itself: installed for all users, it stays in /Library/Input Methods until you drag it to the Trash in Finder (which asks for an administrator password), or run brew uninstall --cask yahoo-keykey-2 if Homebrew installed it";

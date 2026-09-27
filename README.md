@@ -90,10 +90,12 @@ update asks for an administrator password.
 
 1. **Remove the input source first:** **System Settings ▸ Keyboard ▸ Input Sources**, select
    Yahoo! KeyKey 2 and remove it. The app's own Uninstall pane cannot do this part for you.
-2. **Then remove the app** — Homebrew: `brew uninstall --cask teddychan/tap/yahoo-keykey-2`;
-   otherwise open **設定… ▸ 解除安裝**, or drag `~/Library/Input Methods/YahooKeyKey2.app` — or,
-   installed for all users, `/Library/Input Methods/YahooKeyKey2.app` — to the Trash (Finder asks
-   for an administrator password for the all-users copy).
+2. **Then remove the app** — Homebrew: `brew uninstall --cask teddychan/tap/yahoo-keykey-2`.
+   Otherwise, for a copy in `~/Library/Input Methods`, open **設定… ▸ 解除安裝** or drag
+   `~/Library/Input Methods/YahooKeyKey2.app` to the Trash. Installed for all users, drag
+   `/Library/Input Methods/YahooKeyKey2.app` to the Trash in Finder, which asks for an
+   administrator password: **解除安裝** clears such a copy's settings, learning data and cache,
+   but cannot remove the app itself.
 3. **Log out and back in.**
 
 The **解除安裝** pane also clears your settings, learning data and cache. If you deleted the app

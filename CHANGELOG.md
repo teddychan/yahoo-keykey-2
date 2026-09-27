@@ -17,7 +17,10 @@ A plain-language list of changes in each version, newest first.
   `/Library/Input Methods` as a system-owned copy, checks that the copy carries the same signature,
   removes the per-user copy and restarts. Your settings and everything it has learned are kept, and
   your input sources stay as they were. From then on each update asks for an administrator password
-  too, because the folder belongs to the system.
+  too, because the folder belongs to the system. To uninstall such a copy, drag
+  `/Library/Input Methods/YahooKeyKey2.app` to the Trash in Finder, which asks for the password:
+  **解除安裝** still clears its settings and learning data, and now says up front that it cannot
+  remove the app itself.
 
 - **The Homebrew cask now installs for all users.** New installs go straight to
   `/Library/Input Methods`, and Homebrew asks for your password. Installed with Homebrew before
