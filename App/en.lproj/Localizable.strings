@@ -54,14 +54,14 @@
 "keykey.general.installOldCopyMessage" = "The old copy at %@ could not be removed. Move it to the Trash yourself, then log out and back in.";
 "keykey.general.installSignatureUnreadable" = "Yahoo! KeyKey 2 could not confirm its own signature. Reinstall it from the latest release and try again.";
 
-/* What's New pane (2.16.0) */
+/* What's New pane (2.16.1 — 2.16.0's entries kept, plus fixed1) */
 "app.whatsNew.summary" = "Yahoo! KeyKey 2 can now keep working when another app leaves macOS secure input switched on — 1Password often does after your Mac locks — which until now greyed out 倉頡 and every other mode in the input menu until you quit that app. Choose Settings… ▸ General ▸ Install for All Users… once, enter an administrator password, and Yahoo! KeyKey 2 moves to /Library/Input Methods, where macOS keeps it usable.";
 "app.whatsNew.added1" = "Install for All Users…, in Settings… ▸ General. While any app holds secure input — the mode meant for typing passwords — macOS greys out input methods installed for a single user, and a copy in your own ~/Library/Input Methods is one of them. Installed for all users, in /Library/Input Methods, Yahoo! KeyKey 2 keeps working like Apple's own input methods. It asks for an administrator password once and restarts, keeping your settings and everything it has learned; each later update asks for the password too.";
 "app.whatsNew.changed1" = "The Homebrew cask now installs for all users, so Homebrew asks for your password. Installed with Homebrew before this release? Run brew reinstall --cask yahoo-keykey-2 to move your copy.";
 "app.whatsNew.changed2" = "While another app holds secure input, Yahoo! KeyKey 2 keeps typing but stops learning from what you pick, so nothing typed then is saved. Learning picks up again as soon as secure input is off.";
+"app.whatsNew.fixed1" = "Uninstall no longer clears your settings when it can't finish. For a copy installed for all users, Uninstall deleted your settings and everything Yahoo! KeyKey 2 had learned, then reported \"Uninstall Incomplete\" with the app still installed. It now stops before removing anything and tells you to drag the app to the Trash in Finder, which asks for an administrator password — or, if you installed with Homebrew, to run brew uninstall --cask yahoo-keykey-2.";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "Disable Yahoo! KeyKey 2's input methods from Input Sources";
 "keykey.uninstall.item.learningAndSettings" = "Delete user-learning data and preferences";
 "keykey.uninstall.item.trash" = "Move Yahoo! KeyKey 2 to the Trash";
-"keykey.uninstall.item.trashAllUsers" = "Not Yahoo! KeyKey 2 itself: installed for all users, it stays in /Library/Input Methods until you drag it to the Trash in Finder (which asks for an administrator password), or run brew uninstall --cask yahoo-keykey-2 if Homebrew installed it";

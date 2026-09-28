@@ -54,14 +54,14 @@
 "keykey.general.installOldCopyMessage" = "%@ にある古いコピーを削除できませんでした。ご自分でゴミ箱に入れてから、ログアウトしてもう一度ログインしてください。";
 "keykey.general.installSignatureUnreadable" = "Yahoo! KeyKey 2 は自身の署名を確認できませんでした。最新のリリースから再インストールして、もう一度お試しください。";
 
-/* What's New pane (2.16.0) */
+/* What's New pane (2.16.1 — 2.16.0's entries kept, plus fixed1) */
 "app.whatsNew.summary" = "ほかのアプリが macOS の「セキュア入力」をオンにしたままでも（Mac のロック後に 1Password がよくそうなります）、Yahoo! KeyKey 2 が使えるようになりました。これまでは、そのアプリを終了するまで倉頡などすべての入力方式が入力メニューでグレイ表示になっていました。「設定… ▸ 一般 ▸ すべてのユーザ用にインストール…」を一度選んで管理者パスワードを入力すると、Yahoo! KeyKey 2 は /Library/Input Methods に移動し、macOS がそのまま使えるようにします。";
 "app.whatsNew.added1" = "「設定… ▸ 一般」に「すべてのユーザ用にインストール…」を追加しました。いずれかのアプリがセキュア入力（パスワード入力用のモード）をオンにしている間、macOS は1人のユーザ用にインストールされた入力方式をグレイ表示にします。ご自分の ~/Library/Input Methods にあるコピーもその一つです。すべてのユーザ用に /Library/Input Methods へインストールすると、Yahoo! KeyKey 2 は Apple 純正の入力方式と同じように使えます。管理者パスワードを一度入力すると再起動し、設定と学習した内容はそのまま残ります。以後のアップデートでもパスワードが求められます。";
 "app.whatsNew.changed1" = "Homebrew の cask がすべてのユーザ用にインストールするようになったため、Homebrew がパスワードを求めます。このリリースより前に Homebrew でインストールした場合は、brew reinstall --cask yahoo-keykey-2 を実行してコピーを移動してください。";
 "app.whatsNew.changed2" = "ほかのアプリがセキュア入力をオンにしている間、Yahoo! KeyKey 2 は入力はできますが、選んだ字から学習しないため、その間に入力した内容は保存されません。セキュア入力がオフになるとすぐに学習を再開します。";
+"app.whatsNew.fixed1" = "「アンインストール」が最後まで実行できないときに設定を消してしまうことがなくなりました。すべてのユーザ用にインストールしたコピーでは、「アンインストール」が設定と Yahoo! KeyKey 2 が学習した内容を削除したうえで、アプリが残ったまま「アンインストールが完了しませんでした」と表示していました。現在は何も削除する前に停止し、Finder でアプリをゴミ箱にドラッグするよう案内します（管理者パスワードが求められます）。Homebrew でインストールした場合は brew uninstall --cask yahoo-keykey-2 を案内します。";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "入力ソースから Yahoo! KeyKey 2 の入力方式を無効にする";
 "keykey.uninstall.item.learningAndSettings" = "学習データと環境設定を削除する";
 "keykey.uninstall.item.trash" = "Yahoo! KeyKey 2 をゴミ箱に入れる";
-"keykey.uninstall.item.trashAllUsers" = "ただし Yahoo! KeyKey 2 本体は除く：すべてのユーザ用にインストールしたコピーは /Library/Input Methods に残るため、Finder でゴミ箱にドラッグしてください（管理者パスワードが求められます）。Homebrew でインストールした場合は brew uninstall --cask yahoo-keykey-2 を実行してください";

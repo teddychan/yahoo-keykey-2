@@ -2,6 +2,18 @@
 
 A plain-language list of changes in each version, newest first.
 
+## 2.16.1
+
+- **Fixed: Uninstall no longer clears your settings when it can't finish.** For a copy installed
+  for all users, **解除安裝** deleted your settings and everything Yahoo! KeyKey 2 had learned, and
+  only then found it could not move the app out of `/Library/Input Methods` — ending on
+  "Uninstall Incomplete" with the app still installed. It now checks first: it stops before
+  removing anything, and tells you to drag the app to the Trash in Finder (which asks for an
+  administrator password), or to run `brew uninstall --cask yahoo-keykey-2` if you installed with
+  Homebrew. The fix is in DragonKit 4.1.2, the toolkit Yahoo! KeyKey 2 is built on. The 2.16.0
+  checklist line that tried to warn about this is gone: the pane now says it at the moment it
+  matters.
+
 ## 2.16.0
 
 - **New: Install for All Users (設定… ▸ 一般 ▸ 為所有使用者安裝…).** While any app holds macOS

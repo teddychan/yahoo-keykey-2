@@ -107,15 +107,19 @@ final class ConfigContentTests: XCTestCase {
     // exactly as the DragonAppMenu test below compares titles against the kit's keys. What the
     // text SAYS is the release gate's job — it diffs every locale's .strings file — so between
     // them a stale pane cannot ship.
+    //
+    // 2.16.1 keeps all three and adds `.fixed1`, the Uninstall fix from DragonKit 4.1.2: 2.16.0 was
+    // live for about an hour, so most users meet the all-users install for the first time here.
     @MainActor
-    func testWhatsNewAnnouncesTheAllUsersInstallAndWhatChangesWithIt() {
+    func testWhatsNewAnnouncesTheAllUsersInstallAndTheUninstallFix() {
         let content = WhatsNewConfig.content
-        XCTAssertEqual(content.sections.map(\.kind), [.added, .changed])
-        XCTAssertEqual(content.sections.map(\.entries.count), [1, 2])
+        XCTAssertEqual(content.sections.map(\.kind), [.added, .changed, .fixed])
+        XCTAssertEqual(content.sections.map(\.entries.count), [1, 2, 1])
         XCTAssertEqual(content.sections.flatMap(\.entries), [
             L("app.whatsNew.added1"),
             L("app.whatsNew.changed1"),
             L("app.whatsNew.changed2"),
+            L("app.whatsNew.fixed1"),
         ])
     }
 
