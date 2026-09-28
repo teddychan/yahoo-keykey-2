@@ -6,6 +6,12 @@ import DragonKit
 // binary isn't. That makes the entries and the date the only things to keep in sync with
 // CHANGELOG.md on release.
 //
+// 2.16.1 keeps 2.16.0's entries and adds one `.fixed` entry: DragonKit 4.1.2's Uninstall stops
+// before removing anything when it cannot move an all-users copy, where 2.16.0's cleared the
+// settings and then reported "Uninstall Incomplete". The 2.16.0 entries stay because 2.16.0 was
+// live for about an hour — nearly everyone updates from 2.15.0 straight to this release and has
+// not read them.
+//
 // 2.16.0 lets KeyKey install itself for all users, in /Library/Input Methods — the one place macOS
 // lets a third-party input method through while another app holds secure input. 1Password in
 // particular leaves secure input on after a screen lock, which greyed out every KeyKey mode until
@@ -39,6 +45,9 @@ enum WhatsNewConfig {
                 ChangeSection(kind: .changed, entries: [
                     L("app.whatsNew.changed1"),
                     L("app.whatsNew.changed2"),
+                ]),
+                ChangeSection(kind: .fixed, entries: [
+                    L("app.whatsNew.fixed1"),
                 ]),
             ]
         )

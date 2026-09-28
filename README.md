@@ -94,14 +94,15 @@ update asks for an administrator password.
    Otherwise, for a copy in `~/Library/Input Methods`, open **設定… ▸ 解除安裝** or drag
    `~/Library/Input Methods/YahooKeyKey2.app` to the Trash. Installed for all users, drag
    `/Library/Input Methods/YahooKeyKey2.app` to the Trash in Finder, which asks for an
-   administrator password: **解除安裝** clears such a copy's settings, learning data and cache,
-   but cannot remove the app itself.
+   administrator password. **解除安裝** cannot remove such a copy: it stops before removing
+   anything and tells you the same.
 3. **Log out and back in.**
 
 The **解除安裝** pane also clears your settings, learning data and cache. If you deleted the app
-by hand and want those gone too:
+by hand — which is the only way for a copy installed for all users — and want those gone too:
 
 ```sh
+rm -rf ~/Library/Application\ Support/YahooKeyKey2
 rm -f  ~/Library/Preferences/com.dragonapp.inputmethod.yahoo-keykey.plist
 rm -rf ~/Library/Caches/com.dragonapp.inputmethod.yahoo-keykey
 rm -rf ~/Library/HTTPStorages/com.dragonapp.inputmethod.yahoo-keykey
