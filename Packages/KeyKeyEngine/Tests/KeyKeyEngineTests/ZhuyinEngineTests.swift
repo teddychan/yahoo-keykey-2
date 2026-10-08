@@ -118,6 +118,21 @@ final class ZhuyinEngineTests: XCTestCase {
         XCTAssertEqual(e.composingText, "")
     }
 
+    func testOnlyAFinishedReadingWithOneCharacterHasNothingToChoose() {
+        // Issue #148: such a reading commits as soon as its tone lands, without a window.
+        let e = engine()
+        type("cl3", into: e)                     // ㄏㄠˇ → 好 alone
+        XCTAssertTrue(e.hasOnlyOneCandidate)
+        e.backspace()                            // ㄏㄠ, unfinished
+        XCTAssertFalse(e.hasOnlyOneCandidate, "no tone yet, so no list at all")
+        _ = e.commit()
+        type("g4", into: e)                      // ㄕˋ → 是/事/世
+        XCTAssertFalse(e.hasOnlyOneCandidate, "a real choice opens the window")
+        _ = e.commit()
+        type("j4", into: e)                      // ㄨˋ, not in this table
+        XCTAssertFalse(e.hasOnlyOneCandidate, "an unknown reading has nothing to commit")
+    }
+
     func testOutOfRangeSelectionIsANoOp() {
         let e = engine()
         type("g4", into: e)
@@ -133,6 +148,16 @@ final class ZhuyinEngineTests: XCTestCase {
         type("g4", into: e)                      // ㄕˋ, finished
         XCTAssertTrue(e.keyStartsNewComposition("s"), "ㄋ belongs to the next character")
         XCTAssertFalse(e.keyStartsNewComposition("["), "not a 注音 key at all")
+    }
+
+    func testANumberRowSymbolAgainstAFinishedSyllableStartsTheNextCharacter() {
+        // On 大千 ㄅ ㄉ ㄓ ㄚ ㄞ sit on 1 2 5 8 9 (issue #148): a digit the candidate window has no
+        // row for reaches this rule, and must start 的/不/這 rather than be lost.
+        let e = engine()
+        type("g4", into: e)                      // ㄕˋ, finished
+        for key: Character in ["1", "2", "5", "8", "9"] {
+            XCTAssertTrue(e.keyStartsNewComposition(key), "\(key) is a 注音 symbol on 大千")
+        }
     }
 
     func testAToneKeyAgainstAFinishedSyllableCorrectsItInstead() {

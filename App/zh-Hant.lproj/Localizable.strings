@@ -54,12 +54,10 @@
 "keykey.general.installOldCopyMessage" = "無法移除位於 %@ 的舊拷貝。請自行將它移到垃圾桶，然後登出再重新登入。";
 "keykey.general.installSignatureUnreadable" = "Yahoo! KeyKey 2 無法確認自己的簽署。請從最新版本重新安裝後再試一次。";
 
-/* What's New pane (2.16.1 — 2.16.0's entries kept, plus fixed1) */
-"app.whatsNew.summary" = "其他 App 沒有關掉 macOS 的「安全輸入」時——1Password 常在 Mac 鎖定後這樣——Yahoo! KeyKey 2 現在也能照常使用。以前遇到這種情況，倉頡等所有輸入方式都會在輸入選單中變成灰色，直到你結束那個 App 為止。只要選一次「設定… ▸ 一般 ▸ 為所有使用者安裝…」並輸入管理者密碼，Yahoo! KeyKey 2 就會移到 /Library/Input Methods，macOS 會讓它繼續可用。";
-"app.whatsNew.added1" = "「設定… ▸ 一般」新增「為所有使用者安裝…」。任何 App 開啟「安全輸入」（原本用來輸入密碼的模式）時，macOS 會把只為單一使用者安裝的輸入法變成灰色，放在你自己 ~/Library/Input Methods 裡的拷貝就屬於這一類。為所有使用者安裝在 /Library/Input Methods 後，Yahoo! KeyKey 2 就像 Apple 內建的輸入法一樣照常可用。只需輸入一次管理者密碼，它會重新啟動，你的設定和學到的選字習慣都會保留；之後每次更新也會要求輸入密碼。";
-"app.whatsNew.changed1" = "Homebrew cask 現在會為所有使用者安裝，因此 Homebrew 會要求輸入你的密碼。如果你在這個版本之前用 Homebrew 安裝，請執行 brew reinstall --cask yahoo-keykey-2 來移動你的拷貝。";
-"app.whatsNew.changed2" = "其他 App 開著「安全輸入」時，Yahoo! KeyKey 2 仍可打字，但不會從你的選字學習，因此那段時間輸入的內容都不會被記錄。「安全輸入」一關閉，就會恢復學習。";
-"app.whatsNew.fixed1" = "「解除安裝」無法完成時不會再清除你的設定。對於為所有使用者安裝的拷貝，「解除安裝」會先刪除設定和 Yahoo! KeyKey 2 學到的選字習慣，然後在 App 仍然留著的情況下顯示「解除安裝未完成」。現在它會在刪除任何項目之前停止，並提示你在 Finder 中把 App 拖到垃圾桶（會要求輸入管理者密碼）；若以 Homebrew 安裝，則提示執行 brew uninstall --cask yahoo-keykey-2。";
+/* What's New pane (2.16.2) */
+"app.whatsNew.summary" = "注音現在可以一路連續打下去了。數字鍵所在的那一列沒有候選字時，會照常打出注音符號，不會再被吃掉；只有一個字的讀音則直接送出，不再開啟選字視窗——兩者都與原版 Yahoo! KeyKey 相同。倉頡、速成與拼音沒有任何變化。";
+"app.whatsNew.changed1" = "在注音中，只有一個字的讀音沒有可選的，所以打完聲調就直接送出，不再開啟選字視窗。聯想字詞仍會接著出現。";
+"app.whatsNew.fixed1" = "修正在注音中，選字視窗那一列沒有候選字時，數字鍵會被吃掉的問題。在「標準（大千）」鍵盤上，1 2 5 8 9 是 ㄅ ㄉ ㄓ ㄚ ㄞ，所以在較短的候選字清單之後，它們現在會開始打下一個字（不、的、這），3 4 6 7 則會修正聲調。那一列有候選字的數字鍵，仍然會選取該字。";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "從輸入來源中停用 Yahoo! KeyKey 2 的輸入方式";

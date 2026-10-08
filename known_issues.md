@@ -98,6 +98,9 @@ Once a tone has finished the syllable, the candidate window is open — and whil
 itself. On 大千 the tone keys are `3` `4` `6` `7`, so a second tone press lands on a row instead
 of correcting the tone.
 
+A number whose row is empty is not a pick: since 2.16.2 it types 注音, so after a list shorter
+than that number a tone key does correct the tone, and ㄅ ㄉ ㄓ ㄚ ㄞ start the next character.
+
 **Fix:** press **Backspace** once. That removes the tone and leaves the symbols you typed, so you
 can enter the right tone. (Before any tone is typed there is no candidate window, so the number
 row types 注音 normally.) For the same reason, 聯想字詞 is picked with **Shift + 1–9** in 注音

@@ -134,6 +134,35 @@ final class KeyRoutingPolicyTests: XCTestCase {
         XCTAssertNil(KeyEventPolicy.candidateIndex(digit: 4, page: 0, pageSize: 9, count: 3))
     }
 
+    // MARK: selectionDigitAction — a digit while candidates are on screen (issue #148)
+
+    func testADigitWithACandidateOnItsRowPicksIt() {
+        for typing in [false, true] {
+            XCTAssertEqual(KeyEventPolicy.selectionDigitAction(digit: 2, page: 1, pageSize: 9,
+                                                               count: 30, digitIsTypingKey: typing),
+                           .pick(10), "picking wins whether or not the digit also types")
+        }
+    }
+
+    func testADigitPastTheListIsSwallowedWhereItTypesNothing() {
+        // 倉頡/速成: nothing on row 4 of a 3-row list, and a bare 4 must not leak into the document.
+        XCTAssertEqual(KeyEventPolicy.selectionDigitAction(digit: 4, page: 0, pageSize: 9,
+                                                           count: 3, digitIsTypingKey: false),
+                       .swallow)
+    }
+
+    func testADigitPastTheListIsTypedWhereItIsATypingKey() {
+        // 注音 on 大千: ㄏㄠˇ-style short list, then `2` — ㄉ, the start of the next character, not a
+        // lost key. The original Yahoo! KeyKey and McBopomofo both offer only as many selection
+        // keys as there are candidates.
+        XCTAssertEqual(KeyEventPolicy.selectionDigitAction(digit: 2, page: 0, pageSize: 9,
+                                                           count: 1, digitIsTypingKey: true),
+                       .type)
+        XCTAssertEqual(KeyEventPolicy.selectionDigitAction(digit: 3, page: 2, pageSize: 9,
+                                                           count: 20, digitIsTypingKey: true),
+                       .type, "a short last page frees its empty rows too")
+    }
+
     // MARK: pageStep — arrows and Page Up / Page Down
 
     func testNextPageKeys() {

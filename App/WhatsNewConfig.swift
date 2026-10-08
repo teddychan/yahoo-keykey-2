@@ -6,45 +6,32 @@ import DragonKit
 // binary isn't. That makes the entries and the date the only things to keep in sync with
 // CHANGELOG.md on release.
 //
-// 2.16.1 keeps 2.16.0's entries and adds one `.fixed` entry: DragonKit 4.1.2's Uninstall stops
-// before removing anything when it cannot move an all-users copy, where 2.16.0's cleared the
-// settings and then reported "Uninstall Incomplete". The 2.16.0 entries stay because 2.16.0 was
-// live for about an hour — nearly everyone updates from 2.15.0 straight to this release and has
-// not read them.
+// 2.16.2 brings 注音's candidate keys in line with the original Yahoo! KeyKey's ㄅ半 and
+// McBopomofo's Plain Bopomofo (issue #148): a number with no candidate on its row types 注音 — on
+// 大千 that is ㄅ ㄉ ㄓ ㄚ ㄞ, the start of 不, 的, 這 — instead of being swallowed, and a reading
+// with only one character commits as soon as its tone lands.
 //
-// 2.16.0 lets KeyKey install itself for all users, in /Library/Input Methods — the one place macOS
-// lets a third-party input method through while another app holds secure input. 1Password in
-// particular leaves secure input on after a screen lock, which greyed out every KeyKey mode until
-// the user quit it (issue #134; known_issues.md #2).
+// Announced as one `.changed` entry (the window no longer opens for a single candidate, which a
+// typist notices) and one `.fixed` entry (the swallowed number key). Both name 注音,
+// because nothing changes for 倉頡, 速成 or 拼音.
 //
-// Announced as one `.added` entry for 設定… ▸ 一般 ▸ 為所有使用者安裝…, and two `.changed` entries
-// for what moves with it: the Homebrew cask now installs for all users (so brew users are told the
-// one command that moves them), and learning pauses while secure input is on — a behaviour change
-// a user could otherwise read as the setting silently switching itself off.
-//
-// Deliberately NOT in the notes: how macOS decides (a path-prefix check inside HIToolbox), how the
-// copy is made and verified, and the Sparkle mechanics behind "updates ask for a password" — a user
-// meets the button and the password prompt, not the plumbing. CHANGELOG.md and SystemInstall.swift
-// record the rest.
+// Deliberately NOT in the notes: that bare 1–9 still picks whenever its row has a candidate, the
+// way both originals do — that is unchanged behaviour, and README.md says it.
 //
 // Keys are the fleet's stable set (app.whatsNew.summary, .added1, .changed1, …), not named after
 // this release's content — a release just overwrites the same keys' text in all seven .strings
-// files rather than adding new ones and stranding the last release's. This release has one `.added`
-// entry, so 2.15.0's `.added2` is retired from all seven files rather than left stranded, and
-// `.changed2` is new.
+// files rather than adding new ones and stranding the last release's. This release has no `.added`
+// entry and one `.changed`, so 2.16.x's `.added1` and `.changed2` are retired from all seven files
+// rather than left stranded.
 enum WhatsNewConfig {
     @MainActor
     static var content: WhatsNewContent {
         WhatsNewContent(
-            date: "2026-09-28",
+            date: "2026-10-08",
             summary: L("app.whatsNew.summary"),
             sections: [
-                ChangeSection(kind: .added, entries: [
-                    L("app.whatsNew.added1"),
-                ]),
                 ChangeSection(kind: .changed, entries: [
                     L("app.whatsNew.changed1"),
-                    L("app.whatsNew.changed2"),
                 ]),
                 ChangeSection(kind: .fixed, entries: [
                     L("app.whatsNew.fixed1"),

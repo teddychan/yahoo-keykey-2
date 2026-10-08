@@ -54,12 +54,10 @@
 "keykey.general.installOldCopyMessage" = "%@에 있는 이전 사본을 제거할 수 없습니다. 직접 휴지통으로 옮긴 다음 로그아웃했다가 다시 로그인하십시오.";
 "keykey.general.installSignatureUnreadable" = "Yahoo! KeyKey 2가 자신의 서명을 확인할 수 없습니다. 최신 릴리스로 다시 설치한 다음 다시 시도하십시오.";
 
-/* What's New pane (2.16.1 — 2.16.0's entries kept, plus fixed1) */
-"app.whatsNew.summary" = "다른 앱이 macOS의 「보안 입력」을 켠 채로 두어도(Mac이 잠긴 뒤 1Password가 자주 그렇습니다) 이제 Yahoo! KeyKey 2를 계속 사용할 수 있습니다. 지금까지는 그 앱을 종료할 때까지 창힐을 비롯한 모든 입력 방식이 입력 메뉴에서 흐리게 표시되었습니다. 「설정… ▸ 일반 ▸ 모든 사용자용으로 설치…」를 한 번 선택하고 관리자 암호를 입력하면 Yahoo! KeyKey 2가 /Library/Input Methods로 옮겨지고, macOS가 계속 사용할 수 있게 해 줍니다.";
-"app.whatsNew.added1" = "「설정… ▸ 일반」에 「모든 사용자용으로 설치…」가 추가되었습니다. 어떤 앱이든 보안 입력(암호 입력용 모드)을 켜고 있는 동안 macOS는 한 사용자용으로 설치된 입력기를 흐리게 표시하며, 사용자 자신의 ~/Library/Input Methods에 있는 사본도 여기에 해당합니다. 모든 사용자용으로 /Library/Input Methods에 설치하면 Yahoo! KeyKey 2를 Apple 기본 입력기처럼 계속 사용할 수 있습니다. 관리자 암호를 한 번 입력하면 다시 시작되며, 설정과 학습한 내용은 그대로 유지됩니다. 이후 업데이트할 때마다 암호를 묻습니다.";
-"app.whatsNew.changed1" = "이제 Homebrew cask가 모든 사용자용으로 설치하므로 Homebrew가 암호를 묻습니다. 이번 릴리스 이전에 Homebrew로 설치했다면 brew reinstall --cask yahoo-keykey-2를 실행해 사본을 옮기십시오.";
-"app.whatsNew.changed2" = "다른 앱이 보안 입력을 켜고 있는 동안 Yahoo! KeyKey 2는 입력은 계속되지만 선택한 글자에서 학습하지 않으므로, 그동안 입력한 내용은 저장되지 않습니다. 보안 입력이 꺼지면 바로 다시 학습합니다.";
-"app.whatsNew.fixed1" = "「제거」가 끝까지 진행할 수 없을 때 설정을 지우지 않습니다. 모든 사용자용으로 설치한 사본에서는 「제거」가 설정과 Yahoo! KeyKey 2가 학습한 내용을 삭제한 뒤 앱은 그대로 둔 채 「제거가 완료되지 않음」을 표시했습니다. 이제는 아무것도 삭제하기 전에 멈추고, Finder에서 앱을 휴지통으로 드래그하라고(관리자 암호를 묻습니다) 안내하며, Homebrew로 설치했다면 brew uninstall --cask yahoo-keykey-2를 실행하라고 안내합니다.";
+/* What's New pane (2.16.2) */
+"app.whatsNew.summary" = "이제 주음에서 멈추지 않고 계속 입력할 수 있습니다. 후보가 없는 줄의 숫자 키는 사라지지 않고 주음 기호를 입력하며, 글자가 하나뿐인 읽기는 후보 창을 열지 않고 바로 입력됩니다. 둘 다 원래 Yahoo! KeyKey와 같은 동작입니다. 倉頡, 速成, 拼音은 바뀌지 않습니다.";
+"app.whatsNew.changed1" = "주음에서 글자가 하나뿐인 읽기는 고를 것이 없으므로 성조를 입력하는 즉시 후보 창을 열지 않고 입력됩니다. 聯想字詞는 이전처럼 이어서 나타납니다.";
+"app.whatsNew.fixed1" = "주음에서 후보 창의 해당 줄에 후보가 없을 때 숫자 키가 사라지던 문제를 고쳤습니다. 標準(大千) 자판에서는 1 2 5 8 9가 ㄅ ㄉ ㄓ ㄚ ㄞ이므로, 짧은 후보 목록 뒤에도 이제 다음 글자(不, 的, 這)를 시작하고 3 4 6 7은 성조를 고칩니다. 해당 줄에 후보가 있는 숫자는 이전처럼 그 후보를 고릅니다.";
 
 /* Uninstall pane checklist */
 "keykey.uninstall.item.inputSources" = "입력 소스에서 Yahoo! KeyKey 2의 입력 방식 사용 중지";

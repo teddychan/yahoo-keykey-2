@@ -107,6 +107,13 @@ public final class ZhuyinEngine {
         return CandidateOrdering.ordered(matches, rank: [:]) { usageCount(list, $0) }
     }
 
+    /// True when the finished reading names exactly one character, so there is nothing to choose.
+    /// The controller commits it as soon as the tone lands rather than opening a one-row window
+    /// that waits for Space — what the original Yahoo! KeyKey's ㄅ半 and McBopomofo's Plain
+    /// Bopomofo both do (issue #148). False while the syllable is unfinished, since there is no
+    /// list yet, and for a reading the table does not know.
+    public var hasOnlyOneCandidate: Bool { candidates.count == 1 }
+
     /// Which candidate list the current syllable addresses, or nil while it is unfinished.
     public var candidateListKey: CandidateListKey? {
         guard syllable.isComplete, let reading = syllable.reading else { return nil }

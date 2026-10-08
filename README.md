@@ -182,15 +182,16 @@ open-sourced — so associations use Yahoo! KeyKey 2's own ordering in both mode
 ### 注音 (ㄅ半)
 
 The **ㄅ半** method, as it has always worked: one syllable, one character. Type the 注音 symbols,
-finish the syllable with a tone, and the candidate window opens; `1–9` picks, Space and the arrow
-keys page, and typing the next character's first symbol commits the one on screen so you can run
-on without pressing Enter. 聯想字詞 follows every commit, exactly as in 倉頡 and 速成.
+finish the syllable with a tone, and the candidate window opens — unless the reading has only one
+character, which is typed straight away. `1–9` picks, Space and the arrow keys page, and typing the
+next character's first symbol commits the one on screen so you can run on without pressing Enter.
+聯想字詞 follows every commit, exactly as in 倉頡 and 速成.
 
 | | |
 |---|---|
 | **First tone** | **Space** — the one tone with no key of its own |
 | **Other tones** | 大千 `6` ˊ · `3` ˇ · `4` ˋ · `7` ˙  ·  倚天 `2` ˊ · `3` ˇ · `4` ˋ · `1` ˙ |
-| **Pick a candidate** | `1–9` · **Return** takes the first on the page · Space pages (and takes the first when there is only one page) |
+| **Pick a candidate** | `1–9` (a number with no candidate on its row types 注音 instead) · **Return** takes the first on the page · Space pages (and takes the first when there is only one page) |
 | **Fix a wrong tone** | **Backspace** removes the tone and leaves the symbols |
 | **聯想字詞** | **Shift + 1–9** (a bare number types 注音, so it cannot also pick) |
 | **，。** | **Shift + `,`** and **Shift + `.`** — `,` and `.` themselves type ㄝ and ㄡ |
