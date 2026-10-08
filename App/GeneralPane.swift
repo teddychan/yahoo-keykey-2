@@ -83,9 +83,9 @@ private struct GeneralPaneView: View {
             }
 
             DragonSection(LocalizedStringKey(L("keykey.general.language"))) {
-                // No argument, which means DragonLanguage.selectable — all seven locales the kit
-                // ships. That is correct again as of 2.12.0, because KeyKey now ships all seven
-                // itself: App/{en,es,fr,ja,ko,zh-Hans,zh-Hant}.lproj.
+                // No argument, which means DragonLanguage.selectable — every locale the kit ships.
+                // That is correct again as of 2.12.0, because KeyKey ships them all itself:
+                // App/{en,es,fr,ja,ko,ru,zh-Hans,zh-Hant}.lproj (ru since DragonKit 4.2.0).
                 //
                 // It was NOT correct through 2.11.4, when this same bare call shipped against two
                 // .lproj — Settings offered Español, Français, 日本語, 한국어 and 简体中文, and
@@ -94,9 +94,9 @@ private struct GeneralPaneView: View {
                 // list for a two-language app; this release closes the gap the other way instead,
                 // so the narrowing is no longer needed.
                 //
-                // Bare rather than a literal seven, so the day the kit adds an eighth locale the
-                // picker offers it and the checks below fail loudly, instead of a stale list
-                // quietly hiding a language KeyKey has not translated yet. What keeps that honest:
+                // Bare rather than a literal list, so the day the kit adds a locale (4.2.0 added
+                // Russian) the picker offers it and the checks below fail loudly, instead of a
+                // stale list quietly hiding a language KeyKey has not translated yet. What keeps that honest:
                 // ConfigContentTests' testLanguagePickerOffersExactlyTheShippedLocalizations, and
                 // DragonKit CONFORMANCE §R13, which compares this call site against App/*.lproj
                 // for every Dragon app rather than only this one.

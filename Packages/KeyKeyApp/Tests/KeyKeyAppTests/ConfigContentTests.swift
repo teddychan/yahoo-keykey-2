@@ -192,7 +192,7 @@ final class ConfigContentTests: XCTestCase {
                            "a language in the picker's list matches no DragonLanguage case: \(tokens)")
         } else {
             // No argument means the kit's default. Read from DragonLanguage rather than written out
-            // as seven codes, so the day the kit adds an eighth this fails against App/*.lproj
+            // as a list of codes, so the day the kit adds a locale this fails against App/*.lproj
             // instead of comparing against a list that stopped describing the picker.
             offered = Set(DragonLanguage.selectable.map(\.rawValue))
         }
@@ -203,8 +203,8 @@ final class ConfigContentTests: XCTestCase {
 
     // Every locale must define the same keys. A key present in en.lproj and missing from ko.lproj
     // falls back to English silently — no crash, no warning, just one English row in an otherwise
-    // Korean pane — and going from two locales to seven multiplies the places that can happen.
-    // DragonKit pins its own seven the same way (LocalizationTests.allLanguagesDefineTheSameKeys);
+    // Korean pane — and going from two locales to eight multiplies the places that can happen.
+    // DragonKit pins its own locales the same way (LocalizationTests.allLanguagesDefineTheSameKeys);
     // nothing pinned KeyKey's until now, which was survivable at two files and is not at seven.
     func testEveryLocalizationDefinesTheSameKeys() throws {
         var dir = URL(fileURLWithPath: #filePath)
