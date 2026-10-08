@@ -44,11 +44,12 @@ jobs:
       # These are the real files, not the symlinks under Packages/KeyKeyApp/Sources/KeyKeyApp/ —
       # the gate stats each path and diffs it, so it must name what git tracks.
       #
-      # ALL SEVEN locales, not just en and zh-Hant. 2.12.0 added the other five, and a list naming
-      # only two would have let a release rewrite the notes in those two and ship the previous
-      # version's text to Spanish, French, Japanese, Korean and Simplified Chinese readers — the
-      # exact staleness this gate exists to catch, narrowed to the languages nobody on the release
-      # would be reading. Add a line here with every new .lproj.
+      # ALL EIGHT locales, not just en and zh-Hant. 2.12.0 added five more and Russian followed
+      # with DragonKit 4.2.0; a list naming only two would have let a release rewrite the notes in
+      # those two and ship the previous version's text to Spanish, French, Japanese, Korean,
+      # Russian and Simplified Chinese readers — the exact staleness this gate exists to catch,
+      # narrowed to the languages nobody on the release would be reading. Add a line here with
+      # every new .lproj.
       whats_new_path: >-
         App/WhatsNewConfig.swift
         App/en.lproj/Localizable.strings
@@ -56,6 +57,7 @@ jobs:
         App/fr.lproj/Localizable.strings
         App/ja.lproj/Localizable.strings
         App/ko.lproj/Localizable.strings
+        App/ru.lproj/Localizable.strings
         App/zh-Hans.lproj/Localizable.strings
         App/zh-Hant.lproj/Localizable.strings
       build_kind: script

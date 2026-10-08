@@ -28,7 +28,7 @@ import DragonKit
 // record the rest.
 //
 // Keys are the fleet's stable set (app.whatsNew.summary, .added1, .changed1, …), not named after
-// this release's content — a release just overwrites the same keys' text in all seven .strings
+// this release's content — a release just overwrites the same keys' text in every locale's .strings
 // files rather than adding new ones and stranding the last release's. This release has one `.added`
 // entry, so 2.15.0's `.added2` is retired from all seven files rather than left stranded, and
 // `.changed2` is new.
