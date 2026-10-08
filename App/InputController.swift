@@ -575,6 +575,7 @@ final class InputController: IMKInputController {
         // every other meaning it has: paging and committing once candidates are up (the branches
         // below), and a literal space when nothing is being composed.
         if event.keyCode == 49, let zhuyin = engine as? ZhuyinEngine, zhuyin.applyFirstTone() {
+            if zhuyin.hasOnlyOneCandidate { return commitCurrent(to: client, offerAssociations: true) }
             resetCompositionState()
             refresh(client)
             return true
@@ -617,13 +618,19 @@ final class InputController: IMKInputController {
                 return true
             }
             if let d = KeyEventPolicy.selectionDigit(characters: event.characters) {
-                if let index = KeyEventPolicy.candidateIndex(digit: d, page: candidatePage,
-                                                            pageSize: InputController.pageSize,
-                                                            count: count) {
+                let typingKey = event.characters?.first.map(zhuyinClaimsKey) ?? false
+                switch KeyEventPolicy.selectionDigitAction(digit: d, page: candidatePage,
+                                                           pageSize: InputController.pageSize,
+                                                           count: count,
+                                                           digitIsTypingKey: typingKey) {
+                case .pick(let index):
                     engine.selectCandidate(index)
                     return commitCurrent(to: client, offerAssociations: true)
+                case .swallow:
+                    return true // digit beyond this page's candidates: no insert
+                case .type:
+                    break // 注音: on to the run-on rule below, as any other 注音 key
                 }
-                return true // digit beyond this page's candidates: swallow, no insert
             }
         }
 
@@ -685,6 +692,11 @@ final class InputController: IMKInputController {
             _ = commitCurrent(to: client)
         }
         let consumed = engine.handleKey(ch)
+        // 注音: a tone that finishes a reading with only one character leaves nothing to choose,
+        // so it is committed now, 聯想 and all, instead of opening a one-row window (issue #148).
+        if consumed, let zhuyin = engine as? ZhuyinEngine, zhuyin.hasOnlyOneCandidate {
+            return commitCurrent(to: client, offerAssociations: true)
+        }
         if consumed {
             // A new radical/key changes the candidate set; restart paging from page 0 and
             // require the stroke confirmation again (issue #61).

@@ -100,12 +100,34 @@ enum KeyEventPolicy {
     }
 
     /// The index into the FULL list that selection digit `digit` picks on `page`, or nil when that
-    /// row falls past the end of the list. A nil is not a key the caller should pass on: the last
-    /// page is rarely full, and a digit pressed on an empty row is swallowed so no stray number
-    /// leaks into the document.
+    /// row falls past the end of the list. What happens to a nil is `selectionDigitAction`'s call.
     static func candidateIndex(digit: Int, page: Int, pageSize: Int, count: Int) -> Int? {
         let index = page * pageSize + (digit - 1)
         return index < count ? index : nil
+    }
+
+    /// What a bare 1–9 does while a candidate list is on screen.
+    enum SelectionDigitAction: Equatable {
+        /// Pick the candidate at this index into the full list.
+        case pick(Int)
+        /// No candidate on that row: consume the key, so no stray number leaks into the document.
+        case swallow
+        /// No candidate on that row, and the digit is a key the active method types with — 注音's
+        /// number row — so it goes on to be typed.
+        case type
+    }
+
+    /// A digit with a candidate on its row always picks it. One with no candidate there is
+    /// swallowed — the last page is rarely full — unless it is a typing key: in 注音 on 大千 the
+    /// digits are ㄅ ㄉ ㄓ ㄚ ㄞ and the tones, so swallowing one loses the start of the next
+    /// character (issue #148). The original Yahoo! KeyKey's ㄅ半 and McBopomofo's Plain Bopomofo
+    /// both offer only as many selection keys as there are candidates, for the same reason.
+    static func selectionDigitAction(digit: Int, page: Int, pageSize: Int, count: Int,
+                                     digitIsTypingKey: Bool) -> SelectionDigitAction {
+        if let index = candidateIndex(digit: digit, page: page, pageSize: pageSize, count: count) {
+            return .pick(index)
+        }
+        return digitIsTypingKey ? .type : .swallow
     }
 
     /// What an arrow / Page Up / Page Down key does to the shown page.

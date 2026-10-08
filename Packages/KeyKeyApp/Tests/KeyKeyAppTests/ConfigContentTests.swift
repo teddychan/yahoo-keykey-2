@@ -88,16 +88,15 @@ final class ConfigContentTests: XCTestCase {
         let short = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
         XCTAssertEqual(content.displayVersion, DragonVersion.display(short ?? "1.0.0"))
         XCTAssertTrue(content.displayVersion.hasPrefix("v"))
-        XCTAssertEqual(content.date, "2026-09-28")
+        XCTAssertEqual(content.date, "2026-10-08")
     }
 
-    // 2.16.0 is [.added, .changed]: one `.added` entry for 設定… ▸ 一般 ▸ 為所有使用者安裝…, which
-    // moves KeyKey to /Library/Input Methods so it stays usable while another app holds secure
-    // input, and two `.changed` entries for what moves with it — the Homebrew cask installing for
-    // all users, and learning pausing while secure input is on.
+    // 2.16.2 is [.changed, .fixed], both about 注音 (issue #148): `.changed1` for a reading with one
+    // character committing without a window, `.fixed1` for a number with no candidate on its row
+    // typing 注音 instead of being swallowed.
     //
-    // 2.15.0's `.added2` is gone from all seven .strings files rather than left stranded with no
-    // section to render it — see WhatsNewConfig.
+    // 2.16.x's `.added1` and `.changed2` are gone from all seven .strings files rather than left
+    // stranded with no section to render them — see WhatsNewConfig.
     //
     // Entry KEYS are pinned, not just kinds and counts, because kinds and counts had stopped
     // catching anything: 2.11.3, 2.11.4 and the 2.11.5 draft were all [.changed] with one entry —
@@ -107,18 +106,13 @@ final class ConfigContentTests: XCTestCase {
     // exactly as the DragonAppMenu test below compares titles against the kit's keys. What the
     // text SAYS is the release gate's job — it diffs every locale's .strings file — so between
     // them a stale pane cannot ship.
-    //
-    // 2.16.1 keeps all three and adds `.fixed1`, the Uninstall fix from DragonKit 4.1.2: 2.16.0 was
-    // live for about an hour, so most users meet the all-users install for the first time here.
     @MainActor
-    func testWhatsNewAnnouncesTheAllUsersInstallAndTheUninstallFix() {
+    func testWhatsNewAnnouncesTheZhuyinRunOnFixes() {
         let content = WhatsNewConfig.content
-        XCTAssertEqual(content.sections.map(\.kind), [.added, .changed, .fixed])
-        XCTAssertEqual(content.sections.map(\.entries.count), [1, 2, 1])
+        XCTAssertEqual(content.sections.map(\.kind), [.changed, .fixed])
+        XCTAssertEqual(content.sections.map(\.entries.count), [1, 1])
         XCTAssertEqual(content.sections.flatMap(\.entries), [
-            L("app.whatsNew.added1"),
             L("app.whatsNew.changed1"),
-            L("app.whatsNew.changed2"),
             L("app.whatsNew.fixed1"),
         ])
     }

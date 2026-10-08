@@ -2,6 +2,21 @@
 
 A plain-language list of changes in each version, newest first.
 
+## 2.16.2
+
+- **Fixed: in 注音, a number key no longer disappears when the candidate window has nothing on its
+  row** (issue #148). On the **標準（大千）** keyboard `1` `2` `5` `8` `9` type ㄅ ㄉ ㄓ ㄚ ㄞ and `3`
+  `4` `6` `7` are tones, so after a short candidate list — 3 candidates, say — pressing `5` for
+  這 was swallowed as a pick from an empty row. A number with no candidate on its row now types
+  注音: a symbol commits the first candidate and starts your next character, and a tone corrects
+  the tone. A number whose row has a candidate still picks it. This is how the original Yahoo!
+  KeyKey's ㄅ半 and McBopomofo's 傳統注音 (Plain Bopomofo) both behave: they offer only as many
+  selection keys as there are candidates.
+- **Changed: in 注音, a reading with only one character is typed straight away.** With nothing to
+  choose, it goes into your text as soon as you finish its tone, without opening a one-row
+  candidate window that waited for Space; 聯想字詞 still follow. Again what the original ㄅ半 and
+  McBopomofo do. Nothing changes in 倉頡, 速成 or 拼音.
+
 ## 2.16.1
 
 - **Fixed: Uninstall no longer clears your settings when it can't finish.** For a copy installed
