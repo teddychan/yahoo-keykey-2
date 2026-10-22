@@ -2,6 +2,13 @@
 
 A plain-language list of changes in each version, newest first.
 
+## Unreleased
+
+- **Fixed: a plain `tools/build-app.sh` build no longer crashes at launch.** The ad-hoc signature
+  carried the hardened runtime, whose Library Validation refuses the equally ad-hoc
+  Sparkle.framework. Only debug builds avoided it. Notarized releases re-sign with the Developer
+  ID and `--options runtime` themselves, so a downloaded release is unchanged.
+
 ## 2.16.2
 
 - **Fixed: in 注音, a number key no longer disappears when the candidate window has nothing on its

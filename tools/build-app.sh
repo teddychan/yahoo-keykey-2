@@ -341,12 +341,16 @@ chmod -R u+w "$APP/Contents/Frameworks/Sparkle.framework"
 echo "==> Code-signing Sparkle inside-out, then the app (ad-hoc)"
 SPARKLE_FW="$APP/Contents/Frameworks/Sparkle.framework"
 SPARKLE_V="$(/bin/ls -d "$SPARKLE_FW"/Versions/* | grep -v '/Current$' | head -1)"
-# Hardened runtime is required for notarized RELEASE builds. For a local ad-hoc DEBUG build it
-# must be OMITTED: ad-hoc code carries no Team ID, and the hardened runtime's Library Validation
-# then refuses to load the (also ad-hoc) Sparkle.framework — the app dies on launch with a dyld
-# "different Team IDs" error, so the IME never registers its menu. A local debug build doesn't
-# need the hardened runtime. Unquoted on purpose: empty string must expand to no argument.
-if [[ "${KEYKEY_DEBUG_ID:-}" == "1" ]]; then RUNTIME_OPT=""; else RUNTIME_OPT="--options runtime"; fi
+# This stage signs AD-HOC, and an ad-hoc signature must NOT carry the hardened runtime: ad-hoc code
+# has no Team ID, so the runtime's Library Validation refuses to load the (also ad-hoc)
+# Sparkle.framework and the app dies on launch with a dyld "different Team IDs" error — the IME
+# never registers its menu. That was true only of DEBUG builds before, which left every plain
+# `build-app.sh` run (and anyone building from source without a Developer ID) with a bundle that
+# crashes at once. The notarized release path is unaffected: it re-signs with the Developer ID and
+# --options runtime itself (tools/package-release.sh when DEVELOPER_ID_APP is set, and the
+# "Sign (Developer ID + hardened runtime) [script]" step in dragon-release-ci release-macos.yml).
+# Unquoted on purpose below: the empty string must expand to no argument.
+RUNTIME_OPT=""
 for item in "$SPARKLE_V"/XPCServices/*.xpc "$SPARKLE_V/Autoupdate" "$SPARKLE_V/Updater.app"; do
   [ -e "$item" ] && codesign --force $RUNTIME_OPT -s - "$item"
 done
