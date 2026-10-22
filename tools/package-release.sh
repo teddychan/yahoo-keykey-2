@@ -127,7 +127,10 @@ Install from this zip by copying the app into your Input Methods folder:
 
 3. Open System Settings > Keyboard > Input Sources > "+",
    choose Traditional Chinese, and add any of the Yahoo! KeyKey 2 modes:
-       倉頡 (Cangjie)   速成 (Simplex)   拼音 (Pinyin)
+       倉頡 (Cangjie)   速成 (Simplex)   注音 (Zhuyin)   拼音 (Pinyin)
+
+   In 注音, pick the keyboard (大千 / 倚天 / 許氏) from the input-method menu
+   or 設定… > 一般.
 
 4. Switch input source with Ctrl-Space and start typing.
 

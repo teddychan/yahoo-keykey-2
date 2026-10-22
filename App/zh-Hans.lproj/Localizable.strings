@@ -29,6 +29,7 @@
 "keykey.general.zhuyinLayout" = "注音键盘";
 "keykey.general.zhuyinLayoutDachen" = "标准（大千）";
 "keykey.general.zhuyinLayoutEten" = "倚天";
+"keykey.general.zhuyinLayoutHsu" = "许氏";
 "keykey.general.zhuyinLayoutHint" = "注音（ㄅ半）符号在键盘上的位置，立即生效。「标准（大千）」就是台湾键盘上印的那一套，也是原版 Yahoo! KeyKey 的默认设置。空格键是一声；候选字出现后按 1–9 选字。在注音中，联想字词固定以 Shift + 数字选取（不受「联想选字键」影响），因为数字键要用来打注音。";
 "keykey.general.strokeConfirmation" = "以空格键确认字根";
 "keykey.general.strokeConfirmationHint" = "在速成、以及使用通配符（*）的仓颉中，字根还没输完就会出现候选字，此时空格键会直接翻到下一页，而不是确认你输入的字根。开启后，第一次按空格键只确认字根并停留在第 1 页；再按一次空格键才翻页，或直接按 1–9 选字。普通仓颉不受影响。";

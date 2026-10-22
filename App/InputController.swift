@@ -291,6 +291,8 @@ final class InputController: IMKInputController {
              action: #selector(InputController.selectZhuyinLayoutDachen)),
             (title: "倚天鍵盤", layout: ZhuyinLayout.eten,
              action: #selector(InputController.selectZhuyinLayoutEten)),
+            (title: "許氏鍵盤", layout: ZhuyinLayout.hsu,
+             action: #selector(InputController.selectZhuyinLayoutHsu)),
         ].map { entry in
             let item = NSMenuItem(title: entry.title, action: entry.action, keyEquivalent: "")
             item.state = active == entry.layout ? .on : .off
@@ -300,6 +302,7 @@ final class InputController: IMKInputController {
 
     @objc private func selectZhuyinLayoutDachen() { setZhuyinLayout(.dachen) }
     @objc private func selectZhuyinLayoutEten() { setZhuyinLayout(.eten) }
+    @objc private func selectZhuyinLayoutHsu() { setZhuyinLayout(.hsu) }
 
     // Persist the choice and rebuild every controller's engine, so the new keyboard applies to
     // the very next keystroke — in this app and in every other one the IME is loaded into.

@@ -241,7 +241,9 @@ final class PreferencesTests: XCTestCase {
         XCTAssertEqual(ZhuyinLayout.dachen.rawValue, "dachen")
         XCTAssertEqual(ZhuyinLayout.eten.rawValue, "eten")
         XCTAssertEqual(ZhuyinLayout(rawValue: "dachen"), .dachen)
+        XCTAssertEqual(ZhuyinLayout.hsu.rawValue, "hsu")
         XCTAssertEqual(ZhuyinLayout(rawValue: "eten"), .eten)
-        XCTAssertNil(ZhuyinLayout(rawValue: "hsu"))
+        XCTAssertEqual(ZhuyinLayout(rawValue: "hsu"), .hsu)
+        XCTAssertNil(ZhuyinLayout(rawValue: "ibm"))   // a layout this app does not ship
     }
 }

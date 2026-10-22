@@ -72,6 +72,7 @@ private struct GeneralPaneView: View {
                 Picker(L("keykey.general.zhuyinLayout"), selection: $model.zhuyinLayout) {
                     Text(L("keykey.general.zhuyinLayoutDachen")).tag(ZhuyinLayout.dachen)
                     Text(L("keykey.general.zhuyinLayoutEten")).tag(ZhuyinLayout.eten)
+                    Text(L("keykey.general.zhuyinLayoutHsu")).tag(ZhuyinLayout.hsu)
                 }
                 .dragonAnnotation(LocalizedStringKey(L("keykey.general.zhuyinLayoutHint")))
                 Toggle(L("keykey.general.strokeConfirmation"), isOn: $model.strokeConfirmation)

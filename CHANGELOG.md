@@ -2,6 +2,14 @@
 
 A plain-language list of changes in each version, newest first.
 
+## Unreleased
+
+- **Added: 許氏 (Hsu) keyboard for 注音.** The 26-letter layout, where one key stands for several
+  symbols and the neighbouring keys decide which (`m` is ㄇ or ㄢ, `j` is ㄐ, ㄓ or the fourth
+  tone). Space is the first tone; the other tones are `d` ˊ · `f` ˇ · `j` ˋ · `s` ˙. Pick it
+  beside 標準（大千） and 倚天, from the input menu or in 設定… ▸ 一般. 注音 still types one
+  character at a time. The reading rules follow McBopomofo's (MIT).
+
 ## 2.16.2
 
 - **Fixed: in 注音, a number key no longer disappears when the candidate window has nothing on its

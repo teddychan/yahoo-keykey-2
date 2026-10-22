@@ -29,6 +29,7 @@
 "keykey.general.zhuyinLayout" = "Zhuyin keyboard";
 "keykey.general.zhuyinLayoutDachen" = "Standard (大千)";
 "keykey.general.zhuyinLayoutEten" = "倚天 (ETen)";
+"keykey.general.zhuyinLayoutHsu" = "許氏 (Hsu)";
 "keykey.general.zhuyinLayoutHint" = "Where the 注音 symbols sit on the keyboard, effective immediately. Standard (大千) is the layout printed on Taiwanese keyboards and the one the original Yahoo! KeyKey shipped. Space is the first tone; 1–9 pick a candidate once the window is up. In 注音, associated phrases are always picked with Shift + a number — whatever the setting above says — because the number keys type 注音 there.";
 "keykey.general.strokeConfirmation" = "Press Space to confirm the code";
 "keykey.general.strokeConfirmationHint" = "In 速成, and in 倉頡 with the * wildcard, candidates appear before the code is finished, so Space flips to the next page instead of confirming what you typed. With this on, the first Space only confirms the code and keeps page 1 — press Space again to page, or 1–9 to pick. Plain 倉頡 is unaffected.";

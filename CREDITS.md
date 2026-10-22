@@ -15,7 +15,8 @@ KeyKey-style experience alive on modern macOS.
 ## Data & engine
 
 - **openvanilla/McBopomofo** — language model (bundled `Resources/data.txt` is
-  built from McBopomofo's data sources). MIT License.
+  built from McBopomofo's data sources). MIT License. The 許氏 (Hsu) key-reading rules in
+  `ZhuyinHsuLayout.swift` are a port of McBopomofo's `Mandarin.h` / `Mandarin.cpp`.
   https://github.com/openvanilla/McBopomofo
 - **Cangjie (倉頡) table** — from **definite/ibus-table-chinese**
   (`tables/cangjie/cangjie5.txt`); the table declares itself freely

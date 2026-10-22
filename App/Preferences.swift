@@ -18,7 +18,7 @@ enum AssociationTrigger: String {
 }
 
 // Which 注音 keyboard the ㄅ半 engine reads keys through — 大千 (the layout printed on Taiwanese
-// keyboards, and the original Yahoo! KeyKey's default) or 倚天. Unlike CangjieVersion and
+// keyboards, and the original Yahoo! KeyKey's default), 倚天, or 許氏. Unlike CangjieVersion and
 // AssociationTrigger above, this is NOT a second app-level enum over the same raw values: the
 // engine already owns ZhuyinKeyboardLayout.Identifier, whose cases ARE the persisted strings, so
 // a twin here could only drift from the layouts that actually exist.

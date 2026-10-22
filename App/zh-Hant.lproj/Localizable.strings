@@ -29,6 +29,7 @@
 "keykey.general.zhuyinLayout" = "注音鍵盤";
 "keykey.general.zhuyinLayoutDachen" = "標準（大千）";
 "keykey.general.zhuyinLayoutEten" = "倚天";
+"keykey.general.zhuyinLayoutHsu" = "許氏";
 "keykey.general.zhuyinLayoutHint" = "注音（ㄅ半）符號在鍵盤上的位置，立即生效。「標準（大千）」就是台灣鍵盤上印的那一套，也是原版 Yahoo! KeyKey 的預設。空白鍵是一聲；候選字出現後按 1–9 選字。在注音中，聯想字詞固定以 Shift + 數字選取（不受「聯想選字鍵」影響），因為數字鍵要用來打注音。";
 "keykey.general.strokeConfirmation" = "以空白鍵確認字根";
 "keykey.general.strokeConfirmationHint" = "在速成、以及使用萬用字元（*）的倉頡中，字根還沒打完就會出現候選字，此時空白鍵會直接翻到下一頁，而不是確認你打的字根。開啟後，第一次按空白鍵只會確認字根並停留在第 1 頁；再按一次空白鍵才翻頁，或直接按 1–9 選字。一般倉頡不受影響。";

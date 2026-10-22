@@ -63,7 +63,8 @@ final class ZhuyinKeyboardLayoutTests: XCTestCase {
     // MARK: Completeness — the property that makes a layout usable at all
 
     func testEveryLayoutTypesEverySymbolAndEveryToneExactlyOnce() {
-        for id in ZhuyinKeyboardLayout.Identifier.allCases {
+        // 許氏 has no key → symbol map to check; ZhuyinHsuLayoutTests covers it by spelling syllables.
+        for id in ZhuyinKeyboardLayout.Identifier.allCases where id != .hsu {
             let layout = ZhuyinKeyboardLayout.layout(for: id)
             // ASCII printable, minus Space (the first-tone key the controller owns) — the whole
             // set a layout could possibly claim.
@@ -102,6 +103,7 @@ final class ZhuyinKeyboardLayoutTests: XCTestCase {
         // keyboard to the default.
         XCTAssertEqual(ZhuyinKeyboardLayout.Identifier.dachen.rawValue, "dachen")
         XCTAssertEqual(ZhuyinKeyboardLayout.Identifier.eten.rawValue, "eten")
+        XCTAssertEqual(ZhuyinKeyboardLayout.Identifier.hsu.rawValue, "hsu")
     }
 
     // The same syllable must be typable on both layouts and spell the same reading — the reason

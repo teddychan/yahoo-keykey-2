@@ -16,6 +16,7 @@ public struct ZhuyinKeyboardLayout: Sendable, Equatable {
     public enum Identifier: String, Sendable, CaseIterable {
         case dachen = "dachen"   // 標準 / 大千 — the layout printed on Taiwanese keyboards
         case eten = "eten"       // 倚天
+        case hsu = "hsu"         // 許氏 — 26 letters, a key's symbol depends on its neighbours
     }
 
     public let id: Identifier
@@ -31,13 +32,55 @@ public struct ZhuyinKeyboardLayout: Sendable, Equatable {
     /// the controller routes to 臨時英數 long before the engine sees it.
     public func symbol(for key: Character) -> Character? { keyToSymbol[key] }
 
+    /// Whether this layout types a 注音 symbol (or tone) with `key`.
+    func claims(_ key: Character) -> Bool {
+        id == .hsu ? ZhuyinHsu.claims(key) : keyToSymbol[key] != nil
+    }
+
+    /// The syllable after `key` is typed onto `syllable`, or nil when the key is not this layout's
+    /// or cannot go there (a tone with nothing to put it on). 大千 and 倚天 write the key's symbol
+    /// into its slot; 許氏 re-reads the whole key sequence, because its keys change meaning with
+    /// their neighbours (see ZhuyinHsu).
+    func combine(_ key: Character, into syllable: ZhuyinSyllable) -> ZhuyinSyllable? {
+        if id == .hsu {
+            guard let next = ZhuyinHsu.combine(key, into: syllable) else { return nil }
+            // A lone tone mark is not a syllable; the key is spent, but nothing changes.
+            return next.hasSymbol ? next : syllable
+        }
+        guard let symbol = keyToSymbol[key] else { return nil }
+        var next = syllable
+        return next.insert(symbol) ? next : nil
+    }
+
+    /// The syllable with its last-typed part taken back off.
+    func backspaced(_ syllable: ZhuyinSyllable) -> ZhuyinSyllable {
+        // The first tone (Space) is not a key, so 許氏 cannot replay it; it goes first, as everywhere.
+        if id == .hsu, syllable.tone != .first { return ZhuyinHsu.removeLastKey(from: syllable) }
+        var next = syllable
+        next.removeLast()
+        return next
+    }
+
+    /// Whether `key` is a tone mark on this layout — a correction to a finished syllable rather
+    /// than the start of the next character. Never on 許氏: its tone keys (`d f j s`) are also the
+    /// letters ㄉ ㄈ ㄐ ㄙ, and after a finished syllable the next character is what is meant.
+    func isToneKey(_ key: Character) -> Bool {
+        guard id != .hsu, let symbol = keyToSymbol[key] else { return false }
+        return ZhuyinSyllable.Tone.tone(forMark: symbol) != nil
+    }
+
     /// The layout for a persisted identifier.
     public static func layout(for id: Identifier) -> ZhuyinKeyboardLayout {
         switch id {
         case .dachen: return .dachen
         case .eten: return .eten
+        case .hsu: return .hsu
         }
     }
+
+    /// 許氏 — the 26-letter layout. Its keys are resolved by `ZhuyinHsu`, so there is no
+    /// key → symbol map to hold here.
+    public static let hsu = ZhuyinKeyboardLayout(id: .hsu, keyToSymbol: [:])
 
     /// 標準 (大千) — the layout the original Yahoo! KeyKey shipped as its default, and the one
     /// printed on Taiwanese keyboards. Transcribed from the `%keyname` section of the ㄅ半 table

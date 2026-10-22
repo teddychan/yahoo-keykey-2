@@ -29,6 +29,7 @@
 "keykey.general.zhuyinLayout" = "Clavier 注音";
 "keykey.general.zhuyinLayoutDachen" = "Standard (大千)";
 "keykey.general.zhuyinLayoutEten" = "倚天 (ETen)";
+"keykey.general.zhuyinLayoutHsu" = "許氏 (Hsu)";
 "keykey.general.zhuyinLayoutHint" = "L’emplacement des symboles 注音 (ㄅ半) sur le clavier, avec effet immédiat. « Standard (大千) » est la disposition imprimée sur les claviers taïwanais, celle du Yahoo! KeyKey d’origine. Espace donne le premier ton ; les touches 1–9 choisissent un candidat une fois la fenêtre affichée. En 注音, les expressions associées se choisissent toujours avec Maj + un chiffre, quel que soit le réglage ci-dessus, car les chiffres y servent à saisir le 注音.";
 "keykey.general.strokeConfirmation" = "Appuyer sur Espace pour valider le code";
 "keykey.general.strokeConfirmationHint" = "En 速成, et en 倉頡 avec le joker *, les candidats apparaissent avant que le code soit terminé : Espace passe donc à la page suivante au lieu de valider ce que vous avez tapé. Avec cette option, le premier Espace ne fait que valider le code et reste sur la page 1 — appuyez de nouveau sur Espace pour changer de page, ou sur 1–9 pour choisir. Le 倉頡 normal n’est pas affecté.";
