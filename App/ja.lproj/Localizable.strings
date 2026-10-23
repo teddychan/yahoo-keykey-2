@@ -29,6 +29,9 @@
 "keykey.general.zhuyinLayout" = "注音キーボード";
 "keykey.general.zhuyinLayoutDachen" = "標準（大千）";
 "keykey.general.zhuyinLayoutEten" = "倚天（ETen）";
+"keykey.general.zhuyinLayoutHsu" = "許氏（Hsu）";
+"keykey.general.zhuyinSmart" = "注音のスマート変換（文単位）";
+"keykey.general.zhuyinSmartHint" = "注音を文単位で入力すると、言語モデルが漢字を選びます（オリジナルの Yahoo! KeyKey と同じ）。声調キー（第1声はスペース）で音節が確定し、矢印キーで語を移動、1–9 で別の候補に替え、スペースまたは Return で文を確定します。オフにすると 1 文字ずつの入力になります。";
 "keykey.general.zhuyinLayoutHint" = "注音（ㄅ半）記号のキー配置です。すぐに反映されます。「標準（大千）」は台湾のキーボードに印字されている配置で、オリジナルの Yahoo! KeyKey の初期設定でもあります。スペースキーが第1声、候補が出たら 1–9 で選びます。注音では数字キーが注音の入力に使われるため、連想語句の選択は上の設定にかかわらず常に Shift + 数字です。";
 "keykey.general.strokeConfirmation" = "スペースキーでコードを確定";
 "keykey.general.strokeConfirmationHint" = "速成、および * ワイルドカードを使う倉頡では、コードを打ち終わる前に候補が出るため、スペースキーは打ったコードを確定せずに次のページへ送ってしまいます。オンにすると、最初のスペースキーはコードの確定だけを行い 1 ページ目に留まります。もう一度スペースキーを押すとページが進み、1〜9 で直接選べます。通常の倉頡は影響を受けません。";

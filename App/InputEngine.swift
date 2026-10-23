@@ -63,3 +63,18 @@ extension PinyinEngine: InputEngine {
     var pendingUsage: [CandidateUsage] { [] }
 }
 extension PinyinEngine: PhraseComposingEngine {}
+
+// SmartZhuyinEngine (智慧注音) composes sentences like PinyinEngine: a buffer with a cursor, walked by
+// the language model. Unlike 拼音 it does credit per-list usage — each stretch the user pinned by hand
+// — so a character picked again and again leads its reading's list (see its `pendingUsage`).
+extension SmartZhuyinEngine: InputEngine {}
+extension SmartZhuyinEngine: PhraseComposingEngine {}
+
+// The word the cursor is on, for the controller to underline in the marked text. Engines that do
+// not track one (拼音) answer nil and keep the plain marked text they always had.
+extension PhraseComposingEngine {
+    var composingSegments: [ComposingSegment]? { nil }
+}
+extension SmartZhuyinEngine {
+    var composingSegments: [ComposingSegment]? { segments }
+}

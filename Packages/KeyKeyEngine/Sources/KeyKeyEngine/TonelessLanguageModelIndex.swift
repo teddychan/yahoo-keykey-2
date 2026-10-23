@@ -16,7 +16,10 @@ public struct TonelessLanguageModelIndex {
 
     private static let toneScalars: Set<Character> = ["ˊ", "ˇ", "ˋ", "˙"]
 
-    public init(text: String) {
+    /// `keepTones` builds the same index keyed by the full reading, tone marks and all (ㄋㄧˇ-ㄏㄠˇ),
+    /// which is what 智慧注音 walks: a typist who types tones means them. The default strips them
+    /// so toneless pinyin readings can match.
+    public init(text: String, keepTones: Bool = false) {
         // Aggregate best score per (tonelessKey, value).
         var best: [String: [String: Double]] = [:]
         var maxSpan = 1
@@ -25,7 +28,8 @@ public struct TonelessLanguageModelIndex {
             if line.isEmpty || line.hasPrefix("#") { continue }
             let parts = line.split(separator: " ")
             guard parts.count == 3, let score = Double(parts[2]) else { continue }
-            let key = String(parts[0]).filter { !Self.toneScalars.contains($0) }
+            let key = keepTones ? String(parts[0])
+                                : String(parts[0]).filter { !Self.toneScalars.contains($0) }
             let value = String(parts[1])
             let span = key.split(separator: "-").count
             if span > maxSpan { maxSpan = span }
@@ -55,8 +59,8 @@ public struct TonelessLanguageModelIndex {
         maxSpanLength = maxSpan
     }
 
-    public init(contentsOf url: URL) throws {
-        try self.init(text: String(contentsOf: url, encoding: .utf8))
+    public init(contentsOf url: URL, keepTones: Bool = false) throws {
+        try self.init(text: String(contentsOf: url, encoding: .utf8), keepTones: keepTones)
     }
 
     /// Unigrams for a toneless key, sorted by score descending (best first). Empty if none.

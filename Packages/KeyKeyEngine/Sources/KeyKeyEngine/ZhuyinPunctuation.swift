@@ -36,6 +36,8 @@ public enum ZhuyinPunctuation {
         switch layout {
         case .dachen: return dachen[key]
         case .eten: return eten[key]
+        // 許氏 takes only letters, so every punctuation key keeps its shared-table mark.
+        case .hsu: return nil
         }
     }
 }

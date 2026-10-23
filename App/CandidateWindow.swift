@@ -138,8 +138,10 @@ final class CandidateWindow {
     // `hints`, when non-empty, is parallel to `pageCandidates`; a non-nil entry is drawn as a
     // dimmed 倉頡-code hint (反查/拆碼提示) after that row's glyph. An empty array (the default)
     // renders exactly as before.
+    // `selected`, when non-nil, is the row (0-based, on this page) drawn highlighted: the candidate
+    // the Up/Down arrows are on, which Space or Return then picks.
     func show(_ pageCandidates: [String], page: Int, pageCount: Int, fontSize: CGFloat,
-              hints: [String?] = [], near caret: NSRect) {
+              hints: [String?] = [], selected: Int? = nil, near caret: NSRect) {
         let glyphFont = NSFont.systemFont(ofSize: fontSize)
         let numFont = NSFont.monospacedDigitSystemFont(ofSize: Style.numberSize(fontSize), weight: .regular)
         let chromeFont = NSFont.systemFont(ofSize: Style.chromeSize(fontSize), weight: .medium)
@@ -154,6 +156,7 @@ final class CandidateWindow {
         let out = NSMutableAttributedString()
         for (i, cand) in pageCandidates.prefix(9).enumerated() {
             if i > 0 { out.append(NSAttributedString(string: "\n")) }
+            let rowStart = out.length
             out.append(NSAttributedString(
                 string: "\(i + 1)\t",
                 attributes: [.font: numFont, .foregroundColor: NSColor.secondaryLabelColor]))
@@ -165,6 +168,11 @@ final class CandidateWindow {
                 out.append(NSAttributedString(
                     string: "  \(hint)",
                     attributes: [.font: hintFont, .foregroundColor: NSColor.tertiaryLabelColor]))
+            }
+            if i == selected {
+                out.addAttribute(.backgroundColor,
+                                 value: NSColor.controlAccentColor.withAlphaComponent(0.35),
+                                 range: NSRange(location: rowStart, length: out.length - rowStart))
             }
         }
         out.addAttribute(.paragraphStyle, value: para, range: NSRange(location: 0, length: out.length))

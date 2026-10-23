@@ -36,6 +36,9 @@ final class SharedResources {
     // The heavy Pinyin LM index (~55–80 MB), resident ONLY while at least one controller is in
     // Pinyin mode (ref-counted). Built lazily from data.txt on the first acquire.
     let pinyinIndexCache: RefCountedResource<TonelessLanguageModelIndex>
+    // The same LM keyed by full readings, tones kept, for 智慧注音. Same cost, same lifecycle:
+    // resident only while a controller is in 注音 with 智慧選字 on.
+    let zhuyinSmartIndexCache: RefCountedResource<TonelessLanguageModelIndex>
 
     // The 注音 (ㄅ半) character table, behind its OWN lock: it shares nothing with the 倉頡 set
     // below and must not be serialized behind a 倉頡版本 reload. Built on first use (see
@@ -150,6 +153,15 @@ final class SharedResources {
             return TonelessLanguageModelIndex(text: "")
         }
 
+        zhuyinSmartIndexCache = RefCountedResource {
+            if let url = Bundle.main.url(forResource: "data", withExtension: "txt"),
+               let text = try? String(contentsOf: url, encoding: .utf8) {
+                return TonelessLanguageModelIndex(text: text, keepTones: true)
+            }
+            NSLog("YahooKeyKey: data.txt missing; 智慧注音 index empty")
+            return TonelessLanguageModelIndex(text: "", keepTones: true)
+        }
+
         // All stored properties are now set: load the real Cangjie table for the selected
         // version. simplexTable/cangjieCodeIndex are lazy and build on first access.
         loadCangjieTables(version: Preferences.cangjieVersion)
@@ -258,6 +270,11 @@ final class SharedResources {
     // manages acquire/release so the index is built only while Pinyin is actually in use.
     var pinyinIndexOrEmpty: TonelessLanguageModelIndex {
         pinyinIndexCache.current ?? TonelessLanguageModelIndex(text: "")
+    }
+
+    // The resident 智慧注音 index, or an empty one when no controller holds it (see pinyinIndexOrEmpty).
+    var zhuyinSmartIndexOrEmpty: TonelessLanguageModelIndex {
+        zhuyinSmartIndexCache.current ?? TonelessLanguageModelIndex(text: "", keepTones: true)
     }
 
     private static func loadCangjie(resource: String) -> CangjieTable {

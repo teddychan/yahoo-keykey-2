@@ -57,6 +57,17 @@ final class SettingsModel {
     // 以空白鍵確認字根 (issue #61): in 速成 / 倉頡-with-`*`, require one Space press to confirm the
     // typed strokes before Space resumes paging or committing. A plain toggle, so a computed
     // forwarder is fine here — only Picker/Slider need the stored-property treatment below.
+    // 智慧選字. A computed forwarder (it drives a Toggle, not a menu Picker); the write also posts the
+    // notification every live engine rebuilds on, the same one the input menu's toggle posts.
+    var zhuyinSmart: Bool {
+        get { Preferences.zhuyinSmartEnabled }
+        set {
+            guard newValue != Preferences.zhuyinSmartEnabled else { return }
+            Preferences.zhuyinSmartEnabled = newValue
+            NotificationCenter.default.post(name: .zhuyinLayoutChanged, object: nil)
+        }
+    }
+
     var strokeConfirmation: Bool {
         get { Preferences.strokeConfirmationEnabled }
         set { Preferences.strokeConfirmationEnabled = newValue }

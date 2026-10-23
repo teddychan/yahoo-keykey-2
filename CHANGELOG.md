@@ -2,6 +2,27 @@
 
 A plain-language list of changes in each version, newest first.
 
+## Unreleased
+
+- **Added: 許氏 (Hsu) keyboard for 注音.** The 26-letter layout, where one key stands for several
+  symbols and the neighbouring keys decide which (`m` is ㄇ or ㄢ, `j` is ㄐ, ㄓ or the fourth
+  tone). Space is the first tone; the other tones are `d` ˊ · `f` ˇ · `j` ˋ · `s` ˙. Pick it
+  beside 標準（大千） and 倚天, from the input menu or in 設定… ▸ 一般. 注音 still types one
+  character at a time. The reading rules follow McBopomofo's (MIT).
+- **Added: 智慧選字 for 注音 (whole-sentence input), off by default.** Type a sentence of 注音, ending
+  each syllable with its tone (Space for the first tone), and the language model picks the
+  characters, as the original Yahoo! KeyKey's 好打注音 did: `ㄋㄧˇ ㄏㄠˇ` becomes 你好 without
+  choosing either character. ← → move one character at a time and the character under the cursor
+  is underlined; the list offers the word the model chose, then every single character for that
+  syllable, then longer words — so one character of a word can be changed on its own (太長 →
+  太常). 1–9 pick, Space or Return commits the sentence. Characters you pick or accept are
+  remembered and lead next time. It stays off until you turn it on in 設定… ▸ 一般 (or the input
+  menu), so anyone already typing one character at a time keeps that. Nothing changes in 倉頡,
+  速成 or 拼音. **Backspace** takes only the character you just finished back into 注音 (tone off);
+  after that, and for every character before it, it deletes the whole character. **↓ ↑** walk a
+  highlight through the candidates (paging as they go) and Space or Return pick the highlighted
+  one, as its number would; Esc drops the highlight.
+
 ## 2.16.2
 
 - **Fixed: in 注音, a number key no longer disappears when the candidate window has nothing on its

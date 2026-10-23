@@ -36,7 +36,8 @@ public final class ZhuyinEngine {
     /// through to punctuation or to the app.
     @discardableResult
     public func handleKey(_ key: Character) -> Bool {
-        guard let symbol = layout.symbol(for: key), syllable.insert(symbol) else { return false }
+        guard let next = layout.combine(key, into: syllable) else { return false }
+        syllable = next
         invalidate()
         return true
     }
@@ -46,7 +47,7 @@ public final class ZhuyinEngine {
     /// `,` `.` `;` `/` `-` — keys the punctuation table also claims. 注音 wins while 注音 is the
     /// active method, which is what McBopomofo does too; the punctuation those keys would have
     /// typed is on their shifted forms (see ZhuyinPunctuation).
-    public func mapsKey(_ key: Character) -> Bool { layout.symbol(for: key) != nil }
+    public func mapsKey(_ key: Character) -> Bool { layout.claims(key) }
 
     /// The Space bar is the first-tone key on every 注音 keyboard — it is not in any layout map
     /// because Space also pages and commits, which only the controller can do. Returns false when
@@ -67,14 +68,14 @@ public final class ZhuyinEngine {
     /// including why it is not folded into `handleKey`: only the controller can commit into the
     /// client. It then feeds the key to `handleKey` on the fresh syllable.
     public func keyStartsNewComposition(_ key: Character) -> Bool {
-        guard syllable.isComplete, let symbol = layout.symbol(for: key) else { return false }
+        guard syllable.isComplete, layout.claims(key) else { return false }
         // A tone key is a correction to the syllable just finished, not the start of the next one.
-        return ZhuyinSyllable.Tone.tone(forMark: symbol) == nil
+        return !layout.isToneKey(key)
     }
 
     public func backspace() {
         selected = nil
-        _ = syllable.removeLast()
+        syllable = layout.backspaced(syllable)
         cachedCandidates = nil
     }
 

@@ -51,6 +51,15 @@ public struct ZhuyinSyllable: Equatable, Sendable {
 
     public init() {}
 
+    /// A syllable with its four slots already decided — what a context-sensitive layout (許氏)
+    /// produces after resolving a whole key sequence at once.
+    init(initial: Character?, medial: Character?, final: Character?, tone: Tone?) {
+        self.initial = initial
+        self.medial = medial
+        self.final = final
+        self.tone = tone
+    }
+
     /// True once a tone has been applied, i.e. the syllable is finished and addresses a candidate
     /// list. 注音 (ㄅ半) shows candidates only at this point — which is also what keeps the number
     /// row usable: on 大千 the tone keys ARE digits, so a candidate window opened before the tone

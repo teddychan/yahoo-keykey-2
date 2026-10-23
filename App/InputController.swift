@@ -27,9 +27,14 @@ final class InputController: IMKInputController {
     // The active module; selected by Info.plist mode id via setValue(_:forTag:client:).
     private var currentModule: InputMethodModule
     private var engine: InputEngine
+    // Whether this controller holds a reference on the shared 智慧注音 index (see syncSmartIndexHold).
+    private var holdsSmartIndex = false
     private let candidateWindow = CandidateWindow()
     // Current candidate page (9 per page) for the active composition; reused for association paging.
     private var candidatePage = 0
+    // 智慧注音: the candidate the Up/Down arrows are on (an index into all candidates, not the page),
+    // or nil when none is highlighted. Space/Return pick it; anything else clears it.
+    private var candidateHighlight: Int?
     // Stroke confirmation for the active composition (issue #61). Only consulted when
     // Preferences.strokeConfirmationEnabled and the composition is auto-completed (速成, or 倉頡
     // with a `*` wildcard): until the user has pressed Space once, Space confirms the strokes
@@ -95,10 +100,18 @@ final class InputController: IMKInputController {
                 // the method costs nothing; the layout is read LIVE here, so the engine a mode
                 // switch builds always matches the current setting, and a layout change while
                 // 注音 is active rebuilds through .zhuyinLayoutChanged (see init).
-                makeEngine: {
-                    ZhuyinEngine(table: shared.zhuyinTable,
-                                 layout: ZhuyinKeyboardLayout.layout(for: Preferences.zhuyinLayout),
-                                 usageCount: usageCount)
+                makeEngine: { () -> InputEngine in
+                    let layout = ZhuyinKeyboardLayout.layout(for: Preferences.zhuyinLayout)
+                    // 智慧選字 (read live, like the layout): whole sentences, the language model
+                    // picks the characters. Off: the classic ㄅ半, one character per syllable.
+                    // The index is resident only while a controller holds it (syncSmartIndexHold).
+                    if Preferences.zhuyinSmartEnabled {
+                        return SmartZhuyinEngine(index: shared.zhuyinSmartIndexOrEmpty,
+                                                 layout: layout, userRank: userRank,
+                                                 usageCount: usageCount)
+                    }
+                    return ZhuyinEngine(table: shared.zhuyinTable, layout: layout,
+                                        usageCount: usageCount)
                 },
                 methodMenuItems: InputController.zhuyinLayoutMenuItems
             ),
@@ -135,6 +148,21 @@ final class InputController: IMKInputController {
         if currentModule.modeSuffix == "Pinyin" {
             SharedResources.shared.pinyinIndexCache.release()
         }
+        if holdsSmartIndex { SharedResources.shared.zhuyinSmartIndexCache.release() }
+    }
+
+    // Keep the shared 智慧注音 index resident exactly while this controller is in 注音 with 智慧選字
+    // on. Called after `currentModule` is decided and before makeEngine reads the index, on every
+    // mode switch and engine rebuild, so turning the setting off (or leaving 注音) releases it.
+    private func syncSmartIndexHold() {
+        let wanted = currentModule.modeSuffix == "Zhuyin" && Preferences.zhuyinSmartEnabled
+        if wanted, !holdsSmartIndex {
+            SharedResources.shared.zhuyinSmartIndexCache.acquire()
+            holdsSmartIndex = true
+        } else if !wanted, holdsSmartIndex {
+            SharedResources.shared.zhuyinSmartIndexCache.release()
+            holdsSmartIndex = false
+        }
     }
 
     // Rebuild the active engine after a setting the engine was built from changed (倉頡版本,
@@ -149,6 +177,7 @@ final class InputController: IMKInputController {
         resetCompositionState()
         associations = []
         candidateWindow.hide()
+        syncSmartIndexHold()
         engine = currentModule.makeEngine()
     }
 
@@ -291,15 +320,28 @@ final class InputController: IMKInputController {
              action: #selector(InputController.selectZhuyinLayoutDachen)),
             (title: "倚天鍵盤", layout: ZhuyinLayout.eten,
              action: #selector(InputController.selectZhuyinLayoutEten)),
+            (title: "許氏鍵盤", layout: ZhuyinLayout.hsu,
+             action: #selector(InputController.selectZhuyinLayoutHsu)),
         ].map { entry in
             let item = NSMenuItem(title: entry.title, action: entry.action, keyEquivalent: "")
             item.state = active == entry.layout ? .on : .off
             return item
-        }
+        } + [NSMenuItem.separator(), {
+            let item = NSMenuItem(title: "智慧選字（整句）",
+                                  action: #selector(InputController.toggleZhuyinSmart), keyEquivalent: "")
+            item.state = Preferences.zhuyinSmartEnabled ? .on : .off
+            return item
+        }()]
+    }
+
+    @objc private func toggleZhuyinSmart() {
+        Preferences.zhuyinSmartEnabled.toggle()
+        NotificationCenter.default.post(name: .zhuyinLayoutChanged, object: nil)
     }
 
     @objc private func selectZhuyinLayoutDachen() { setZhuyinLayout(.dachen) }
     @objc private func selectZhuyinLayoutEten() { setZhuyinLayout(.eten) }
+    @objc private func selectZhuyinLayoutHsu() { setZhuyinLayout(.hsu) }
 
     // Persist the choice and rebuild every controller's engine, so the new keyboard applies to
     // the very next keystroke — in this app and in every other one the IME is loaded into.
@@ -365,6 +407,7 @@ final class InputController: IMKInputController {
         if module.modeSuffix == "Pinyin" {
             SharedResources.shared.pinyinIndexCache.acquire()
         }
+        syncSmartIndexHold()
         engine = module.makeEngine()
     }
 
@@ -531,6 +574,36 @@ final class InputController: IMKInputController {
         // Space/Return commit the whole buffer; Backspace deletes; Esc discards.
         // Runs BEFORE the Cangjie/Simplex candidate block so those semantics don't apply.
         if let phrase = engine as? PhraseComposingEngine, !engine.composingText.isEmpty {
+            // 智慧注音: Up/Down walk a highlight through the candidates (paging as it goes) and Space or
+            // Return pick the highlighted one, exactly as its number would; Esc drops the highlight.
+            // Left/Right still move the cursor, and any other key clears the highlight.
+            if engine is SmartZhuyinEngine {
+                let count = engine.candidates.count
+                switch event.keyCode {
+                case 125, 126: // Down / Up
+                    guard count > 0 else { return true }
+                    let step = event.keyCode == 125 ? 1 : -1
+                    let next = (candidateHighlight ?? (step > 0 ? -1 : 0)) + step
+                    candidateHighlight = min(max(next, 0), count - 1)
+                    candidatePage = (candidateHighlight ?? 0) / InputController.pageSize
+                    refresh(client); return true
+                default:
+                    if let highlighted = candidateHighlight {
+                        if event.keyCode == 49 || event.keyCode == 36 { // Space / Return
+                            return pickCandidate(highlighted, phrase: phrase, client: client)
+                        }
+                        if event.keyCode == 53 { // Esc: drop the highlight, keep the composition
+                            candidateHighlight = nil; refresh(client); return true
+                        }
+                    }
+                    candidateHighlight = nil
+                }
+            }
+            // 智慧注音: Space is the first-tone key while a syllable is unfinished; it commits the
+            // sentence only once there is no syllable left to tone.
+            if event.keyCode == 49, let smart = engine as? SmartZhuyinEngine, smart.applyFirstTone() {
+                candidatePage = 0; refresh(client); return true
+            }
             switch event.keyCode {
             case 123, 126: // Left / Up → previous node
                 _ = phrase.moveCursorLeft(); refresh(client); return true
@@ -548,15 +621,11 @@ final class InputController: IMKInputController {
             // or commit the whole buffer if this was the last node. So a single syllable commits
             // immediately (like 倉頡/速成), while multi-syllable phrases can be picked syllable by
             // syllable; Space still commits everything at once. (First page only in v1.)
-            if let chars = event.characters, let d = Int(chars), (1...9).contains(d) {
+            // (On 大千/倚天 the digits are 注音 keys, so they type instead — see zhuyinClaimsKey.)
+            if let chars = event.characters, let d = Int(chars), (1...9).contains(d),
+               !(chars.first.map(zhuyinClaimsKey) ?? false) {
                 guard d - 1 < engine.candidates.count else { return true } // ignore out-of-range digit
-                engine.selectCandidate(d - 1)
-                if phrase.moveCursorRight() {
-                    candidatePage = 0
-                    refresh(client)
-                    return true
-                }
-                return commitCurrent(to: client, offerAssociations: true)
+                return pickCandidate(d - 1, phrase: phrase, client: client)
             }
             // Letters / apostrophe extend the composition.
             if let ch = event.characters?.first, engine.handleKey(ch) {
@@ -564,8 +633,16 @@ final class InputController: IMKInputController {
                 refresh(client)
                 return true
             }
-            // Anything else (e.g. punctuation) commits the buffer, then passes to the app.
+            // Anything else (e.g. punctuation) commits the buffer, then passes to the app. 智慧注音
+            // ends a sentence with a mark, so that mark is converted here the way it would have
+            // been had nothing been composing.
             _ = commitCurrent(to: client)
+            if engine is SmartZhuyinEngine, Preferences.fullWidthPunctuationEnabled,
+               let ch = event.characters?.first, !zhuyinClaimsKey(ch),
+               let full = zhuyinPunctuation(for: ch) ?? Punctuation.fullWidth(for: ch) {
+                client.insertText(full, replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
+                return true
+            }
             return false
         }
 
@@ -706,6 +783,19 @@ final class InputController: IMKInputController {
         return consumed
     }
 
+    // Choose candidate `index` for the cursor's word, then move on to the next one — or commit the
+    // whole buffer when that was the last. Shared by the digit keys and 智慧注音's highlight.
+    private func pickCandidate(_ index: Int, phrase: PhraseComposingEngine, client: IMKTextInput) -> Bool {
+        engine.selectCandidate(index)
+        candidateHighlight = nil
+        if phrase.moveCursorRight() {
+            candidatePage = 0
+            refresh(client)
+            return true
+        }
+        return commitCurrent(to: client, offerAssociations: true)
+    }
+
     override func commitComposition(_ sender: Any!) {
         guard let client = sender as? IMKTextInput else { return }
         _ = commitCurrent(to: client)
@@ -798,13 +888,13 @@ final class InputController: IMKInputController {
     // Whether the active 注音 layout types a 注音 symbol with this key (false in every other
     // input method). What keeps 全形標點 off the keys 注音 needs — see the punctuation branch.
     private func zhuyinClaimsKey(_ ch: Character) -> Bool {
-        (engine as? ZhuyinEngine)?.mapsKey(ch) ?? false
+        (engine as? ZhuyinEngine)?.mapsKey(ch) ?? (engine as? SmartZhuyinEngine)?.mapsKey(ch) ?? false
     }
 
     // The full-width mark 注音 puts on this key, or nil to fall back to the shared table. Only
     // 注音 moves any: `<` and `>` carry ，and 。 there, because `,` and `.` type 注音 symbols.
     private func zhuyinPunctuation(for ch: Character) -> String? {
-        guard engine is ZhuyinEngine else { return nil }
+        guard engine is ZhuyinEngine || engine is SmartZhuyinEngine else { return nil }
         return ZhuyinPunctuation.fullWidth(for: ch, layout: Preferences.zhuyinLayout)
     }
 
@@ -819,6 +909,7 @@ final class InputController: IMKInputController {
     // engine swap) — NOT while merely paging, which must keep the confirmation.
     private func resetCompositionState() {
         candidatePage = 0
+        candidateHighlight = nil
         strokeConfirmed = false
     }
 
@@ -849,9 +940,32 @@ final class InputController: IMKInputController {
 
     private func refresh(_ client: IMKTextInput) {
         let composing = engine.composingText
-        client.setMarkedText(composing,
-                             selectionRange: NSRange(location: composing.utf16.count, length: 0),
-                             replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
+        let noRange = NSRange(location: NSNotFound, length: NSNotFound)
+        let segments = (engine as? SmartZhuyinEngine)?.composingSegments ?? []
+        if segments.contains(where: \.isCursor) {
+            // 智慧注音, with the cursor moved back onto a word: draw that word in the system's
+            // selected-clause style (thick underline, tinted) and put the caret at its end, so it
+            // is plain which word the candidates and digits now address.
+            let marked = NSMutableAttributedString()
+            var caret = composing.utf16.count
+            for (i, seg) in segments.enumerated() {
+                var attrs: [NSAttributedString.Key: Any] = [
+                    .underlineStyle: (seg.isCursor ? NSUnderlineStyle.thick : NSUnderlineStyle.single).rawValue,
+                    .markedClauseSegment: i,
+                ]
+                if seg.isCursor {
+                    attrs[.backgroundColor] = NSColor.selectedTextBackgroundColor.withAlphaComponent(0.45)
+                }
+                marked.append(NSAttributedString(string: seg.text, attributes: attrs))
+                if seg.isCursor { caret = marked.length }
+            }
+            client.setMarkedText(marked, selectionRange: NSRange(location: caret, length: 0),
+                                 replacementRange: noRange)
+        } else {
+            client.setMarkedText(composing,
+                                 selectionRange: NSRange(location: composing.utf16.count, length: 0),
+                                 replacementRange: noRange)
+        }
         // In association mode show the suggested phrases (paged); otherwise show engine candidates.
         // Cangjie/Simplex always select by digit, so the numbered candidate window is shown
         // whenever there is something to pick.
@@ -899,7 +1013,10 @@ final class InputController: IMKInputController {
             var rect = NSRect.zero
             client.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
             candidateWindow.show(page, page: candidatePage, pageCount: pageCount,
-                                 fontSize: Preferences.candidateFontSize, hints: hints, near: rect)
+                                 fontSize: Preferences.candidateFontSize, hints: hints,
+                                 selected: associations.isEmpty
+                                     ? candidateHighlight.map { $0 - candidatePage * size } : nil,
+                                 near: rect)
         }
     }
 
